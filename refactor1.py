@@ -22,7 +22,7 @@ modules = [ (k,v) for (k,v) in sys.modules.iteritems() if k.startswith(prefix) a
 
 
 
-search_loc = '/home/michael/hw_to_come/'
+search_loc = '/home/mhtest/hw/'
 def find_occurences(text):
     cmd = 'find %s -name "*.py" -exec grep -l "%s" {} \; ' % (search_loc, text)
     #subprocess.call(cmd
@@ -118,12 +118,12 @@ def inspect_function( func_name, func, is_method=False):
             continue
         print '    Arg:',a, valid_func_arg_name(a)
         pass
-        op_data.append( [ valid_func_arg_name(a), func_name, 'Argument: %s'%a] )
+        op_data.append( [ valid_func_arg_name(a), func_name, 'Argument: %s' %a] )
 
         if not valid_func_arg_name(a):
             global_renames.append( a )
     for varname in var_names:
-        op_data.append( [ valid_var_name(varname), func_name, 'Variable: %s'%varname] )
+        op_data.append( [ valid_var_name(varname), func_name, 'Variable: %s' %varname] )
         if not valid_var_name(varname):
             lns, line_start = inspect.getsourcelines(func)
             line_end = line_start + len(lns)
@@ -288,7 +288,7 @@ print len(local_renames)
 for filename,fnc,fnc_new in OK_changes:
     assert False
     print filename, fnc, fnc_new
-    new_section = re.sub(r'\b%s\b'%fnc, fnc_new, "\n".join(content))
+    new_section = re.sub(r'\b%s\b' %fnc, fnc_new, "\n".join(content))
     new_contents = "\n".join(pre) + "\n" + new_section + "\n" +"\n".join(post)
     with open(filename,'w') as f:
         f.write(new_contents)
