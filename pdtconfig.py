@@ -4,6 +4,15 @@ import os
 import glob
 from configobj import ConfigObj
 from validate import Validator
+import sys
+
+
+# Dynamically add 'glob2' to the path:
+local_path = os.path.dirname(__file__)
+glob2_src = os.path.join(local_path, 'glob2/src/')
+sys.path.append(glob2_src)
+import glob2
+
 
 
 def _ensure_dir_exists(path):
@@ -12,6 +21,11 @@ def _ensure_dir_exists(path):
         os.makedirs(dirname)
     return path
 
+
+
+
+#def _double_star_glob(glob_expr):
+#    pass
 
 
 class PDTProfile(object):
@@ -39,17 +53,26 @@ class PDTProfile(object):
         return self.data_dict['working_dir']
 
     @property
-    def find_and_replace_filename(self):
+    def find_and_replace_filename_regular(self):
         return os.path.join( self.working_dir, 'findandreplace.stash')
+
+#    @property
+#    def find_and_replace_filename_dangerous(self):
+#        return os.path.join( self.working_dir, 'findandreplace-dangerous.stash')
 
 
     @property
     def unmerged_changes(self):
         pass
-    
+
     @property
     def files(self):
-        return []
+        src_files = os.path.expanduser( self.data_dict['source_files']  )
+        files = glob2.glob(src_files)
+        files = [filename for filename in files if os.path.isfile(filename) ]
+        return files
+
+
 
 
 

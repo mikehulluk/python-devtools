@@ -253,15 +253,13 @@ def get_filenames(root_dir):
 
 
 var_regex = re.compile('''^[a-z_][a-z0-9_]{2,30}$''')
-def is_valid_variable_name(name):
-    if name in remap_data.not_remapped:
+def is_valid_variable_name(varname):
+    if varname.startswith('t_'):
         return True
-    if v.startswith('t_'):
-        return True
-    if v[0] in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_':
+    if varname[0] in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_':
         return True
 
-    if not var_regex.match(v):
+    if not var_regex.match(varname):
         return False
     return True
 
@@ -298,7 +296,7 @@ def print_and_highlight_variable_in_block(blk, variable):
 
 
 
-def resolve_variable_in_scopes(var_name, var_scopes):
+def resolve_variable_in_scopes(var_name, var_scopes, subst_data):
 
         # Clear the screen:
         print chr(27) + "[2J"
@@ -338,67 +336,72 @@ def resolve_variable_in_scopes(var_name, var_scopes):
                     src_regex = r'''\b%s\b''' % var_name,
                     target_regex = change_to.strip() )
 
-        subst_data.write_to_file('~/Desktop/substs1.txt')
+        subst_data.write_to_disk()
 
-def resolve_variable_everywhere(var_name):
+def resolve_variable_everywhere(var_name, scopes, subst_data):
         var_scopes = [scope for scope in scopes if var_name in scope.local_variables]
+
+        # Is this variable rename already handled?
+
         while var_scopes:
             sub_var_scopes = []
             while sum( [len(s.get_contents().split('\n')) for s in sub_var_scopes]) < 20 and var_scopes:
                 sub_var_scopes.append(var_scopes.pop())
-            resolve_variable_in_scopes(var_name, sub_var_scopes)
+            resolve_variable_in_scopes(var_name, sub_var_scopes, subst_data=subst_data)
 
 
 
 
 
 
-remap_data = RemapData()
-subst_data = SubstData()
+def find_and_replace_invalid_localvariable_names(files, subst_data, remap_data):
 
+    # Don't apply new substitutions to files with existing changes to be made:
+    files = [filename for filename in files if not filename in subst_data.filenames]
 
-files = get_filenames('/home/michael/hw_to_come//morphforge/src/morphforge/')
-#files = get_filenames('/home/michael/hw_to_come//hw-results')
+    visitors = []
+    for f in files:
+        try:
+            visitors.append( MyNodeVisitor(f) )
+        except:
+            print 'Problem parsing:', f
+            raise
+            pass
 
-#files = ["/home/michael/hw_to_come/morphforge/src/morphforge/traces/methods/trace_methods_std_filters.py"]
-#visitors = [ analyse_file(f) for f in files]
+    scopes = list( itertools.chain(*[v.scopes for v in visitors])  )
+    variables = set(itertools.chain(*[ s.local_variables for s in scopes]))
+    vars = list(variables)
 
-
-visitors = []
-for f in files:
-    try:
-        visitors.append( MyNodeVisitor(f) )
-    except:
-        print 'Problem parsing:', f
-        raise
-        pass
-#visitors = [ analyse_file(f) for f in files]
-
-scopes = list( itertools.chain(*[v.scopes for v in visitors])  )
-variables = set(itertools.chain(*[ s.local_variables for s in scopes]))
-vars = list(variables)
-
-#
-
-all_vars = set(vars)
-#print all_vars
-print len(all_vars)
+    all_vars = set(vars)
+    print len(all_vars)
 #
 
 
-#print Style.BRIGHT
-for v in sorted(all_vars):
-    if not is_valid_variable_name(v):
-        resolve_variable_everywhere(v)
+    for varname in sorted(all_vars):
+        if varname in remap_data.not_remapped:
+            continue
+        if not is_valid_variable_name(varname):
+            resolve_variable_everywhere(varname, scopes=scopes, subst_data=subst_data)
 
 
-    
 
 
-#analyse_file(filename = '/home/michael/hw_to_come/morphforge/src/morphforge/simulation/neuron/core/neuronsimulation.py')
-#analyse_file(filename = '/home/michael/hw_to_come/morphforge/src/morphforge/simulation/neuron/core/neuronsimulationenvironment.py')
-#analyse_file(filename = '/home/michael/hw_to_come/morphforge/src/morphforge/simulation/neuron/core/neuronsimulationsettings.py')
-#    #print filenames
+def find_and_replace_invalid_localvariable_names_in_profile(profile):
+    print 'Renaming local variables in profile:', profile
+    find_and_replace_invalid_localvariable_names(
+            files=profile.files, 
+            remap_data = RemapData(),
+            subst_data = SubstData.from_file(profile.find_and_replace_filename_regular),
+            )
 
+
+
+
+#if __name__ == '__main__':
+#    remap_data = RemapData()
+#    subst_data = SubstData.from_file('~/Desktop/substsNew.txt')
+#
+#    files = get_filenames('/home/michael/hw_to_come//morphforge/src/morphforge/')
+#    find_and_replace_invalid_localvariable_names(files=files, subst_data=subst_data, remap_data=remap_data)
 
 

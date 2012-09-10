@@ -11,10 +11,14 @@ sample = r""">> '/home/michael/hw_to_come//morphforge/src/morphforge/traces/meth
 
 
 import ply.lex as lex
+import re
 
 def t_STRING(t):
-    r"""'[^']*'"""
+    #r"""'[^']*'"""
+    #r"""'[^']*'"""
+    r"""(?<!\\)(?:\\\\)*'((?:\\.|[^\\'])*)'"""
     t.value = t.value[1:-1]
+    t.value = t.value.replace("\'","'")
     return t
 def t_NUMBER(t):
     r'-?\d+'
@@ -62,6 +66,7 @@ def p_empty(p):
 
 def p_subst_block0(p):
     r""" filesubstblock : DOUBLEARROW STRING substlines"""
+    print p[2]
     p[0] = (p[2],p[3])
 
 
