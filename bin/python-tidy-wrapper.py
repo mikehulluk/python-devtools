@@ -1,1 +1,1 @@
-../python-tidy-wrapper.py
+pythontidywrapper.py
