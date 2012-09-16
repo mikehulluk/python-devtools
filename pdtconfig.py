@@ -91,7 +91,7 @@ class PDTProfileMgr(object):
 
     @classmethod
     def _load_profile(cls, profile_filename):
-        print 'Loading profile:', profile_filename
+        #print 'Loading profile:', profile_filename
         profile_name = os.path.splitext(os.path.split(profile_filename)[-1])[0]
         profile_data = ConfigObj(infile=profile_filename, configspec=cls._configspec)
         cls.profiles[profile_name] = PDTProfile(profile_name, profile_data)

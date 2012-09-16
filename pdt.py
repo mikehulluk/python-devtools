@@ -7,6 +7,7 @@ from pdtconfig import PDTProfileMgr
 from coreclasses import SubstData, SubstDataActioner, SubstDataOptions
 from variable_hunter import find_and_replace_invalid_localvariable_names_in_profile
 from pythontidywrapper import tidyfile
+import re
 
 
 
@@ -51,8 +52,10 @@ def rename_global(args):
         substs = SubstData.from_file(profile.find_and_replace_filename_regular)
         assert substs.nchanges == 0, "Don't try global renames with unapplyed renames outstanding"
 
-        src=r'''\bsomaLoc\b'''
-        target='soma_loc'
+        #src=r'''\bsomaLoc\b'''
+        #target='soma_loc'
+        src = args.source_regex
+        target = args.target_regex
 
         for filename in profile.files:
             substs.add_substitution(
@@ -78,6 +81,29 @@ def clearrenames(args):
         substs.write_to_disk()
 
 
+def grep(args):
+    match_files = []
+    for profile_name in args.profile:
+        profile = PDTProfileMgr.profiles[profile_name]
+
+        src = args.source_regex
+        r = re.compile(src)
+
+        for filename in profile.files:
+            with open(filename) as f:
+                if r.search( f.read() ):
+                    match_files.append(filename)
+
+    for mf in match_files:
+        print re.escape(mf)
+
+
+
+    
+
+def grepword(args):
+    args.source_regex = r'\b' + args.source_regex + r'\b'
+    grep(args)
 
 
 # The actions that the tool supports:
@@ -88,6 +114,8 @@ actions = {
     'apply': applyrenames,
     'clear': clearrenames,
     'rename-global': rename_global,
+    'grep': grep,
+    'grepword': grepword,
 }
 
 
@@ -95,6 +123,8 @@ actions = {
 parser = argparse.ArgumentParser(description='Python Devtools')
 parser.add_argument('--fromfile', action='append', default=[], help='')
 parser.add_argument('--dangerous', help='', action="store_true", default=False)
+parser.add_argument('--source_regex', help='', action="store", default=None)
+parser.add_argument('--target_regex', help='', action="store", default=None)
 parser.add_argument('action', action='store',  help='the action to perform: [%s]' % ', '.join(actions) )
 parser.add_argument('profile', action='store', nargs='+',  help='the profiles to target') 
 
@@ -108,6 +138,10 @@ parser.add_argument('profile', action='store', nargs='+',  help='the profiles to
 def main():
 
     args = parser.parse_args()
+
+
+    if args.profile == ['@all']:
+        args.profile = ['morphforge','signalanalysis','results']
 
     # Check all the profiles requested actually exist:
     for profilename in args.profile:

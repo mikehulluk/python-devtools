@@ -10,7 +10,7 @@ def tidyfile(filename):
     print 'Tidying File:', filename
     # Run PythonTidy
     new_filename = filename + '.new'
-    cmd = 'PythonTidy %s %s'%(filename, new_filename)
+    cmd = 'PythonTidy "%s" "%s"'%(filename, new_filename)
     os.system(cmd)
 
     with open(filename) as f1:
@@ -19,7 +19,7 @@ def tidyfile(filename):
                 print 'Identical Files'
                 return
     # Run meld:
-    cmd = 'meld %s %s'%(filename, new_filename)
+    cmd = 'meld "%s" "%s"'%(filename, new_filename)
     os.system(cmd)
     os.unlink(new_filename)
 
