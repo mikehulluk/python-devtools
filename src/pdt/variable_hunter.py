@@ -14,15 +14,16 @@ from colorama import Fore, Back, Style
 import sys
 
 
-
-
 class ScopeType:
+
     Class = 'Class'
     Function = 'Function'
     Lambda = 'Lambda'
     Module = 'Module'
 
+
 class VariableTyoe:
+
     Param = 'Param'
     Local = 'Local'
 
@@ -48,12 +49,14 @@ class Scope(object):
 
     def declare_variable(self, variable):
         self._declared_variables.add(variable)
+
     def declare_variables(self, variables):
         for variable in variables:
             self._declared_variables.add(variable)
 
     def declare_object(self, obj_name):
         self._known_objects.add(obj_name)
+
     def declare_parameter(self, obj_name):
         self._parameters.add(obj_name)
 
@@ -64,9 +67,10 @@ class Scope(object):
     
     def filename(self):
         return self._module_visitor._filename
+
     def full_name(self):
         if self._parent_scope == None:
-            return self.name if self.name else ''
+            return (self.name if self.name else '')
         else:
             return self._parent_scope.full_name() + '.' + self.name
 
@@ -77,9 +81,8 @@ class Scope(object):
 
 class MyNodeVisitor(ast.NodeVisitor):
 
-
     def __init__(self, filename):
-        super(MyNodeVisitor,self).__init__()
+        super(MyNodeVisitor, self).__init__()
         self.assign_on = False
         self.scope_stack = []
         self.current_scope = None
@@ -107,13 +110,11 @@ class MyNodeVisitor(ast.NodeVisitor):
     def is_variable_builtin(self, variable_name):
         return variable_name in __builtin__.__dict__
 
-
-
     def visit(self, node):
         super(MyNodeVisitor, self).visit(node)
 
     def generic_visit(self, node):
-        #print node.__dict__
+        # print node.__dict__
 
         if isinstance(node, (ast.expr, ast.stmt)):
             if not self._last_lineposition or node.lineno >= self._last_lineposition[0]:
@@ -121,8 +122,6 @@ class MyNodeVisitor(ast.NodeVisitor):
                 self._last_lineposition = (node.lineno, node.col_offset)
 
         super(MyNodeVisitor, self).generic_visit(node)
-
-
 
     def visit_ClassDef(self, node):
         self.current_scope.declare_object(node.name)
@@ -136,7 +135,7 @@ class MyNodeVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
         # Finish up:
-        
+
         self.current_scope._finish_line = self._last_lineposition
         self.current_scope = self.scope_stack.pop()
 
@@ -178,16 +177,11 @@ class MyNodeVisitor(ast.NodeVisitor):
         self.current_scope._finish_line = self._last_lineposition
         self.current_scope = self.scope_stack.pop()
 
-
-
-
-
     def visit_Module(self, node):
         new_scope = Scope(None, parent_scope=None, scope_type=ScopeType.Module, start_line=None, module_visitor=self)
         self.current_scope = new_scope
         self.generic_visit(node)
-        # Finish up:
-
+       
 
 
     def visit_Name(self, node):
@@ -198,23 +192,21 @@ class MyNodeVisitor(ast.NodeVisitor):
             if not self.is_variable_in_current_scope(node.id) and not self.is_variable_in_parent_scope(node.id) and not self.is_variable_builtin(node.id):
                 print "Haven't declared: '%s' anywhere" % node.id
 
-
     def visit_Assign(self, node):
-        self.assign_on = True 
+        self.assign_on = True
         self.generic_visit(node)
         self.assign_on = False
 
     def visit_For(self, node):
-        self.assign_on=True
+        self.assign_on = True
         self.visit(node.target)
-        self.assign_on=False
+        self.assign_on = False
 
     def visit_ListComp(self, node):
-        self.assign_on=True
+        self.assign_on = True
         for gen in node.generators:
             self.visit(gen.target)
-        self.assign_on=False
-
+        self.assign_on = False
 
     def visit_Import(self, node):
         for impname in node.names:
@@ -231,17 +223,15 @@ class MyNodeVisitor(ast.NodeVisitor):
                 self.current_scope.declare_object(impname.name)
 
 
-
 def analyse_file(filename):
     myvisitor = MyNodeVisitor(filename)
     return myvisitor
 
 
-
 def get_filenames(root_dir):
 
     filenames_out = []
-    for (dirpath,dirnames, filenames) in os.walk(root_dir):
+    for (dirpath, dirnames, filenames) in os.walk(root_dir):
         for fname in filenames:
             if not fname.endswith('.py'):
                 continue
@@ -250,9 +240,8 @@ def get_filenames(root_dir):
     return filenames_out
 
 
-
-
 var_regex = re.compile('''^[a-z_][a-z0-9_]{2,30}$''')
+
 def is_valid_variable_name(varname):
     if varname.startswith('t_'):
         return True
@@ -262,9 +251,6 @@ def is_valid_variable_name(varname):
     if not var_regex.match(varname):
         return False
     return True
-
-
-
 
 
 #
@@ -299,44 +285,45 @@ def print_and_highlight_variable_in_block(blk, variable):
 def resolve_variable_in_scopes(var_name, var_scopes, subst_data):
 
         # Clear the screen:
-        print chr(27) + "[2J"
+    print chr(27) + '[2J'
 
-        print Fore.GREEN, 
-        print 'Resolving variables called: "%s"' % (var_name)
-        print '#####################################'
+    print Fore.GREEN,
+    print 'Resolving variables called: "%s"' % var_name
+    print '#####################################'
 
-        for index,vs in enumerate(var_scopes):
-            print Fore.GREEN
-            print ('<%d>'%index), 'In scope:', Fore.RED, Style.BRIGHT, vs.filename(), vs.full_name(), Style.RESET_ALL
-            blk = vs.get_contents()
-            print_and_highlight_variable_in_block(blk, var_name)
-
-
-        user_input = raw_input('Change which occurances [NONE]:')
-        if user_input  in ['-', '*']:
-            indices = range(len(var_scopes))
-        elif user_input == '':
-            indices =[]
-        else:
-            indices = [ int(i) for i in user_input.replace(',',' ').split() ]
-
-        if not indices:
-            return
-
-        print 'Changing in indices:', indices
-
-        change_to = raw_input('Change to:')
+    for (index, vs) in enumerate(var_scopes):
+        print Fore.GREEN
+        print '<%d>' % index, 'In scope:', Fore.RED, Style.BRIGHT, \
+            vs.filename(), vs.full_name(), Style.RESET_ALL
+        blk = vs.get_contents()
+        print_and_highlight_variable_in_block(blk, var_name)
 
 
-        for index in indices:
-            scope = var_scopes[index]
-            subst_data.add_substitution(
-                    filename = scope.filename(),
-                    line_range = ( scope._start_line[0], scope._finish_line[0] ),
-                    src_regex = r'''\b%s\b''' % var_name,
-                    target_regex = change_to.strip() )
+    user_input = raw_input('Change which occurances [NONE]:')
+    if user_input in ['-', '*']:
+        indices = range(len(var_scopes))
+    elif user_input == '':
+        indices = []
+    else:
+        indices = [int(i) for i in user_input.replace(',', ' ').split()]
 
-        subst_data.write_to_disk()
+    if not indices:
+        return
+
+    print 'Changing in indices:', indices
+
+    change_to = raw_input('Change to:')
+
+
+    for index in indices:
+        scope = var_scopes[index]
+        subst_data.add_substitution(
+                filename = scope.filename(),
+                line_range = ( scope._start_line[0], scope._finish_line[0] ),
+                src_regex = r'''\b%s\b''' % var_name,
+                target_regex = change_to.strip() )
+
+    subst_data.write_to_disk()
 
 def resolve_variable_everywhere(var_name, scopes, subst_data):
         var_scopes = [scope for scope in scopes if var_name in scope.local_variables]
@@ -362,7 +349,7 @@ def find_and_replace_invalid_localvariable_names(files, subst_data, remap_data):
     visitors = []
     for f in files:
         try:
-            visitors.append( MyNodeVisitor(f) )
+            visitors.append(MyNodeVisitor(f))
         except:
             print 'Problem parsing:', f
             raise
@@ -376,7 +363,6 @@ def find_and_replace_invalid_localvariable_names(files, subst_data, remap_data):
     print len(all_vars)
 #
 
-
     for varname in sorted(all_vars):
         if varname in remap_data.not_remapped:
             continue
@@ -389,19 +375,7 @@ def find_and_replace_invalid_localvariable_names(files, subst_data, remap_data):
 def find_and_replace_invalid_localvariable_names_in_profile(profile):
     print 'Renaming local variables in profile:', profile
     find_and_replace_invalid_localvariable_names(
-            files=profile.files, 
-            remap_data = RemapData(),
-            subst_data = SubstData.from_file(profile.find_and_replace_filename_regular),
-            )
-
-
-
-
-#if __name__ == '__main__':
-#    remap_data = RemapData()
-#    subst_data = SubstData.from_file('~/Desktop/substsNew.txt')
-#
-#    files = get_filenames('/home/michael/hw_to_come//morphforge/src/morphforge/')
-#    find_and_replace_invalid_localvariable_names(files=files, subst_data=subst_data, remap_data=remap_data)
-
+			files=profile.files,
+            remap_data=RemapData(),
+            subst_data=SubstData.from_file(profile.find_and_replace_filename_regular))
 

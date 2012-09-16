@@ -16,7 +16,7 @@ def do_fromfile(filename, args):
     print 'FromFile', filename
     substs = SubstData.from_file(filename)
     SubstDataActioner.apply_all(substs, options=SubstDataOptions())
-    #print substs
+    
 
 def main():
     print 'Safe-Substituter'
@@ -28,8 +28,5 @@ def main():
         do_fromfile(fromfile, args)
 
 
-
 main()
-
-
 

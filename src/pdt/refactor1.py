@@ -8,8 +8,7 @@ import ast
 import _ast
 import morphforge.stdimports
 import morphforgecontrib.stdimports
-print "\n".join(['','',''])
-
+print '\n'.join(['', '', ''])
 
 prefix = 'morphforge'
 modules = [ (k,v) for (k,v) in sys.modules.iteritems() if k.startswith(prefix) and isinstance(v,types.ModuleType) ]

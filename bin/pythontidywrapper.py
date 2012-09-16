@@ -1,16 +1,16 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#! /usr/bin/python
 
 import sys
 import os
 import shutil
 
 
+
 def tidyfile(filename):
     print 'Tidying File:', filename
     # Run PythonTidy
     new_filename = filename + '.new'
-    cmd = 'PythonTidy "%s" "%s"' % (filename, new_filename)
+    cmd = 'PythonTidy %s %s'%(filename, new_filename)
     os.system(cmd)
 
     with open(filename) as f1:
@@ -19,17 +19,18 @@ def tidyfile(filename):
                 print 'Identical Files'
                 return
     # Run meld:
-    cmd = 'meld "%s" "%s"' % (filename, new_filename)
+    cmd = 'meld %s %s'%(filename, new_filename)
     os.system(cmd)
     os.unlink(new_filename)
 
 
 def main():
-    for (i, filename) in enumerate(sys.argv[1:]):
+    for i,filename in enumerate(sys.argv[1:]):
         print 'File: %d/%d' % (i, len(sys.argv))
         tidyfile(filename)
 
-
 if __name__ == '__main__':
     main()
+
+
 
