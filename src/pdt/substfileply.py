@@ -18,7 +18,7 @@ def t_STRING(t):
     #r"""'[^']*'"""
     r"""(?<!\\)(?:\\\\)*'((?:\\.|[^\\'])*)'"""
     t.value = t.value[1:-1]
-    t.value = t.value.replace("\'","'")
+    t.value = t.value.replace(r"\'","'")
     return t
 def t_NUMBER(t):
     r'-?\d+'

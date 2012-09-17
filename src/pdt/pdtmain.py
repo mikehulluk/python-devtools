@@ -59,12 +59,14 @@ def rename_global(args):
         tgt = args.target_expr
 
         for filename in profile.files:
+            #print filename
+            #print profile.find_and_replace_filename_regular
             substs.add_substitution(
                     filename=filename,
                     line_range=None, 
                     src_regex=src,
                     target_regex=tgt)
-
+        substs.write_to_disk()
     if args.apply:
         for profile in args.profile_targets:
             substs = SubstData.from_file(profile.find_and_replace_filename_regular)
@@ -106,7 +108,6 @@ def grep(args):
 # A parser for the targets, which allows us flexibility in the 
 # order we add the targets:
 target_parser = argparse.ArgumentParser(description='target_parser',add_help=False)
-#target_parser.add_argument('--target',  action='append', default=PDTProfileMgr.default_targets)
 target_parser.add_argument('--target',  action='append', default=None)
 
 
@@ -148,6 +149,7 @@ sp_replace.add_argument('src_expr', )
 sp_replace.add_argument('target_expr', )
 sp_replace.add_argument('-w', '--word', action='store_true', default=False, dest='match_word' )
 sp_replace.add_argument('-a', '--apply', action='store_true', default=False, )
+sp_replace.add_argument( '--dangerous', action='store_true', default=False, dest='dangerous' )
 sp_replace.set_defaults(func=rename_global)
 
 
