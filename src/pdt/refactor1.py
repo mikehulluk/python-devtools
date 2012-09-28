@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import subprocess
 import types
@@ -11,7 +13,8 @@ import morphforgecontrib.stdimports
 print '\n'.join(['', '', ''])
 
 prefix = 'morphforge'
-modules = [ (k,v) for (k,v) in sys.modules.iteritems() if k.startswith(prefix) and isinstance(v,types.ModuleType) ]
+modules = [(k, v) for (k, v) in sys.modules.iteritems()
+           if k.startswith(prefix) and isinstance(v, types.ModuleType)]
 
 
 

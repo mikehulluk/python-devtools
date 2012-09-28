@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import glob
 from configobj import ConfigObj
-from validate import Validator
 import sys
 
 # Dynamically add 'glob2' to the path:
@@ -50,10 +48,6 @@ class PDTProfile(object):
     def find_and_replace_filename_regular(self):
         return os.path.join(self.working_dir, 'findandreplace.stash')
 
-#    @property
-#    def find_and_replace_filename_dangerous(self):
-#        return os.path.join( self.working_dir, 'findandreplace-dangerous.stash')
-
     @property
     def unmerged_changes(self):
         pass
@@ -64,7 +58,7 @@ class PDTProfile(object):
         files = glob2.glob(src_files)
         files = [filename for filename in files
                  if os.path.isfile(filename)]
-        print files
+        #print files
         return files
 
 
@@ -73,15 +67,14 @@ class PDTProfileMgr(object):
     _pdtrcdir = os.path.expanduser('~/.python-devtools/')
     _pdtrc = os.path.expanduser('~/.python-devtools/.pdtrc')
 
-
-    profiles = None
+    profiles = {}
     profile_groups = {}
     default_targets = []
 
     @classmethod
     def _resolve_target_list_item(cls, item):
         if item in cls.profiles:
-            return [cls.profiles[item], ]
+            return [cls.profiles[item]]
         elif item in cls.profile_groups:
             return cls.expand_target_list_to_profiles(cls.profile_groups[item])
         else:
@@ -94,13 +87,6 @@ class PDTProfileMgr(object):
         for target_str in target_list:
             targets.extend(cls._resolve_target_list_item(target_str))
         return sorted(list(set(targets)))
-
-    @classmethod
-    def _load_profile(cls, profile_filename):
-        profile_name = os.path.splitext(os.path.split(profile_filename)[-1])[0]
-        profile_data = ConfigObj(infile=profile_filename)
-        cls.profiles[profile_name] = PDTProfile(profile_name, profile_data)
-
 
     @classmethod
     def load_rc_file(cls):
@@ -116,18 +102,19 @@ class PDTProfileMgr(object):
         if 'profile_groups' in pdtrcdata:
             cls.profile_groups = pdtrcdata['profile_groups']
 
+        # Load the profiles:
+        if not 'profiles' in pdtrcdata:
+            raise RuntimeError('No-profiles defined in %s' % cls._pdtrc)
+        for profile_name, profile_data in pdtrcdata['profiles'].iteritems():
+            cls.profiles[profile_name] = PDTProfile(profile_name, profile_data)
+
+
     @classmethod
     def _init(cls):
         _ensure_dir_exists(cls._pdtrcdir)
 
         # Load from .rc file:
         cls.load_rc_file()
-
-        # Load profiles:
-        cls.profiles = {}
-        profile_filenames = glob.glob(cls._pdtrcdir + '/*.profile')
-        for profile_filename in profile_filenames:
-            cls._load_profile(profile_filename)
 
 
 PDTProfileMgr._init()

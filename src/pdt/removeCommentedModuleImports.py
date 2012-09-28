@@ -6,7 +6,8 @@ import os
 rModule1 = re.compile(r"""[#] (\s)* from (.*) import (.*)""", re.VERBOSE)
 rModule2 = re.compile(r"""[#] (\s)* import (.*) """, re.VERBOSE)
 
-def removeFromFile( filename, pretend=True):
+
+def removeFromFile(filename, pretend=True):
 
     output = []
     changes = False
@@ -27,18 +28,17 @@ def removeFromFile( filename, pretend=True):
         return
 
     if changes:
-        shutil.move(filename, filename+".back")
-        with open(filename,'w') as f:
-            f.write( "".join(output ) )
+        shutil.move(filename, filename + '.back')
+        with open(filename, 'w') as f:
+            f.write(''.join(output))
 
 
-for root, dirs, files in os.walk('.'):
-    #if root[0] == '.':
+for (root, dirs, files) in os.walk('.'):
+    # if root[0] == '.':
     #    continue
 
     for f in files:
-        fName = os.path.join( root,f )
+        fName = os.path.join(root, f)
         if fName.endswith('.py'):
             removeFromFile(fName, pretend=False)
-
 
