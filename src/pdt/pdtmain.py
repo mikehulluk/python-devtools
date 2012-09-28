@@ -66,7 +66,7 @@ def rename_global(args):
                     line_range=None, 
                     src_regex=src,
                     target_regex=tgt)
-
+        substs.write_to_disk()
     if args.apply:
         for profile in args.profile_targets:
             substs = SubstData.from_file(profile.find_and_replace_filename_regular)
@@ -116,6 +116,7 @@ target_parser.add_argument('--target',  action='append', default=None)
 parser = argparse.ArgumentParser(description='Python Devtools', add_help=False, parents=[target_parser])
 subparsers = parser.add_subparsers()
 
+
 # Subcommands:
 # ===============
 
@@ -125,7 +126,7 @@ sp_list_profiles.set_defaults(func=listprofiles)
 
 # 'grep' - Simple grepping:
 sp_grep = subparsers.add_parser('grep', parents=[target_parser])
-sp_grep.add_argument('expression')
+sp_grep.add_argument('expression', )
 sp_grep.add_argument('-w', '--word', action='store_true', default=False, dest='match_word' )
 sp_grep.set_defaults(func=grep)
 
@@ -133,26 +134,30 @@ sp_grep.set_defaults(func=grep)
 sp_grep = subparsers.add_parser('tidy', parents=[target_parser])
 sp_grep.set_defaults(func=tidy)
 
+
 # 'subst-clear'
 sp_subst_clear = subparsers.add_parser('subst-clear', parents=[target_parser])
 sp_subst_clear.set_defaults(func=subst_clear)
 
 # 'subst-apply'
 sp_subst_apply = subparsers.add_parser('subst-apply', parents=[target_parser])
-sp_subst_apply.add_argument('--dangerous', action='store_true', default=False, dest='dangerous' )
+sp_subst_apply.add_argument( '--dangerous', action='store_true', default=False, dest='dangerous' )
 sp_subst_apply.set_defaults(func=subst_apply)
 
 # 'replace' - global search and replace:
 sp_replace = subparsers.add_parser('replace', parents=[target_parser])
-sp_replace.add_argument('src_expr')
-sp_replace.add_argument('target_expr')
+sp_replace.add_argument('src_expr', )
+sp_replace.add_argument('target_expr', )
 sp_replace.add_argument('-w', '--word', action='store_true', default=False, dest='match_word' )
 sp_replace.add_argument('-a', '--apply', action='store_true', default=False, )
 sp_replace.set_defaults(func=rename_global)
 
+
 # 'refactor-local-variables'
 sp_refactor_local_vars = subparsers.add_parser('refactor-local-variables', parents=[target_parser])
 sp_refactor_local_vars.set_defaults(func=renamelocalvariables)
+
+
 
 
 def main():
@@ -167,6 +172,8 @@ def main():
     # Get and execute the action-functor
     functor = args.func
     functor(args)
+
+
 
 
 main()

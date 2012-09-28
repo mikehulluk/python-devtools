@@ -1,5 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 import ply
 
@@ -16,9 +14,11 @@ import re
 
 
 def t_STRING(t):
+    #r"""'[^']*'"""
+    #r"""'[^']*'"""
     r"""(?<!\\)(?:\\\\)*'((?:\\.|[^\\'])*)'"""
     t.value = t.value[1:-1]
-    t.value = t.value.replace("\'", "'")
+    t.value = t.value.replace("\'","'")
     return t
 def t_NUMBER(t):
     r"""-?\d+"""
@@ -27,11 +27,9 @@ def t_NUMBER(t):
 
 
 # Error handling rule
-
 def t_error(t):
     print "Illegal character '%s'" % t.value[0]
     raise RuntimeError()
-
 
 t_DOUBLEARROW = '>>'
 t_DOUBLESTAR = '\*\*'
@@ -54,7 +52,6 @@ tokens = [
 def p_file0(p):
     r""" file : empty"""
     p[0] = []
-
 
 def p_file1(p):
     r""" file : file filesubstblock"""

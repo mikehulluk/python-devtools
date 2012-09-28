@@ -27,6 +27,7 @@ class SubstData(object):
         self.filename = filename
 
     def add_substitution(self, filename, line_range, src_regex, target_regex):
+        assert os.path.exists(filename)
         if not filename in self.substitutions:
             self.substitutions[filename] = []
         self.substitutions[filename].append( (line_range, src_regex, target_regex) )
@@ -35,7 +36,9 @@ class SubstData(object):
         filename = os.path.expanduser(self.filename)
         with open(filename,'w') as fobj:
             for filename, substs in self.substitutions.iteritems():
-                fobj.write("\n>> '%s'"% filename.replace("'","\\'") )
+                fname =filename.replace(r"\'",r"'") 
+                fname =fname.replace("'",r"\'") 
+                fobj.write("\n>> '%s'"% fname)
                 for (line_range, src,target)  in substs:
                     line_range_str = '[%d:%d]'%( line_range[0], line_range[1]) if line_range is not None else ''
                     fobj.write("\n  ** %s '%s' '%s' " %( line_range_str, src, target)) 
@@ -66,14 +69,21 @@ class SubstData(object):
         if not os.path.exists(filename):
             return SubstData(filename)
 
-        with open(filename, 'r') as fobj:
-            raw_data = parse_string(fobj.read())
+        fname = filename
+        #fname = filename.replace(r"\'","'")
+        #fname = fname.replace("\'","'")
+        with open(fname, 'r') as fobj:
+            try:
+                raw_data = parse_string(fobj.read())
+            except:
+                print 'Problem parsing', fname
+                raise
 
         obj = SubstData(filename)
-        for (filename, transforms) in raw_data:
+        for (_filename, transforms) in raw_data:
             for (line_range, src_regex, target_regex) in transforms:
                 obj.add_substitution(
-                        filename=filename,
+                        filename=_filename,
                         line_range=line_range,
                         src_regex=src_regex,
                         target_regex=target_regex)
@@ -104,6 +114,10 @@ class SubstDataActioner(object):
             except SubstDataDangerousSubstException:
                 print 'Dangerous subsitions missed in', filename
                 pass
+            except Exception,e:
+                print 'Error occured substituting in file', filename
+                print 'Error', str(e)
+
 
     @classmethod
     def apply_changes_to_file(cls, substdata, filename, options):
