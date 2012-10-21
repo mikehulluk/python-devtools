@@ -1,0 +1,97 @@
+body {
+  font-family: MgOpen Cosmetica;
+  font-size: small; }
+
+.mainouter {
+  width: 100%;
+  border: 1px black solid;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  overflow: hidden; }
+
+.mainpane {
+  border: 1px black solid;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  float: left;
+  width: 70%; }
+  .mainpane .header {
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    border: 1px black solid;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    /*overflow:auto;*/ }
+    .mainpane .header .pdtlogo {
+      padding: 0px; }
+      .mainpane .header .pdtlogo span {
+        font-size: 32pt;
+        float: left;
+        padding: 10px; }
+    .mainpane .header .actionbar {
+      overflow: hidden;
+      /* if you don't want #second to wrap below #first */
+      padding-top: 15px;
+      border: black solid 1px; }
+      .mainpane .header .actionbar .actionbartop {
+        background-color: orange; }
+      .mainpane .header .actionbar .actionbarbottom {
+        background-color: yellow; }
+      .mainpane .header .actionbar ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0; }
+        .mainpane .header .actionbar ul li {
+          display: inline;
+          background-color: lightblue; }
+
+.mainpane .action {
+  border: 1px black solid;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 20px; }
+
+.targetselectorpane {
+  overflow: hidden;
+  /* if you don't want #second to wrap below #first */
+  border: 1px black solid;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  float: right; }
+  .targetselectorpane h1 {
+    font-size: 12pt; }
+  .targetselectorpane .targetlist {
+    padding: 3px;
+    margin: 3px; }
+  .targetselectorpane .targetlist li {
+    font-size: 10pt;
+    margin: 3px;
+    padding-below: 3px;
+    list-style-type: none; }
+  .targetselectorpane .targetlist li.active {
+    background-color: lightgreen; }
+  .targetselectorpane .targetlist li.inactive {
+    background-color: salmon; }
+
+.mainouter {
+  width: 100%; }
+
+.pymonitor {
+  border: 1px black solid;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  float: clear;
+  clear: both; }
+  .pymonitor .heading {
+    color: red; }
+
+.fsmonitor {
+  border: 1px black solid;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  float: clear;
+  clear: both; }
+  .fsmonitor .heading {
+    color: red; }

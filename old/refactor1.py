@@ -57,7 +57,7 @@ global_renames = []
 local_renames = []
 
 def is_special(txt):
-    if txt in ["Cell", "CurrentClamp", "GapJunction", "MembraneMechanism" ,"PostSynapticMechanism" ,"PreSynapticMechanism" ,"Simulation" ,"SimulationSettings" ,"Synapse",'VoltageClamp','V', 't_TAG']:
+    if txt in ["Cell", "CurrentClamp", "GapJunction", "Channel" ,"Simulation" ,"SimulationSettings" ,"Synapse",'VoltageClamp','V', 't_TAG']:
         return True
 
     return txt.startswith("__")

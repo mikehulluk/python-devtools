@@ -10,6 +10,10 @@ from coreclasses import SubstData, SubstDataActioner, SubstDataOptions
 from variable_hunter import find_and_replace_invalid_localvariable_names_in_profile
 from pythontidywrapper import tidyfile
 import re
+import itertools
+import sys
+import os
+import gzip
 
 
 def listprofiles(args):
@@ -102,6 +106,40 @@ def grep(args):
     for mf in match_files:
         print re.escape(mf)
 
+def dogrin(args):
+    import grin 
+    
+
+    files = list(itertools.chain( * [profile.files for profile in args.profile_targets] ))
+
+
+    try:
+        if args.context is not None:
+            args.before_context = args.context
+            args.after_context = args.context
+        args.use_color = args.force_color or (not args.no_color and
+            sys.stdout.isatty() and
+            (os.environ.get('TERM') != 'dumb'))
+
+        regex = grin.get_regex(args)
+        g = grin.GrepText(regex, args)
+        openers = dict(text=open, gzip=gzip.open)
+        for filename in files:
+            report = g.grep_a_file(filename, opener=openers['text'])
+            sys.stdout.write(report)
+    except KeyboardInterrupt:
+        raise SystemExit(0)
+    except IOError as e:
+        if 'Broken pipe' in str(e):
+            # The user is probably piping to a pager like less(1) and has exited
+            # it. Just exit.
+            raise SystemExit(0)
+        raise
+
+
+    print 'doing grin'
+    pass
+
 
 
 
@@ -156,6 +194,17 @@ sp_replace.set_defaults(func=rename_global)
 # 'refactor-local-variables'
 sp_refactor_local_vars = subparsers.add_parser('refactor-local-variables', parents=[target_parser])
 sp_refactor_local_vars.set_defaults(func=renamelocalvariables)
+
+# 'grin', if its available:
+# grin is nicely designed to play with other tools, so the 
+# argument parsing is straight forward.
+try:
+    import grin
+    sp_grin = subparsers.add_parser('grin', parents=[target_parser])
+    grin.get_grin_arg_parser(sp_grin)
+    sp_grin.set_defaults(func=dogrin)
+except ImportError:
+    pass
 
 
 

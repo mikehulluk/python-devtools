@@ -1,0 +1,77 @@
+{% load dajaxice_templatetags %}
+
+<head>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}default.css">
+<script type="text/javascript" src="{{ STATIC_URL }}jquery-1.8.2.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}jquery-ui-1.9.0.custom.js"></script>
+{% dajaxice_js_import %}
+
+{% block additional_header %} {% endblock %}
+</head>
+
+
+<body>
+
+
+
+
+<div class="mainouter">
+    
+    
+    <div class='targetselectorpane'>
+        <h1>Target Profiles</h1>
+        <ul class='targetlist'>
+            <li class='active'>morphforge</li>
+            <li class='inactive'>signalanalysis</li>
+            <li>morphforge</li>
+        </ul>    
+    </div>
+    
+    
+    
+    
+    <div class='mainpane'>
+        <div class='header'>
+            <div class='pdtlogo'><span>PDT</span></div>
+            
+            <div class='actionbar'>
+            
+                <div class='actionbartop'>
+                    <ul>
+                        <li>Grin</li>
+                        <li>Lint</li>
+                        <li>Refactor</li>
+                    </ul>
+                </div>
+                
+                
+                <div class='actionbarbottom'>
+                    <ul>
+                        <li>Action1</li>
+                        <li>Action2</li>
+                        <li>Action3</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class='action'>
+            {% block content %}{% endblock %}
+        </div>
+    
+    
+    </div>
+</div>
+
+<div class="fsmonitor">
+    <div class="topline"><span class='heading'>FS Monitor:</span> </div>
+</div>
+
+<div class="pymonitor">
+    <div class="topline"><span class='heading'>PyMonitor:</span> </div>
+</div>
+
+
+
+</body>

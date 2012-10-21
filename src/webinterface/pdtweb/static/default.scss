@@ -1,0 +1,144 @@
+
+
+
+@mixin generallayoutbox {
+    border: 1px black solid;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+
+@mixin lowernotificationbox {
+    @include generallayoutbox;
+    width:100%;
+    float:clear;
+    clear:both;
+    
+   .heading {
+      color:red;
+    }
+}
+
+
+
+body {
+    font-family: MgOpen Cosmetica;
+    font-size: small;
+}
+
+
+
+.mainouter {
+    width:100%;
+    @include generallayoutbox;
+    overflow:hidden;
+}
+
+
+.mainpane {
+    @include generallayoutbox;
+    float:left;
+    
+    width:70%;
+    .header
+    {
+        padding-bottom:0px;
+        margin-bottom:0px;
+        
+        @include generallayoutbox;
+        /*overflow:auto;*/
+        .pdtlogo
+        {
+            padding:0px;
+            span 
+            {
+                font-size:32pt;
+                float:left;
+                padding:10px;
+            }
+        }
+    
+        .actionbar {
+            overflow: hidden; /* if you don't want #second to wrap below #first */
+            padding-top:15px;
+            border: black solid 1px;
+            
+            .actionbartop {
+                background-color:orange;
+            }
+            .actionbarbottom {
+                background-color:yellow;
+            }
+            
+        
+            ul
+            {
+                list-style-type:none;
+                margin:0;
+                padding:0;
+                li
+                {
+                    display:inline;
+                    background-color:lightblue;
+                }
+            }
+            
+        }
+    }
+    
+    
+}
+
+.mainpane .action {
+     @include generallayoutbox;
+     margin-left:20px;
+}
+
+
+
+.targetselectorpane {
+    overflow: hidden; /* if you don't want #second to wrap below #first */
+    @include generallayoutbox;
+    float:right;
+    
+    h1{
+        font-size: 12pt;
+    }
+    .targetlist{
+        padding:3px;
+        margin:3px;
+        
+    
+    }
+    
+    .targetlist li {
+        font-size: 10pt;
+        margin:3px;
+        padding-below:3px;
+        list-style-type: none;
+        
+    }
+    .targetlist li.active { background-color:lightgreen; }
+    .targetlist li.inactive { background-color:salmon; }
+    
+    
+}
+
+.mainouter {
+     width:100%;
+}
+
+
+
+
+.pymonitor {
+    @include lowernotificationbox;
+
+    
+}
+
+.fsmonitor {
+  @include lowernotificationbox;
+
+  
+}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+
+{% block additional_header %}
+
+<script type="text/javascript">
+
+function autocomplete_change(){
+    /*ss = 'my_search_string'*/
+    ss = $('#search_string_input').val()
+    Dajaxice.webinterface.pdtweb.autocomplete_change(autocomplete_callback, {'search_string':ss});
+
+}
+
+
+function autocomplete_callback(data){
+    $('#results').html(data.res);
+    $('#results_2').html(data.matches.join(','));
+}
+</script>
+{% endblock %}
+
+
+
+
+
+{% block content %}
+<h1>Grin</h1>
+
+<div class='grinform'>
+   <form>
+       <div>
+        <input type="text" id="search_string_input" name="search_string" oninput='autocomplete_change();'/>
+        </div>
+        
+        <div>
+            <ul>
+            <li> 
+                <input type="radio" name="search_what" value="All Files">All files</input>
+            </li>
+            <li> <input type="radio" name="search_what" value="Python Files">Python files</input></li>
+            </ul>
+        </div>
+        
+        
+        
+    </form>
+</div>
+
+<h1>Results</h1>
+<p id='results'></p>
+<p id='results_2'></p>
+
+<h1>All Files</h1>
+{% for filename in allfiles %}
+{{ filename.full_filename }}
+{% endfor %}
+
+{% endblock %}
+
