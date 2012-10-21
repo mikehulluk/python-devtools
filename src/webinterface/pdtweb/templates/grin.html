@@ -15,7 +15,17 @@ function autocomplete_change(){
 
 function autocomplete_callback(data){
     $('#results').html(data.res);
-    $('#results_2').html(data.matches.join(','));
+    /*$('#results_2').html(data.matches.join(','));*/
+    
+    $('#results_2 ul').empty()
+
+    for(var i=0, len=data.matches.length; i < len; i++)
+    {
+        fname = data.matches[i]
+        $('#results_2 ul').append(
+            $('<li>').append(
+                $('<a>').append(fname)) ) ;
+    }
 }
 </script>
 {% endblock %}
@@ -49,7 +59,7 @@ function autocomplete_callback(data){
 
 <h1>Results</h1>
 <p id='results'></p>
-<p id='results_2'></p>
+<div id='results_2'><ul></ul></div>
 
 <h1>All Files</h1>
 {% for filename in allfiles %}
