@@ -197,9 +197,9 @@ sp_replace.set_defaults(func=rename_global)
 sp_refactor_local_vars = subparsers.add_parser('refactor-local-variables', parents=[target_parser])
 sp_refactor_local_vars.set_defaults(func=renamelocalvariables)
 
-
-
 # 'grin', if its available:
+# grin is nicely designed to play with other tools, so the 
+# argument parsing is straight forward.
 try:
     import grin
     sp_grin = subparsers.add_parser('grin', parents=[target_parser])

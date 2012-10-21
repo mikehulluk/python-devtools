@@ -114,11 +114,9 @@ class MyNodeVisitor(ast.NodeVisitor):
         super(MyNodeVisitor, self).visit(node)
 
     def generic_visit(self, node):
-        # print node.__dict__
 
         if isinstance(node, (ast.expr, ast.stmt)):
             if not self._last_lineposition or node.lineno >= self._last_lineposition[0]:
-                #print "Uupdating Last linenoe:", node.lineno, node
                 self._last_lineposition = (node.lineno, node.col_offset)
 
         super(MyNodeVisitor, self).generic_visit(node)

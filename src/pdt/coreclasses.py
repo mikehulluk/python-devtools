@@ -12,7 +12,7 @@ from substfileply import parse_string
 class RemapData(object):
     def __init__(self,):
         self.previous_remaps = {}
-        self.not_remapped = ['ax','cPickle', 'np','i','j','pq','os','re']
+        self.not_remapped = ['ax','cPickle', 'np','i','j','units','os','re']
 
 
 

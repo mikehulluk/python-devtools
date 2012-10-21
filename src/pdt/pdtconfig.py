@@ -50,10 +50,6 @@ class PDTProfile(object):
     def find_and_replace_filename_regular(self):
         return os.path.join(self.working_dir, 'findandreplace.stash')
 
-#    @property
-#    def find_and_replace_filename_dangerous(self):
-#        return os.path.join( self.working_dir, 'findandreplace-dangerous.stash')
-
     @property
     def unmerged_changes(self):
         pass
