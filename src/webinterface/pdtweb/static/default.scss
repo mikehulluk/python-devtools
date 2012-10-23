@@ -142,3 +142,32 @@ body {
 
   
 }
+
+.codeblock {
+list-style-type: none;
+background-color: lightgrey;
+}
+
+
+
+.grinhighlight{
+    font-weight: bold;
+}
+
+.searchstring{
+    font-weight: bold;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.error{
+    color:red;
+}
+
+.resultsblock{
+    padding-top:15px;
+    padding-bottom:15px;
+}
+.lineno{
+    background-color:white;
+}

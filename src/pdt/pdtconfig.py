@@ -58,7 +58,6 @@ class PDTProfile(object):
         files = glob2.glob(src_files)
         files = [filename for filename in files
                  if os.path.isfile(filename)]
-        #print files
         return files
 
 

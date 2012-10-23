@@ -5,27 +5,78 @@
 
 <script type="text/javascript">
 
-function autocomplete_change(){
-    /*ss = 'my_search_string'*/
-    ss = $('#search_string_input').val()
-    Dajaxice.webinterface.pdtweb.autocomplete_change(autocomplete_callback, {'search_string':ss});
 
+function submit_search(){
+    alert('Submitted')
+    ss = $('#search_string_input').val()
+    Dajaxice.webinterface.pdtweb.full_search(search_callback, {'search_string':ss});
+}
+
+function autocomplete_change(){
+    ss = $('#search_string_input').val()
+    Dajaxice.webinterface.pdtweb.autocomplete_change(search_callback, {'search_string':ss});
 }
 
 
-function autocomplete_callback(data){
-    $('#results').html(data.res);
-    /*$('#results_2').html(data.matches.join(','));*/
-    
-    $('#results_2 ul').empty()
+function search_callback(data){
+    $('#results_2').empty()
+
+    ressum = $('#resultssummary')
+    ressum.empty()
+    ressum.append( 
+            $('<span>').append('Searching for:'), 
+            $('<span>').attr('class','searchstring').append( data.search_string ),
+            $('<br>'),
+            $('<span>').attr('id','searchresult')
+            )
+
+    if(data.error)
+    {
+        $('#searchresult').html(data.error)
+        $('#searchresult').addClass('error')
+        return
+    }
+
+    $('#searchresult').html('Showing '  + data.matches.length  + ' of ' + data.numfound  )
+    $('#searchresult').addClass('results')
+
 
     for(var i=0, len=data.matches.length; i < len; i++)
     {
-        fname = data.matches[i]
-        $('#results_2 ul').append(
-            $('<li>').append(
-                $('<a>').append(fname)) ) ;
+        fname = data.matches[i][0]
+        f_matches = data.matches[i][1]
+
+        base_node_li = $('<li>')
+        base_node_div = $('<div>')
+        base_node_div_ul = $('<ul>')
+
+        $('#results_2').append( base_node_li)
+        base_node_li.append(base_node_div)
+
+        base_node_div.append( $('<a>').append(fname) )
+        base_node_div.append( base_node_div_ul)
+
+
+
+        for(var j=0, len2=f_matches.length; j < len2; j++){
+
+            contents_node_li = $('<li class="codeblock">')
+            contents_node_pre = $('<pre>')
+            contents_node_span = $('<div>').attr('class','lineno').append( 'Lines: ' + f_matches[j][0][0] + '-' + f_matches[j][0][1]  )
+
+
+            contents_node_pre.append( f_matches[j][1] )
+            base_node_div_ul.append(contents_node_li)
+            contents_node_li.append(contents_node_span)
+            contents_node_li.append(contents_node_pre)
+
+        }
+
+
+
     }
+
+
 }
 </script>
 {% endblock %}
@@ -38,33 +89,44 @@ function autocomplete_callback(data){
 <h1>Grin</h1>
 
 <div class='grinform'>
-   <form>
+   <form onSubmit="submit_search();return false">
        <div>
         <input type="text" id="search_string_input" name="search_string" oninput='autocomplete_change();'/>
         </div>
-        
+
         <div>
             <ul>
-            <li> 
+            <li>
                 <input type="radio" name="search_what" value="All Files">All files</input>
             </li>
             <li> <input type="radio" name="search_what" value="Python Files">Python files</input></li>
             </ul>
         </div>
-        
-        
-        
+
+
+
     </form>
 </div>
 
-<h1>Results</h1>
-<p id='results'></p>
-<div id='results_2'><ul></ul></div>
+<!-- <h1>Results</h1> -->
+<!-- <p id='results'></p> -->
 
+<div class='resultsblock'>
+    <div id='resultssummary'>BLAHBLHA</div>
+
+    <div >
+        <ul id='results_2'></ul>
+    </div>
+</div>
+
+
+
+{% comment %}
 <h1>All Files</h1>
 {% for filename in allfiles %}
 {{ filename.full_filename }}
 {% endfor %}
+{% endcomment %}
 
 {% endblock %}
 
