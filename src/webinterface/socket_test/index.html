@@ -1,0 +1,85 @@
+<html>
+
+    <head>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    </head>
+
+    <body>
+        <div id='ID'></div>
+        <div id='status'></div>
+        <div id='txt'></div>
+
+    </body>
+
+
+
+
+
+    <script>
+
+
+        function socket_callback(data, textStatus) {
+
+            msg_time = data.time
+
+            for(var i=0;i<data.messages.length;i++)
+            {
+                // Extract out the headers:
+                msg = data.messages[i]
+                msg_type = msg[0]
+                msg_details = msg[1]
+
+                if(msg_type=='Heartbeat')
+                {
+                    $('#status').html('Last Update:' + msg_time)
+                }
+                else if(msg_type=='Shutdown')
+                {
+                    $('#status').html('Shutdown Called:' + msg_time)
+                    return
+                }
+                else
+                {
+                    m = msg_time +  ' ' + msg_details
+                    $('#txt').prepend(m)
+                    $('#txt').prepend('<br/>')
+                }
+
+
+            }
+
+            //#alert('Socket Callback OK!')
+
+
+            //Create a new socket with the server:
+            $.get('http://localhost:9008',{'some':'data'}, socket_callback, "json")
+        }
+
+        function ready_handler() {
+           
+            // Setup global namespace
+            $.mhns = {}
+
+            // Create a random string, this will hold the client ID:
+            $.mhns.clientid = Math.floor(Math.random()*1E16)
+            $.mhns.last_sentry_update = null
+            $('#ID').html('ClientID: ' +  $.mhns.clientid  )
+
+            $('#txt').append("Ready!")
+
+
+
+            $.get('http://localhost:9008',{'last_update':$.mhns.last_sentry_update}, socket_callback, "json")
+
+        }
+
+        $(document).ajaxError( function() {
+            $('#status').html('Lost Connection to Sentry')
+            //#alert('AjaxError');
+        } )
+        $(document).ready(ready_handler)
+
+
+    </script>
+
+</html>

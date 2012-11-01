@@ -45,20 +45,11 @@ def autocomplete_change(req, search_string):
 def full_search(req, search_string):
     print 'In full_search'
 
-    #if len(search_string) < 3:
-    #    return simplejson.dumps({
-    #        'search_string':search_string,
-    #    'res': 'THE RESULTS ARE: '+search_string,
-    #    'matches': {},
-    #    })
 
     try:
         max_find = None
         max_return = None
         nmatches_total, matches_dict = search_for_text_naive(search_string,max_find=max_find, max_return=max_return)
-
-    #    if nmatches_total==max_find:
-    #        nmatches_total = ('over %d'%max_find)
 
     except re.error:
         return simplejson.dumps({
