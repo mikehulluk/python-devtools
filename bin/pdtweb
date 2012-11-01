@@ -1,0 +1,3 @@
+#! /bin/sh
+
+python /home/michael/hw_to_come/python-devtools/src/webinterface/manage.py $*

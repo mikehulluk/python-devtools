@@ -1,14 +1,33 @@
 <html>
-
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
     <script src="http://code.jquery.com/jquery-latest.js"></script>
+
+
+
+
+    <style type="text/css">
+    body {
+    color: purple;
+    background-color: #d8da3d
+    }
+
+    #sentry.error {
+        background-color: red;
+    }
+    </style>
+
+
+
+
+
+
+
     </head>
 
     <body>
-        <div id='ID'></div>
-        <div id='status'></div>
-        <div id='txt'></div>
-
+        <div id='sentry'></div>
     </body>
 
 
@@ -18,65 +37,107 @@
     <script>
 
 
-        function socket_callback(data, textStatus) {
+        function ajax_sentry_connect(){
+            $.ajax({
+                url: 'http://localhost:9000/sentry',
+                type: 'GET',
+                data:{'last_update':$.mhns.last_sentry_update},
+                success:  ajax_sentry_callback,
+                error: ajax_sentry_callbackerror,
+                dataType:'json',
+                global:false,
+                });
+        }
+
+        function ajax_sentry_callback(data, textStatus) {
 
             msg_time = data.time
+            $.mhns.last_sentry_update = data.last_id
+            $('#sentry #status').html('Msg: ' + $.mhns.last_sentry_update +  ' Last Update:' + msg_time)
 
-            for(var i=0;i<data.messages.length;i++)
+
+
+            file_change = false
+            for(var i=0;i<data.msgs.length;i++)
             {
                 // Extract out the headers:
-                msg = data.messages[i]
-                msg_type = msg[0]
-                msg_details = msg[1]
+                msg = data.msgs[i]
 
-                if(msg_type=='Heartbeat')
+                if(msg.msg_type=='Heartbeat')
                 {
-                    $('#status').html('Last Update:' + msg_time)
+                    $('#sentry').removeClass('error')
                 }
-                else if(msg_type=='Shutdown')
+                else if(msg.msg_type=='Shutdown')
                 {
-                    $('#status').html('Shutdown Called:' + msg_time)
+                    $('#sentry #status').html('Shutdown Called:' + msg_time)
+                    m = 'Closing Connection Sentry'
+                    $('#sentry #msglist').prepend('<li>Closing Connection to Sentry</li>')
+                    $('#sentry').addClass('error')
                     return
+                }
+                else if(msg.msg_type=='Initialise')
+                {
+                    m = 'Initialising Sentry'
+                    $('#sentry #msglist').prepend('<li>'+m+'</li>')
+
+                }
+                else if(msg.msg_type=='FileChange')
+                {
+                    m =msg_time +  ' ' + msg.msg_details
+                    $('#sentry #msglist').prepend('<li>'+m+'</li>')
+                    file_change = true;
                 }
                 else
                 {
-                    m = msg_time +  ' ' + msg_details
-                    $('#txt').prepend(m)
-                    $('#txt').prepend('<br/>')
+                    m = 'Unexpected message type:' + msg.msg_type
+                    $('#sentry #msglist').prepend('<li>'+m+'</li>')
                 }
-
-
             }
 
-            //#alert('Socket Callback OK!')
+            // Trim the list of items, to a maxium of 20
+            $('#sentry #msglist li').slice( 20 ).remove();
+
+            if(file_change){
+                $.mhns.onfilechange()
+            }
 
 
             //Create a new socket with the server:
-            $.get('http://localhost:9008',{'some':'data'}, socket_callback, "json")
+            ajax_sentry_connect()
         }
+
+        function sentry_init() {
+
+            $.mhns.last_sentry_update = -1
+
+            // Create elements of the DOM:
+            $('#sentry').append('<div id="status"/>')
+            $('#sentry').append('<ul id="msglist" />')
+
+            $.mhns.onfilechange = function() { alert('FileChanged') };
+
+            ajax_sentry_connect()
+        }
+
+        function ajax_sentry_callbackerror(){
+            $('#sentry #status').html('Lost Connection to Sentry')
+            $('#sentry').addClass('error')
+        }
+
 
         function ready_handler() {
-           
+
             // Setup global namespace
             $.mhns = {}
-
-            // Create a random string, this will hold the client ID:
-            $.mhns.clientid = Math.floor(Math.random()*1E16)
-            $.mhns.last_sentry_update = null
-            $('#ID').html('ClientID: ' +  $.mhns.clientid  )
-
-            $('#txt').append("Ready!")
-
-
-
-            $.get('http://localhost:9008',{'last_update':$.mhns.last_sentry_update}, socket_callback, "json")
+            sentry_init()
 
         }
 
-        $(document).ajaxError( function() {
-            $('#status').html('Lost Connection to Sentry')
-            //#alert('AjaxError');
-        } )
+
+
+
+
+
         $(document).ready(ready_handler)
 
 

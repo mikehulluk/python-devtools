@@ -46,6 +46,14 @@ last_transmission = time.time()
 #is_shutting_down = False
 
 
+import re
+
+
+
+
+
+
+
 def time_string():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
@@ -60,6 +68,14 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
     """
 
     def handle(self):
+
+        ## Get the client:
+        #print self.request
+        #print self.__dict__.keys()
+        #print self.headers
+        #assert False
+
+
         #if is_shutting_down:
         #    time_str = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         #    response = json.dumps({'time':time_str, 'messages':(MsgTypes.Shutdown, None)})
@@ -68,7 +84,18 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
 
         # self.request is the TCP socket connected to the client
-        #self.data = self.request.recv(1024).strip()
+        self.data = self.request.recv(1024).strip()
+        print 'Data', self.data
+        
+        header_re = re.compile("""GET \/\?last_update=(?P<last_update>.*) HTTP""")
+        m = header_re.search(self.data)
+
+        print m.groupdict()['last_update']
+
+        #print self.path
+        #print self.request
+        assert False
+
 
 
 
@@ -263,8 +290,8 @@ def main_loop():
 
     mask = EventsCodes.ALL_FLAGS['IN_DELETE'] | EventsCodes.ALL_FLAGS['IN_CREATE'] | EventsCodes.ALL_FLAGS['IN_ATTRIB']   |EventsCodes.ALL_FLAGS['IN_MODIFY']# watched events
     #mask = EventsCodes.ALL_FLAGS['IN_DELETE'] | EventsCodes.ALL_FLAGS['IN_CREATE'] | EventsCodes.ALL_FLAGS['IN_MODIFY']# watched events
-    wdd = wm.add_watch('../sentry.py', mask, rec=True)
-    wdd = wm.add_watch('../', mask, rec=True)
+    #wdd = wm.add_watch('../sentry.py', mask, rec=True)
+    #wdd = wm.add_watch('../', mask, rec=True)
 
 
     try:
