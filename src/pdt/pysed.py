@@ -57,7 +57,7 @@ class TmpDir(object):
 def pysed( filenames, plugin_names, require_clean=False, do_apply=True ):
     # Build the manager
     simplePluginManager = yapsy.PluginManager.PluginManager()
-    simplePluginManager.setPluginPlaces(["/home/michael/.python-devtools/plugins/pysed/"])
+    simplePluginManager.setPluginPlaces(["/home/michael/.python-devtools/plugins/pysed/",'/home/michael/hw/python-devtools/plugins/'])
     simplePluginManager.collectPlugins()
 
 
@@ -90,27 +90,21 @@ def pysed( filenames, plugin_names, require_clean=False, do_apply=True ):
                 subprocess.check_call(['patch','--quiet', '-u', new_filename, '-i', patch_file])
 
             # Merge the new changes:
-            if filecmp.cmp(filename, new_filename, shallow=False)==True:
+            if filecmp.cmp(filename, new_filename, shallow=False) == True:
                 print 'no changes to:', filename
                 continue
 
-            subprocess.check_call(['meld', filename, new_filename] )
-
-
-
-
-
-
-
-
-
+            subprocess.check_call(['meld', filename, new_filename])
 
 
 
 
 if __name__=='__main__':
     lyx_files = sorted(glob.glob('/home/michael/hw/hw-writing/chapters/*.lyx') )
-    plugin_names = [ ('LyxRef', {} )   ]
+    plugin_names = [ 
+            #('LyxRef', {} ),
+            ('LyxWhitespace', {} )   
+            ]
 
     pysed(lyx_files, plugin_names)
     print 'Done'
