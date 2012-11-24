@@ -1,0 +1,10 @@
+[Core]
+Name = LyxRef
+Module = lyx_reference_formatter
+
+[Documentation]
+Description = Ensures the references are in the correct format and they are surrounded with spaces
+Author = Mike Hull
+Version = 0.1-alpha
+Website = My very own website
+Version = the_version_number_of_the_plugin
