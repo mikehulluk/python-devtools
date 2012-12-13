@@ -1,1 +1,7 @@
 *.pyc
+doc/build/
+
+parser.out
+parsetab.py
+*.orig
+*.new
