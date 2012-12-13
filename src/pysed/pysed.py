@@ -7,12 +7,73 @@ import subprocess
 import tempfile
 import shutil
 import filecmp
+import os
+from configobj import ConfigObj
+
 
 
 def filter_expect_single(seq, func):
     r = [ o for o in seq if func(o)]
     assert len(r)==1
     return r[0]
+
+def isiterable(obj):
+    try:
+        for i in obj:
+            return True
+    except TypeError: 
+        return False
+
+def normalise_to_list(objs):
+    if objs is None:
+        return []
+    if isinstance(objs, basestring):
+        return [objs]
+    if isiterable(objs):
+        return objs
+    return [objs]
+    
+
+class TmpDir(object):
+    def __enter__(self,):
+        self.working_dir = tempfile.mkdtemp()
+        return self.working_dir
+
+    def __exit__(self,exc_type, exc_val, exc_tb):
+        shutil.rmtree(self.working_dir)
+
+class PySedError(Exception):
+    pass
+
+class PySed(object):
+    _default_rc_filename = '~/.python-devtools/.pysedrc'
+
+
+    # The constructor reads the configuration:
+    def __init__(self, rcfilename=None): 
+        if rcfilename is None:
+            rcfilename = PySed._default_rc_filename
+
+        rcfilename = os.path.expanduser(rcfilename)
+
+        if not os.path.exists(rcfilename):
+            raise PySedError("Can't open the specified rcfile: %s"% rcfilename)
+        self.config = ConfigObj(infile=rcfilename)
+    
+        # Setup the plugin architecture:
+        self.simplePluginManager = yapsy.PluginManager.PluginManager()
+        self.simplePluginManager.setPluginPlaces(["/home/michael/.python-devtools/plugins/pysed/",'/home/michael/hw/python-devtools/plugins/pysed/'])
+        self.simplePluginManager.collectPlugins()
+
+
+    def pysed_build_patches(self, src_filename, plugin_names=None, plugin_groupnames=None):
+        assert False
+
+    def apply_interactive(self, src_filenames, plugin_names=None, plugin_groupnames=None):
+        pass
+
+
+    #pysedobj.apply_interactive(lyx_files, plugin_groups='LyxStd')
 
 
 
@@ -42,13 +103,8 @@ def pysedfile( filename, plugin_names, plugin_mgr ):
 
 
 
-class TmpDir(object):
-    def __enter__(self,):
-        self.working_dir = tempfile.mkdtemp()
-        return self.working_dir
 
-    def __exit__(self,exc_type, exc_val, exc_tb):
-        shutil.rmtree(self.working_dir)
+
 
 
 
@@ -57,7 +113,7 @@ class TmpDir(object):
 def pysed( filenames, plugin_names, require_clean=False, do_apply=True ):
     # Build the manager
     simplePluginManager = yapsy.PluginManager.PluginManager()
-    simplePluginManager.setPluginPlaces(["/home/michael/.python-devtools/plugins/pysed/",'/home/michael/hw/python-devtools/plugins/'])
+    simplePluginManager.setPluginPlaces(["/home/michael/.python-devtools/plugins/pysed/",'/home/michael/hw/python-devtools/plugins/pysed/'])
     simplePluginManager.collectPlugins()
 
 
@@ -100,9 +156,18 @@ def pysed( filenames, plugin_names, require_clean=False, do_apply=True ):
 
 
 if __name__=='__main__':
+
+    pysedobj = PySed()
+    lyx_files = sorted(glob.glob('/home/michael/hw/hw-writing/chapters/*.lyx') )
+    #def pysed_build_patches(self, src_filename, plugin_names=None, plugin_groupnames=None):
+    
+    pysedobj.apply_interactive(lyx_files, plugin_groupnames='LyxStd')
+
+
+
     lyx_files = sorted(glob.glob('/home/michael/hw/hw-writing/chapters/*.lyx') )
     plugin_names = [ 
-            #('LyxRef', {} ),
+            ('LyxRef', {} ),
             ('LyxWhitespace', {} )   
             ]
 
