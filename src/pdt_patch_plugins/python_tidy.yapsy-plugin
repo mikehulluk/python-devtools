@@ -1,0 +1,11 @@
+ 
+[Core]
+Name = Python Tidy Plugin
+Module = python_tidy
+   
+[Documentation]
+Description = What my plugin broadly does
+Author = My very own name
+Version = 0.1
+Website = My very own website
+Version = the_version_number_of_the_plugin

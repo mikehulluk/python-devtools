@@ -188,6 +188,7 @@ sp_replace.add_argument('src_expr', )
 sp_replace.add_argument('target_expr', )
 sp_replace.add_argument('-w', '--word', action='store_true', default=False, dest='match_word' )
 sp_replace.add_argument('-a', '--apply', action='store_true', default=False, )
+sp_replace.add_argument( '--dangerous', action='store_true', default=False, dest='dangerous' )
 sp_replace.set_defaults(func=rename_global)
 
 

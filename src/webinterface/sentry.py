@@ -55,10 +55,10 @@ def update_file(filename):
 def main():
 
     # Scan for changes in all tracked files:
-    #print 'Updating all files:'
-    #for filename in filenames:
-    #    update_file(filename)
-    #print 'OK'
+    print 'Updating all files:'
+    for filename in filenames:
+        update_file(filename)
+    print 'OK'
 
     print 'Starting Monitoring'
 
@@ -74,7 +74,7 @@ def main():
 import os
 from pyinotify import WatchManager, Notifier, ThreadedNotifier, EventsCodes, ProcessEvent
 
-previous_modification_time
+#previous_modification_time
 
 class PTmp(ProcessEvent):
     def process_IN_CREATE(self, event):

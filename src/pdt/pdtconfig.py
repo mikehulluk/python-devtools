@@ -8,7 +8,7 @@ import sys
 # Dynamically add 'glob2' to the path:
 # (from ROOT/src/pdt to ROOT/glob2/)
 local_path = os.path.dirname(__file__)
-glob2_src = os.path.join(local_path, '../../glob2/src/')
+glob2_src = os.path.join(local_path, '../../dependancies/glob2/src/')
 sys.path.append(glob2_src)
 import glob2
 
@@ -77,7 +77,7 @@ class PDTProfileMgr(object):
         elif item in cls.profile_groups:
             return cls.expand_target_list_to_profiles(cls.profile_groups[item])
         else:
-            print 'Unable to resolve target:', item
+            print('Unable to resolve target: %s' % item)
             assert False
 
     @classmethod
