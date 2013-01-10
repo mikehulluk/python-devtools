@@ -24,6 +24,15 @@ import yapsy.PluginManager
 import pdt_patch_builtin
 
 
+
+# Tesing:
+# =============
+import patch_manager
+patch_manager.PatchManager()
+# =============
+
+
+
     
 
 
