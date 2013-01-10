@@ -3,33 +3,34 @@
 
 
 import argparse
-
-
-
-
-from pdtconfig import PDTProfileMgr
-
 import re
 import itertools
 import sys
 import os
 import gzip
 
-import yapsy.PluginManager
-
 
 import yapsy.PluginManager
+
+from pdtconfig import PDTProfileMgr
 
 
 import pdt_patch_builtin
-
-
-
-# Tesing:
-# =============
 import patch_manager
-patch_manager.PatchManager()
-# =============
+
+
+
+
+
+def do_profile_list(args):
+    print 'Listing Profiles:'
+    print 'Profiles:'
+    for profile_name, profile in sorted(PDTProfileMgr.profiles.items()):
+        print ' - %s' % profile_name
+    print 'Profile Groups:'
+    for profilegroup_name, profile in sorted(PDTProfileMgr.profile_groups.items()):
+        print ' - %s' % profilegroup_name
+    print 'Default Targets: ', PDTProfileMgr.default_targets
 
 
 
@@ -42,6 +43,12 @@ def do_grin():
     
     
 
+# (from ROOT/src/pdt to ROOT/glob2/)
+local_path = os.path.dirname(__file__)
+plugin_dir = os.path.join(local_path, '../src/pdt_patch_plugins/')
+plugin_dir = os.path.normpath(plugin_dir)
+print plugin_dir
+
 
 class PatchToolMgr(object):
    
@@ -51,6 +58,10 @@ class PatchToolMgr(object):
     
     
     def build_argparser(self, patch_parser):
+        
+        
+        #sp_patch.add_argument('--apply', help='apply', action='store_true' )
+     
      
         # Subcommand:
         sp_patch_subparsers = patch_parser.add_subparsers() 
@@ -69,7 +80,7 @@ class PatchToolMgr(object):
     
     def _search_patch_plugins(self, argparser):
         self.simplePluginManager = yapsy.PluginManager.PluginManager()
-        #self.simplePluginManager.setPluginPlaces(['/home/michael/hw_to_come/python-devtools/src/pdt_patch_plugins/',])
+        self.simplePluginManager.setPluginPlaces([plugin_dir,])
         self.simplePluginManager.collectPlugins()
         
          # Loop round the plugins and print their names.
@@ -109,6 +120,14 @@ def _build_argparser():
 
 
 
+    # Profile management:
+    # =================
+    sp_profile_parser = subparsers.add_parser('profile', help='Information about registered profiles')
+    sp_profile_subparsers = sp_profile_parser.add_subparsers()
+    sp_profile_list = sp_profile_subparsers.add_parser('list', help='List availble profiles')
+    sp_profile_list.set_defaults(func=do_profile_list)
+
+    #p_profile_parser
 
 
     # Global Searching:
@@ -130,6 +149,9 @@ def _build_argparser():
     # Working with patches:
     # =====================
     sp_patch = subparsers.add_parser('patch', help='Build, apply or manage a set of patches', formatter_class=argparse.RawTextHelpFormatter) 
+    
+    
+    
     patch_tool_manager = PatchToolMgr()
     patch_tool_manager.build_argparser(sp_patch)
     
@@ -150,6 +172,10 @@ def main():
     if not args.target:
         args.target = PDTProfileMgr.default_targets
     args.profile_targets = PDTProfileMgr.expand_target_list_to_profiles(args.target)
+    # also include a list of all the target files:
+    args.file_targets = list(set(itertools.chain( *[target.files for target in args.profile_targets] )))
+    args.file_targets.sort()
+
 
     # Get and execute the action-functor
     #args.func = lambda s:None

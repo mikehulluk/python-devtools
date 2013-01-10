@@ -9,9 +9,3 @@ class PatchPlugin(IPlugin):
         raise NotImplementedError()
 
 
-
-
-#class SimpleTextChangePlugin(PatchPlugin):
-#    
-#    def text():
-        
