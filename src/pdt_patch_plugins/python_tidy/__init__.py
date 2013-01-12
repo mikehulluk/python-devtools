@@ -16,9 +16,9 @@ class PluginOne(SimpleTextChangePlugin):
         
         print 'Doing plugin'
         
-    def build_arg_parser(self, argparser):
+    def build_arg_parser(self, argparser, parent_parser, action_wrapper):
         parser = argparser.add_parser('python-tidy', help='* Python-Tidy')
-        parser.set_defaults(func=self._do_plugin)
+        parser.set_defaults(func=action_wrapper(self._do_plugin))
 
 
     #def action_file(self, filename):

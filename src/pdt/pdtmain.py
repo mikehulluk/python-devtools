@@ -50,6 +50,26 @@ plugin_dir = os.path.normpath(plugin_dir)
 print plugin_dir
 
 
+
+class PatchFunctionWrapper(object):
+    def __init__(self, pre_actions=None, post_actions=None):
+        
+        self.pre_actions = pre_actions if pre_actions else []
+        self.post_actions = post_actions if post_actions else []
+    
+    def __call__(self, func):
+        def mycall(args, *args_, **kwargs):
+            for action in self.pre_actions:
+                action(args=args)
+            res = func(args, *args_, **kwargs)
+            
+            for action in self.post_actions:
+                action(args=args)
+            return res
+            
+        return mycall
+        
+
 class PatchToolMgr(object):
    
     def __init__(self):
@@ -60,10 +80,30 @@ class PatchToolMgr(object):
     def build_argparser(self, patch_parser):
         
         
-        #sp_patch.add_argument('--apply', help='apply', action='store_true' )
+        # Create a parent parser, which we can use to apply default arguments,
+        # even though the actions are mostly handled by the plugins. 
+        # For example, we want to use 'apply'
+        patch_function_wrapper = PatchFunctionWrapper()
+        
+        def check_apply(args):
+            if args.apply:
+                print 'Trying to apply'
+                pdt_patch_builtin.DoPatchApply().do_apply(args)
+            else:
+                print 'Not Trying to apply'
+        patch_function_wrapper.post_actions.append( check_apply)
+            
+        
+        parent_parser = argparse.ArgumentParser('parent', add_help=False)
+        parent_parser.add_argument('--apply', help='apply', action='store_true' )
+        
+        
+        
+        
+        
      
      
-        # Subcommand:
+        # Create a parser for the subcommand:
         sp_patch_subparsers = patch_parser.add_subparsers() 
         
         # Built-in commands:
@@ -76,9 +116,13 @@ class PatchToolMgr(object):
             handler.build_arg_parser(sp_patch_subparsers)
         
         # Plugin Commands:
-        self._search_patch_plugins(argparser=sp_patch_subparsers)
+        self._search_patch_plugins(argparser=sp_patch_subparsers, parent_parser=parent_parser, patch_function_wrapper=patch_function_wrapper)
     
-    def _search_patch_plugins(self, argparser):
+    
+
+        
+    
+    def _search_patch_plugins(self, argparser, parent_parser, patch_function_wrapper):
         self.simplePluginManager = yapsy.PluginManager.PluginManager()
         self.simplePluginManager.setPluginPlaces([plugin_dir,])
         self.simplePluginManager.collectPlugins()
@@ -88,7 +132,7 @@ class PatchToolMgr(object):
             plugin.plugin_object.print_name()
             
             # Hook the plugin into the menu system:
-            plugin.plugin_object.build_arg_parser(argparser=argparser)
+            plugin.plugin_object.build_arg_parser(argparser=argparser, parent_parser=parent_parser, action_wrapper=patch_function_wrapper)
         
         
     
@@ -175,6 +219,7 @@ def main():
     # also include a list of all the target files:
     args.file_targets = list(set(itertools.chain( *[target.files for target in args.profile_targets] )))
     args.file_targets.sort()
+    print 'Target files:', len(args.file_targets)
 
 
     # Get and execute the action-functor

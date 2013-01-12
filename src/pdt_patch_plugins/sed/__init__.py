@@ -23,11 +23,7 @@ class PluginOne(IPlugin):
     def _do_plugin(self, args):
         print 'Running sed plugin'
         
-        # Get the relevant files:
-        #files = itertools.chain( *[target.files for target in args.profile_targets] )
-        #files = list(set(files))
-        
-        
+       
         # Apply the changes:
         file_changes = {}
         #for filename in sorted(files):
@@ -57,9 +53,9 @@ class PluginOne(IPlugin):
         
 
 
-    def build_arg_parser(self, argparser):
+    def build_arg_parser(self, argparser, parent_parser, action_wrapper):
         parser = argparser.add_parser('sed', help='* Sed')
         parser.add_argument('sedexpr')
-        parser.set_defaults(func=self._do_plugin)
+        parser.set_defaults(func=action_wrapper(self._do_plugin))
         
         
