@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from patch_manager import session, Patch, PatchSet, PatchManager
+from pdt.patch_manager import session, Patch, PatchSet, PatchManager
 
 
 class DoPatchApply(object):

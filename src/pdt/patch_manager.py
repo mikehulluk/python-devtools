@@ -24,21 +24,6 @@ class PatchManager(object):
         return [p for p in session.query(Patch).all()
                 if p.target_filename == filename]
 
-    # @classmethod
-    # def create_dummy_patchset(cls,):
-    #    ps1 = PatchSet(
-    #            name='Test1',
-    #            release_date = datetime.datetime.now()
-    #            )
-
-    #    p1 = Patch(target_filename='Testfile1',
-    #               patch_data='PATCH_DATA1')
-    #    p2 = Patch(target_filename='Testfile2',
-    #               patch_data='PATCH_DATA2')
-    #    ps1.patches.extend([p1,p2])
-
-    #    session.add(ps1)
-    #    session.commit()
 
     @classmethod
     def create_patchset(cls, patching_data, name=None):

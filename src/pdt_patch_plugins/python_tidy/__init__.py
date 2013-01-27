@@ -19,9 +19,11 @@ import re
 import pythontidy
 
 
-class OutstandingChangesException(Exception):
+from pdt.plugins.errors import OutstandingChangesException
 
-    pass
+#class OutstandingChangesException(Exception):
+#
+#    pass
 
 
 

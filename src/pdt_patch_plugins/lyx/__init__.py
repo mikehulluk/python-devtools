@@ -160,8 +160,11 @@ status collapsed
 
 
 
-class OutstandingChangesException(Exception):
-    pass
+#class OutstandingChangesException(Exception):
+#    pass
+
+from pdt.plugins.errors import OutstandingChangesException
+
 
 class PluginOne(IPlugin):
     def print_name(self):

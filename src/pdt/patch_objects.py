@@ -6,15 +6,12 @@ from sqlalchemy import Column, Date, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-import datetime
-import difflib
-import subprocess
-import filecmp
 
 from sqlalchemy.orm import sessionmaker
 
 from pdt.filelocations import PDTFileLocations
-from pdt.util import TmpDir
+
+
 
 engine = create_engine(PDTFileLocations.get_patch_sqlalchemy_url(),
                        echo=False)
@@ -32,7 +29,6 @@ class Patch(Base):
     patch_data = Column(String)
     patch_set = Column(Integer, ForeignKey('patchsets.id'))
 
-    # ----------------------------------------------------------------------
     def __init__(self, target_filename, patch_data):
         self.target_filename = target_filename
         self.patch_data = patch_data
@@ -51,9 +47,8 @@ class PatchSet(Base):
                 len(self.patches))
 
 
-# create tables
+# Setup the classes with SQL-alchemy
 Base.metadata.create_all(engine)
-
 Session = sessionmaker(bind=engine)
 session = Session()
 

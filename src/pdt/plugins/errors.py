@@ -1,0 +1,5 @@
+
+
+
+class OutstandingChangesException(Exception):
+    pass

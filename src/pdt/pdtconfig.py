@@ -2,23 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import os
-from configobj import ConfigObj
-import sys
 
-# Dynamically add 'glob2' to the path:
-# (from ROOT/src/pdt to ROOT/glob2/)
-local_path = os.path.dirname(__file__)
-glob2_src = os.path.join(local_path, '../../dependancies/glob2/src/')
-sys.path.append(glob2_src)
+from configobj import ConfigObj
+
+
+# glob2 is copied along with this package, 
+# so lets make sure its on the path:
+import dependancies_setup
 import glob2
 
 
-def _ensure_dir_exists(path):
-    dirname = os.path.dirname(path)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-    return path
 
+from pdt.filelocations import PDTFileLocations
+import pdt.util
 
 class PDTProfile(object):
 
@@ -33,7 +29,7 @@ class PDTProfile(object):
                              % name)
 
         # Check and create upfront:
-        _ensure_dir_exists(self.data_dict['working_dir'])
+        pdt.util.ensure_dir_exists(self.data_dict['working_dir'])
 
     def __repr__(self):
         return '<Profile: %s (%s) >' % (self.name, self.data_dict)
@@ -65,8 +61,8 @@ class PDTProfile(object):
 
 class PDTProfileMgr(object):
 
-    _pdtrcdir = os.path.expanduser('~/.python-devtools/')
-    _pdtrc = os.path.expanduser('~/.python-devtools/.pdtrc')
+    _pdtrcdir = PDTFileLocations.get_rc_dir()
+    _pdtrc = PDTFileLocations.get_rc_file()
 
     profiles = {}
     profile_groups = {}
@@ -113,7 +109,7 @@ class PDTProfileMgr(object):
 
     @classmethod
     def _init(cls):
-        _ensure_dir_exists(cls._pdtrcdir)
+        pdt.util.ensure_dir_exists(cls._pdtrcdir)
 
         # Load from .rc file:
         cls.load_rc_file()

@@ -2,19 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import re
 import itertools
-import sys
-import os
-import gzip
 
 import yapsy.PluginManager
 
 from pdtconfig import PDTProfileMgr
-from pdt_filelocations import PDTFileLocations
 
-import pdt_patch_builtin
-import patch_manager
+
+from pdt.filelocations import PDTFileLocations
+import pdt.builtin_functions
+import pdt.patch_manager
 
 
 def do_profile_list(args):
@@ -30,29 +27,12 @@ def do_profile_list(args):
     print 'Default Targets: ', PDTProfileMgr.default_targets
 
 
-def do_grin(args):
-    #print 'doing grin'
-    import grin
-
-    if args.context is not None:
-        args.before_context = args.context
-        args.after_context = args.context
-    args.use_color = args.force_color or (not args.no_color and
-        sys.stdout.isatty() and
-        (os.environ.get('TERM') != 'dumb'))
-
-    regex = grin.get_regex(args)
-    g = grin.GrepText(regex, args)
-    
-    for filename in args.file_targets:
-        report = g.grep_a_file(filename, opener=open)
-        sys.stdout.write(report)
     
     
      
 
 
-class PatchFunctionWrapper(object):
+class PrePostFunctionWrapper(object):
 
     def __init__(self, pre_actions=None, post_actions=None):
 
@@ -80,11 +60,11 @@ class PatchToolMgr(object):
         # Create a parent parser, which we can use to apply default arguments,
         # even though the actions are mostly handled by the plugins.
         # For example, we want to use 'apply'
-        patch_function_wrapper = PatchFunctionWrapper()
+        patch_function_wrapper = PrePostFunctionWrapper()
 
         def check_apply(args):
             if args.apply:
-                pdt_patch_builtin.DoPatchApply().do_apply(args)
+                pdt.builtin_functions.patch.DoPatchApply().do_apply(args)
 
         patch_function_wrapper.post_actions.append(check_apply)
 
@@ -97,9 +77,9 @@ class PatchToolMgr(object):
         sp_patch_subparsers = patch_parser.add_subparsers()
 
         # Built-in commands:
-        builtin_handlers = [pdt_patch_builtin.DoPatchApply(),
-                            pdt_patch_builtin.DoPatchDrop(),
-                            pdt_patch_builtin.DoPatchList()]
+        builtin_handlers = [pdt.builtin_functions.patch.DoPatchApply(),
+                            pdt.builtin_functions.patch.DoPatchDrop(),
+                            pdt.builtin_functions.patch.DoPatchList()]
         for handler in builtin_handlers:
             handler.build_arg_parser(sp_patch_subparsers)
 
@@ -160,20 +140,11 @@ def _build_argparser():
 
     # Global Searching:
     # =================
-
     # add 'grin', if its available:
     # grin is nicely designed to play with other tools, so the
     # argument parsing is straight forward.
-    try:
-        import grin
-        sp_grin = subparsers.add_parser('grin',
-                parents=[target_parser],
-                help='Use grin on the targetted files')
-        grin.get_grin_arg_parser(sp_grin)
-        sp_grin.set_defaults(func=do_grin)
-    except ImportError:
-        pass
-
+    pdt.builtin_functions.mygrin.DoGrinObj().build_arg_parser(subparsers, parent_parsers=[target_parser])
+    
     # Working with patches:
     # =====================
     sp_patch = subparsers.add_parser('patch',

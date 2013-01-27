@@ -13,9 +13,7 @@ import subprocess
 import re
 
 
-class OutstandingChangesException(Exception):
-    pass
-
+from pdt.plugins.errors import OutstandingChangesException
 
 
 

@@ -3,10 +3,9 @@
 
 import tempfile
 import shutil
-
+import os
 
 class TmpDir(object):
-
     def __enter__(self):
         self.working_dir = tempfile.mkdtemp()
         return self.working_dir
@@ -15,3 +14,8 @@ class TmpDir(object):
         shutil.rmtree(self.working_dir)
 
 
+def ensure_dir_exists(path):
+    dirname = os.path.dirname(path)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    return path
