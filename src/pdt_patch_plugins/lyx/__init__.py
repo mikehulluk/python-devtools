@@ -19,7 +19,7 @@ from functools import partial
 
 def sub_func(m, text, replacement=None):
     
-    # Check for specil lyx lines:
+    # Check for special lyx lines:
     line_start = text.rfind('\n', 0, m.start())
     line_end = text.find('\n', m.start()+1,)
     if line_start != -1:

@@ -28,7 +28,9 @@ class PDTProfile(object):
         self.data_dict['name'] = name
 
         if not 'working_dir' in self.data_dict:
-            self.data_dict['working_dir'] = os.path.join(PDTProfileMgr._pdtrcdir, '.profile-%s/'%name)
+            self.data_dict['working_dir'] = \
+                os.path.join(PDTProfileMgr._pdtrcdir, '.profile-%s/'
+                             % name)
 
         # Check and create upfront:
         _ensure_dir_exists(self.data_dict['working_dir'])
@@ -77,7 +79,7 @@ class PDTProfileMgr(object):
         elif item in cls.profile_groups:
             return cls.expand_target_list_to_profiles(cls.profile_groups[item])
         else:
-            print('Unable to resolve target: %s' % item)
+            print 'Unable to resolve target: %s' % item
             assert False
 
     @classmethod
@@ -104,9 +106,10 @@ class PDTProfileMgr(object):
         # Load the profiles:
         if not 'profiles' in pdtrcdata:
             raise RuntimeError('No-profiles defined in %s' % cls._pdtrc)
-        for profile_name, profile_data in pdtrcdata['profiles'].iteritems():
-            cls.profiles[profile_name] = PDTProfile(profile_name, profile_data)
-
+        for (profile_name, profile_data) in pdtrcdata['profiles'
+                ].iteritems():
+            cls.profiles[profile_name] = PDTProfile(profile_name,
+                    profile_data)
 
     @classmethod
     def _init(cls):
