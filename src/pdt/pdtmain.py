@@ -30,8 +30,26 @@ def do_profile_list(args):
     print 'Default Targets: ', PDTProfileMgr.default_targets
 
 
-def do_grin():
-    pass
+def do_grin(args):
+    #print 'doing grin'
+    import grin
+
+    if args.context is not None:
+        args.before_context = args.context
+        args.after_context = args.context
+    args.use_color = args.force_color or (not args.no_color and
+        sys.stdout.isatty() and
+        (os.environ.get('TERM') != 'dumb'))
+
+    regex = grin.get_regex(args)
+    g = grin.GrepText(regex, args)
+    
+    for filename in args.file_targets:
+        report = g.grep_a_file(filename, opener=open)
+        sys.stdout.write(report)
+    
+    
+     
 
 
 class PatchFunctionWrapper(object):
@@ -184,12 +202,10 @@ def main():
     args.file_targets = list(set(itertools.chain(*[target.files
                              for target in args.profile_targets])))
     args.file_targets.sort()
-    
 
     # Get and execute the action-functor
     functor = args.func
     functor(args)
-
 
 
 if __name__ == '__main__':
