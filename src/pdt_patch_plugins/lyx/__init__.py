@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import itertools
 
@@ -5,12 +7,10 @@ from yapsy.IPlugin import IPlugin
 
 import sys
 
-
 import pdt
 import pdt.patch_manager
 from pdt.patch_manager import PatchSet, PatchManager
 import subprocess
-
 
 import re
 import re
@@ -18,10 +18,10 @@ from functools import partial
 
 
 def sub_func(m, text, replacement=None):
-    
-    # Check for specil lyx lines:
+
+    # Check for special lyx lines:
     line_start = text.rfind('\n', 0, m.start())
-    line_end = text.find('\n', m.start()+1,)
+    line_end = text.find('\n', m.start() + 1)
     if line_start != -1:
         line = text[line_start:line_end].strip()
         if line[0] in ['\\','#'] or line.replace('.',' ').replace('{',' ').strip().split()[0] in ['key','reference','name','filename','ref']:
@@ -160,8 +160,11 @@ status collapsed
 
 
 
-class OutstandingChangesException(Exception):
-    pass
+#class OutstandingChangesException(Exception):
+#    pass
+
+from pdt.plugins.errors import OutstandingChangesException
+
 
 class PluginOne(IPlugin):
     def print_name(self):

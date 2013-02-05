@@ -12,8 +12,8 @@ from pdt.patch_manager import PatchSet, PatchManager
 import subprocess
 
 
-class OutstandingChangesException(Exception):
-    pass
+from pdt.plugins.errors import OutstandingChangesException
+
 
 class PluginOne(IPlugin):
     def print_name(self):
