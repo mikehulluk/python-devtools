@@ -192,9 +192,10 @@ class PluginOne(IPlugin):
 
 
     def do_text(self, text, ):
-        #text = Actions.RemapCitations(text)
+        
+        text = Actions.RemapCitations(text)
         #text = Actions.FixWhitespace(text)
-        text = Actions.FixAbbreviations(text)
+        #text = Actions.FixAbbreviations(text)
         #text = Actions.FixAc(text)
         #FixAc
         return text

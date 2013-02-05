@@ -20,6 +20,8 @@ import patch_manager
 
 
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 def do_profile_list(args):
@@ -34,14 +36,14 @@ def do_profile_list(args):
 
 
 
-    
+
 
 
 def do_grin():
     pass
-    
-    
-    
+
+
+
 
 # (from ROOT/src/pdt to ROOT/glob2/)
 local_path = os.path.dirname(__file__)
@@ -53,38 +55,38 @@ print plugin_dir
 
 class PatchFunctionWrapper(object):
     def __init__(self, pre_actions=None, post_actions=None):
-        
+
         self.pre_actions = pre_actions if pre_actions else []
         self.post_actions = post_actions if post_actions else []
-    
+
     def __call__(self, func):
         def mycall(args, *args_, **kwargs):
             for action in self.pre_actions:
                 action(args=args)
             res = func(args, *args_, **kwargs)
-            
+
             for action in self.post_actions:
                 action(args=args)
             return res
-            
+
         return mycall
-        
+
 
 class PatchToolMgr(object):
-   
+
     def __init__(self):
         pass
-    
-    
-    
+
+
+
     def build_argparser(self, patch_parser):
-        
-        
+
+
         # Create a parent parser, which we can use to apply default arguments,
-        # even though the actions are mostly handled by the plugins. 
+        # even though the actions are mostly handled by the plugins.
         # For example, we want to use 'apply'
         patch_function_wrapper = PatchFunctionWrapper()
-        
+
         def check_apply(args):
             if args.apply:
                 print 'Trying to apply'
@@ -92,20 +94,20 @@ class PatchToolMgr(object):
             else:
                 print 'Not Trying to apply'
         patch_function_wrapper.post_actions.append( check_apply)
-            
-        
+
+
         parent_parser = argparse.ArgumentParser('parent', add_help=False)
         parent_parser.add_argument('--apply', help='apply', action='store_true' )
-        
-        
-        
-        
-        
-     
-     
+
+
+
+
+
+
+
         # Create a parser for the subcommand:
-        sp_patch_subparsers = patch_parser.add_subparsers() 
-        
+        sp_patch_subparsers = patch_parser.add_subparsers()
+
         # Built-in commands:
         builtin_handlers = [
             pdt_patch_builtin.DoPatchApply(),
@@ -114,49 +116,51 @@ class PatchToolMgr(object):
         ]
         for handler in builtin_handlers:
             handler.build_arg_parser(sp_patch_subparsers)
-        
+
         # Plugin Commands:
         self._search_patch_plugins(argparser=sp_patch_subparsers, parent_parser=parent_parser, patch_function_wrapper=patch_function_wrapper)
-    
-    
 
-        
-    
+
+
+
+
     def _search_patch_plugins(self, argparser, parent_parser, patch_function_wrapper):
         self.simplePluginManager = yapsy.PluginManager.PluginManager()
         self.simplePluginManager.setPluginPlaces([plugin_dir,])
         self.simplePluginManager.collectPlugins()
-        
+
+        print 'Loading Plugins:'
          # Loop round the plugins and print their names.
         for plugin in self.simplePluginManager.getAllPlugins():
             plugin.plugin_object.print_name()
-            
+
             # Hook the plugin into the menu system:
             plugin.plugin_object.build_arg_parser(argparser=argparser, parent_parser=parent_parser, action_wrapper=patch_function_wrapper)
-        
-        
-    
-    
+        print 'Done Loading Plugins'
 
 
 
-    
+
+
+
+
+
 
 pdt_desc = """
 PythonDevTools is a set of tools designed to make it easy to apply simple text operations on sets of files.
 PDT performs 2 types of operations:
 1. Searching, using 'grep' or 'grin'
-2. Replacing, using patches on top of files that can then be applied. 
+2. Replacing, using patches on top of files that can then be applied.
 """
 
 
 
 def _build_argparser():
-    
+
     # Some options that are common accross all parsers:
     target_parser = argparse.ArgumentParser(description='target_parser', add_help=False)
     target_parser.add_argument('--target',  action='append', default=None)
-    
+
 
     # Main parser object
     parser = argparse.ArgumentParser(description=pdt_desc, add_help=True, parents=[target_parser], formatter_class=argparse.RawTextHelpFormatter)
@@ -177,9 +181,9 @@ def _build_argparser():
     # Global Searching:
     # =================
     sp_grep = subparsers.add_parser('grin', help='Use grep on the targetted files')
-    
+
     # 'grin', if its available:
-    # grin is nicely designed to play with other tools, so the 
+    # grin is nicely designed to play with other tools, so the
     # argument parsing is straight forward.
     try:
         import grin
@@ -188,20 +192,20 @@ def _build_argparser():
         sp_grin.set_defaults(func=do_grin)
     except ImportError:
         pass
-    
-    
+
+
     # Working with patches:
     # =====================
-    sp_patch = subparsers.add_parser('patch', help='Build, apply or manage a set of patches', formatter_class=argparse.RawTextHelpFormatter) 
-    
-    
-    
+    sp_patch = subparsers.add_parser('patch', help='Build, apply or manage a set of patches', formatter_class=argparse.RawTextHelpFormatter)
+
+
+
     patch_tool_manager = PatchToolMgr()
     patch_tool_manager.build_argparser(sp_patch)
-    
 
-    
-        
+
+
+
     return parser
 
 
