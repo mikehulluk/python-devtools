@@ -26,10 +26,10 @@ from pdt.plugins.errors import OutstandingChangesException
 
 class PluginOne(IPlugin):
     def print_name(self):
-        print 'This is plugin Python-tidy'
+        print 'This is plugin Tab-Replacer'
 
     def _do_plugin(self, args):
-        print """Running 'python-tidy' plugin"""
+        print """Running 'removing tabs' plugin"""
 
         # Apply the changes:
         file_changes = {}
@@ -56,16 +56,13 @@ class PluginOne(IPlugin):
     def do_text(self, text, args, filename=None):
         if filename:
             print 'Checking file:', filename
-        in_file = StringIO(text)
-        out_file = StringIO()
         
-        pythontidy.tidy_up(file_in=in_file, file_out = out_file)
-        
-        return out_file.getvalue()
+        return text.replace('\t','    ')
 
 
     def build_arg_parser(self, argparser, parent_parser, action_wrapper):
-        parser = argparser.add_parser('python-tidy', help='* PythonTidy', parents=[parent_parser])
+        pass
+        parser = argparser.add_parser('replace-tabs', help='* PythonTidy', parents=[parent_parser])
         parser.set_defaults(func=action_wrapper(self._do_plugin))
         
         

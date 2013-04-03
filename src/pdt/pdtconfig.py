@@ -52,11 +52,15 @@ class PDTProfile(object):
 
     @property
     def files(self):
-        src_files = os.path.expanduser(self.data_dict['source_files'])
-        files = glob2.glob(src_files)
-        files = [filename for filename in files
-                 if os.path.isfile(filename)]
-        return files
+        src_terms = self.data_dict['source_files'].split(';')
+        all_files = []
+        for src_term in src_terms:
+            src_files = glob2.glob( os.path.expanduser(src_term) )
+        #files = glob2.glob(src_files)
+            files = [filename for filename in src_files if os.path.isfile(filename)]
+            all_files.extend(files)
+        print all_files
+        return all_files
 
 
 class PDTProfileMgr(object):

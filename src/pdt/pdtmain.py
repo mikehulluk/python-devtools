@@ -117,7 +117,7 @@ PDT performs 2 types of operations:
 
 def _build_argparser():
 
-    # Some options that are common accross all parsers:
+    # Some options that are common across all parsers:
     target_parser = argparse.ArgumentParser(description='target_parser'
             , add_help=False)
     target_parser.add_argument('--target', action='append',

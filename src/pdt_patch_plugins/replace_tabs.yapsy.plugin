@@ -1,6 +1,6 @@
 
 [Core]
-Name = Replace Plugin
+Name = Replace Tabs Plugin
 Module = replace_tabs
    
 [Documentation]
