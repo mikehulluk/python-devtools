@@ -1,7 +1,7 @@
 
 [Core]
 Name = Replace Plugin
-Module = replace_tabs
+Module = replace
    
 [Documentation]
 Description = What my plugin broadly does
