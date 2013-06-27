@@ -1,0 +1,7 @@
+\.pyc$
+\.~$
+
+# use glob syntax.
+syntax: glob
+_build/*
+.project
