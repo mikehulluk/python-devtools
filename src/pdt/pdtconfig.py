@@ -42,9 +42,9 @@ class PDTProfile(object):
     def working_dir(self):
         return self.data_dict['working_dir']
 
-    @property
-    def find_and_replace_filename_regular(self):
-        return os.path.join(self.working_dir, 'findandreplace.stash')
+    #@property
+    #def find_and_replace_filename_regular(self):
+    #    return os.path.join(self.working_dir, 'findandreplace.stash')
 
     @property
     def unmerged_changes(self):
@@ -85,6 +85,11 @@ class PDTProfileMgr(object):
     @classmethod
     def expand_target_list_to_profiles(cls, target_list):
         targets = []
+
+        # Allow either a string or a list:
+        if isinstance(target_list, basestring):
+            target_list = [target_list]
+
         for target_str in target_list:
             targets.extend(cls._resolve_target_list_item(target_str))
         return sorted(list(set(targets)))

@@ -6,25 +6,22 @@ import os
 
 class PDTFileLocations(object):
 
+    _pdtrcdir = os.path.expanduser('~/.python-devtools/')
 
     @classmethod
     def get_rc_dir(cls):
-        return os.path.expanduser('~/.python-devtools/')
+        if not os.path.exists(PDTFileLocations._pdtrcdir):
+            os.makedirs(PDTFileLocations._pdtrcdir)
+        return PDTFileLocations._pdtrcdir
 
     @classmethod
     def get_rc_file(cls):
-        return os.path.expanduser('~/.python-devtools/.pdtrc')
-
-
-    _pdtrcdir = os.path.expanduser('~/.python-devtools/')
-    _pdtrc = os.path.expanduser('~/.python-devtools/.pdtrc')
-
+        return os.path.join( PDTFileLocations.get_rc_dir(), '.pdtrc')
 
 
     @classmethod
     def get_patch_sqlalchemy_url(cls):
-        sqlfilename = os.path.join(cls.get_rc_dir(),
-                                   'patches.db')
+        sqlfilename = os.path.join(cls.get_rc_dir(), 'patches.db')
         return 'sqlite:///%s' % sqlfilename
 
     @classmethod

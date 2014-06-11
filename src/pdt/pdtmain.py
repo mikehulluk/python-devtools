@@ -4,15 +4,13 @@
 import argparse
 import itertools
 
-import yapsy.PluginManager
 
 from pdtconfig import PDTProfileMgr
-
-
 from pdt.filelocations import PDTFileLocations
 import pdt.builtin_functions
 import pdt.patch_manager
 
+import yapsy.PluginManager
 
 def do_profile_list(args):
     print 'Listing Profiles:'
