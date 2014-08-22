@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pdt.patch_manager import session, Patch, PatchSet, PatchManager
-
+from pdt.errors import PatchApplyError
 
 class DoPatchApply(object):
 
@@ -23,20 +23,24 @@ class DoPatchApply(object):
             self._do_apply_filename(target_filename)
 
     def _do_apply_filename(self, target_filename):
-        print 'Applying to: %s' % target_filename
+        print 'Applying patches to: %s' % target_filename
 
         patches = PatchManager.get_patches_for_filename(target_filename)
         patch_datas = [p.patch_data for p in patches]
         print ' - Patches Found: %d' % len(patches)
 
-        # Apply the patches:
-        PatchManager.apply_patchs(target_filename, patch_datas)
+        try:
+            # Apply the patches:
+            PatchManager.apply_patchs(target_filename, patch_datas)
 
-        # Remove these patches from the database:
-        for p in patches:
-            session.delete(p)
-        session.commit()
-        PatchManager.clear_empty_patchsets()
+            # Remove these patches from the database:
+            for p in patches:
+                session.delete(p)
+            session.commit()
+            PatchManager.clear_empty_patchsets()
+        except PatchApplyError:
+            print 'Error applying patch to XX'
+            #raise
 
 
 class DoPatchDrop(object):

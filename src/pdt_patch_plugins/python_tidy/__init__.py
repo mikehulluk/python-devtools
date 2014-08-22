@@ -1,32 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import itertools
-
-from yapsy.IPlugin import IPlugin
-
-import sys
 
 from StringIO import StringIO
 
-import pdt
-import pdt.patch_manager
-from pdt.patch_manager import PatchSet, PatchManager
-import subprocess
-import re
+from pdt.patch_manager import PatchManager
+from pdt.plugins.errors import OutstandingChangesException
 
 
 import pythontidy
 
 
-from pdt.plugins.errors import OutstandingChangesException
 
+import pdt.plugins.pdt_plugin_base
+class Plugin(pdt.plugins.pdt_plugin_base.PatchPlugin):
 
-
-
-class PluginOne(IPlugin):
-    def print_name(self):
-        print 'This is plugin Python-tidy'
+    def plugin_name(self):
+        return 'python-tidy'
 
     def _do_plugin(self, args):
         print """Running 'python-tidy' plugin"""
@@ -53,8 +43,8 @@ class PluginOne(IPlugin):
                 file_changes[filename] = (old_contents, new_contents)
 
         PatchManager.create_patchset(file_changes)
-        
-        
+
+
 
 
     def do_text(self, text, args, filename=None):
@@ -62,14 +52,14 @@ class PluginOne(IPlugin):
             print 'Checking file:', filename
         in_file = StringIO(text)
         out_file = StringIO()
-        
+
         pythontidy.tidy_up(file_in=in_file, file_out = out_file)
-        
+
         return out_file.getvalue()
 
 
     def build_arg_parser(self, argparser, parent_parser, action_wrapper):
-        parser = argparser.add_parser('python-tidy', help='* PythonTidy', parents=[parent_parser])
+        parser = argparser.add_parser(self.plugin_name(), help='* PythonTidy', parents=[parent_parser])
         parser.set_defaults(func=action_wrapper(self._do_plugin))
-        
-        
+
+

@@ -8,6 +8,7 @@ import filecmp
 
 from pdt.util import TmpDir
 from pdt.patch_objects import Patch, PatchSet, session
+from pdt.errors import PatchApplyError
 
 
 class PatchManager(object):
@@ -75,14 +76,22 @@ class PatchManager(object):
             # Apply the patches to the new file:
             for patch_file in patch_files:
                 print '  Applying patch', patch_file
-                subprocess.check_call([
-                    'patch',
-                    '--quiet',
-                    '-u',
-                    new_filename,
-                    '-i',
-                    patch_file,
-                    ])
+                try:
+                    subprocess.check_call([
+                        'patch',
+                        '--quiet',
+                        '-u',
+                        new_filename,
+                        '-i',
+                        patch_file,
+                        ])
+                except subprocess.CalledProcessError:
+                    dmp_file = '/tmp/pdt-patch-error-%s.patch'%src_filename.replace("/","__")
+                    with open(dmp_file,'w') as wf:
+                        with open(patch_file) as rf:
+                            wf.write( rf.read() )
+
+                    raise PatchApplyError()
 
             # Merge the new changes:
             if filecmp.cmp(src_filename, new_filename, shallow=False) == True:

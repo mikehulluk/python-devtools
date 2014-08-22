@@ -11,6 +11,14 @@ import pdt.builtin_functions
 import pdt.patch_manager
 
 import yapsy.PluginManager
+import sys
+
+import logging
+logging.getLogger('yapsy').setLevel(logging.DEBUG)
+ch = logging.StreamHandler( sys.__stdout__ ) # Add this
+ch.setLevel(logging.WARNING)
+logging.getLogger('yapsy').addHandler(ch)
+
 
 def do_profile_list(args):
     print 'Listing Profiles:'
@@ -25,9 +33,9 @@ def do_profile_list(args):
     print 'Default Targets: ', PDTProfileMgr.default_targets
 
 
-    
-    
-     
+
+
+
 
 
 class PrePostFunctionWrapper(object):
@@ -68,8 +76,8 @@ class PatchToolMgr(object):
 
         parent_parser = argparse.ArgumentParser('parent',
                 add_help=False)
-        parent_parser.add_argument('--apply', help='apply',
-                                   action='store_true')
+        parent_parser.add_argument('--no-apply', help='apply', dest='apply',
+                                   action='store_false')
 
         # Create a parser for the subcommand:
         sp_patch_subparsers = patch_parser.add_subparsers()
@@ -96,7 +104,7 @@ class PatchToolMgr(object):
 
          # Loop round the plugins and print their names.
         for plugin in self.simplePluginManager.getAllPlugins():
-            plugin.plugin_object.print_name()
+            print "Found plugin: ", plugin.plugin_object.plugin_name()
 
             # Hook the plugin into the menu system:
             plugin.plugin_object.build_arg_parser(argparser=argparser,
@@ -109,7 +117,7 @@ pdt_desc = \
 PythonDevTools is a set of tools designed to make it easy to apply simple text operations on sets of files.
 PDT performs 2 types of operations:
 1. Searching, using 'grep' or 'grin'
-2. Replacing, using patches on top of files that can then be applied. 
+2. Replacing, using patches on top of files that can then be applied.
 """
 
 
@@ -142,7 +150,7 @@ def _build_argparser():
     # grin is nicely designed to play with other tools, so the
     # argument parsing is straight forward.
     pdt.builtin_functions.mygrin.DoGrinObj().build_arg_parser(subparsers, parent_parsers=[target_parser])
-    
+
     # Working with patches:
     # =====================
     sp_patch = subparsers.add_parser('patch',
