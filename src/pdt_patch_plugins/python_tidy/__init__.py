@@ -40,7 +40,11 @@ class PluginOne(IPlugin):
 
             with open(filename) as f:
                 old_contents = f.read()
-            new_contents = self.do_text(old_contents, args, filename=filename)
+            try:
+                new_contents = self.do_text(old_contents, args, filename=filename)
+            except:
+                print "Error processing:", f
+                continue
 
             if PatchManager.get_patches_for_filename(filename):
                 raise OutstandingChangesException()

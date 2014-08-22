@@ -6,7 +6,7 @@ import os
 
 class PDTFileLocations(object):
 
-    _pdtrcdir = os.path.expanduser('~/.python-devtools/')
+    _pdtrcdir = os.path.expanduser('~/.pdt/')
 
     @classmethod
     def get_rc_dir(cls):
@@ -16,12 +16,12 @@ class PDTFileLocations(object):
 
     @classmethod
     def get_rc_file(cls):
-        return os.path.join( PDTFileLocations.get_rc_dir(), '.pdtrc')
+        return os.path.join( PDTFileLocations.get_rc_dir(), 'pdtrc')
 
 
     @classmethod
     def get_patch_sqlalchemy_url(cls):
-        sqlfilename = os.path.join(cls.get_rc_dir(), 'patches.db')
+        sqlfilename = os.path.join(cls.get_rc_dir(), '.patches.sql')
         return 'sqlite:///%s' % sqlfilename
 
     @classmethod
@@ -39,8 +39,7 @@ class PDTFileLocations(object):
 
     @classmethod
     def _get_local_plugin_locations(cls):
-        plugin_dir = os.path.join(cls.get_rc_dir(),
-                                  'pdt_patch_plugins/')
+        plugin_dir = os.path.join(cls.get_rc_dir(), 'pdt_patch_plugins/')
         return [plugin_dir]
 
     @classmethod

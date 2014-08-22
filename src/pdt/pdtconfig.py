@@ -42,10 +42,6 @@ class PDTProfile(object):
     def working_dir(self):
         return self.data_dict['working_dir']
 
-    #@property
-    #def find_and_replace_filename_regular(self):
-    #    return os.path.join(self.working_dir, 'findandreplace.stash')
-
     @property
     def unmerged_changes(self):
         pass
@@ -56,7 +52,6 @@ class PDTProfile(object):
         all_files = []
         for src_term in src_terms:
             src_files = glob2.glob( os.path.expanduser(src_term) )
-        #files = glob2.glob(src_files)
             files = [filename for filename in src_files if os.path.isfile(filename)]
             all_files.extend(files)
         print all_files
@@ -97,9 +92,12 @@ class PDTProfileMgr(object):
     @classmethod
     def load_rc_file(cls):
         pdtrcdata = ConfigObj(infile=cls._pdtrc)
+        
 
         if not pdtrcdata:
-            return
+            err =  "Nothing defined in %s\n" % (PDTFileLocations.get_rc_file(),)
+            err += "Try adding:\n"
+            raise RuntimeError(err)
 
         # Default profile names:
         if 'default_targets' in pdtrcdata:
