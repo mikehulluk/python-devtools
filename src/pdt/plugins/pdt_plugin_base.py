@@ -27,7 +27,7 @@ class PatchPlugin(IPlugin):
 
         # Apply the changes:
         file_changes = {}
-        for filename in args.file_targets:
+        for filename in args.source_files:
 
             with open(filename) as f:
                 old_contents = f.read()

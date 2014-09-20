@@ -6,13 +6,13 @@ import pdt
 import pdt.patch_manager
 import re
 
-r1 = re.compile(r'''^(.*[^\s].*)[ ][ ]+''',re.MULTILINE)
-r2 = re.compile(r'''\( ''',re.MULTILINE)
-r3 = re.compile(r'''\[ ''',re.MULTILINE)
-r4 = re.compile(r''' \)''',re.MULTILINE)
-r5 = re.compile(r''' \]''',re.MULTILINE)
+#r1 = re.compile(r'''^(.*[^\s].*)[ ][ ]+''',re.MULTILINE)
+#r2 = re.compile(r'''\(\s+''',re.MULTILINE)
+#r3 = re.compile(r'''\[\s+''',re.MULTILINE)
+r4 = re.compile(r'''^([^\n]\s*\S)\s+\)''',re.MULTILINE)
+#r5 = re.compile(r'''(?:^.*?[^\s].*?)\s+\]''',re.MULTILINE)
 
-r6 = re.compile(r''',\)''',re.MULTILINE)
+#r6 = re.compile(r''',\)''',re.MULTILINE)
 
 
 
@@ -26,12 +26,12 @@ class Plugin(pdt.plugins.pdt_plugin_base.PatchPlugin):
     def do_text(self, text, args):
         #text = r1.sub(r'''\1 ''',text)
 
-        text = r2.sub(r'''(''',text)
-        text = r3.sub(r'''[''',text)
-        text = r4.sub(r''')''',text)
-        text = r5.sub(r''']''',text)
+        #text = r2.sub(r'''(''',text)
+        #text = r3.sub(r'''[''',text)
+        text = r4.sub(r'''\1)''',text)
+        #text = r5.sub(r''']''',text)
 
-        text = r6.sub(r''')''',text)
+        #text = r6.sub(r''')''',text)
         return text
 
     def build_arg_parser(self, argparser, parent_parser, action_wrapper):

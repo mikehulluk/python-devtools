@@ -59,6 +59,22 @@ class PrePostFunctionWrapper(object):
         return mycall
 
 
+
+class CleanToolMgr(object):
+    def build_argparser(self, sp_parser):
+        sp_parser.set_defaults(func=self.do_clean)
+    def do_clean(self, option_ns):
+
+        print 'Option-NS', option_ns
+
+        target = option_ns.target
+
+        print target
+        #print kwargs
+        pass
+
+
+
 class PatchToolMgr(object):
 
     def build_argparser(self, patch_parser):
@@ -156,10 +172,20 @@ def _build_argparser():
     sp_patch = subparsers.add_parser('patch',
             help='Build, apply or manage a set of patches',
             formatter_class=argparse.RawTextHelpFormatter)
-
     # Add all the patch-tools
     patch_tool_manager = PatchToolMgr()
     patch_tool_manager.build_argparser(sp_patch)
+
+
+
+    # Cleaning
+    # ===============
+    sp_clean = subparsers.add_parser('clean',
+            help='Build, apply or manage a set of patches', )
+            #formatter_class=argparse.RawTextHelpFormatter)
+    # Add all the patch-tools
+    patch_tool_manager = CleanToolMgr()
+    patch_tool_manager.build_argparser(sp_clean)
 
     return parser
 
@@ -176,9 +202,8 @@ def main():
         PDTProfileMgr.expand_target_list_to_profiles(args.target)
 
     # Lets also include a list of all the target files as an argument:
-    args.file_targets = list(set(itertools.chain(*[target.files
-                             for target in args.profile_targets])))
-    args.file_targets.sort()
+    args.source_files = sorted( list(set(itertools.chain(*[target.source_files for target in args.profile_targets]))) )
+    args.build_files = sorted( list(set(itertools.chain(*[target.build_files for target in args.profile_targets]))) )
 
     # Get and execute the action-functor
     functor = args.func

@@ -23,7 +23,7 @@ class Plugin(pdt.plugins.pdt_plugin_base.PatchPlugin):
 
         # Apply the changes:
         file_changes = {}
-        for filename in args.file_targets:
+        for filename in args.source_files:
 
             if not filename.endswith('.py'):
                 continue

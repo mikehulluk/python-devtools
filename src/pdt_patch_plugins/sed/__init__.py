@@ -5,6 +5,7 @@ import pdt.patch_manager
 import subprocess
 import pdt.plugins.pdt_plugin_base
 
+import shlex
 
 class Plugin(pdt.plugins.pdt_plugin_base.PatchPlugin):
 
@@ -12,7 +13,11 @@ class Plugin(pdt.plugins.pdt_plugin_base.PatchPlugin):
         return 'sed'
 
     def do_text(self, text, sedexpr):
-        p = subprocess.Popen(['sed', sedexpr], stdout=subprocess.PIPE, stdin=subprocess.PIPE )
+        sedexpr = sedexpr.sedexpr
+        print 'sedexpr:', sedexpr
+        print type(sedexpr)
+
+        p = subprocess.Popen(['sed'] +  shlex.split(sedexpr) , stdout=subprocess.PIPE, stdin=subprocess.PIPE )
         p.stdin.write(text)
         out = p.communicate()[0]
         return out

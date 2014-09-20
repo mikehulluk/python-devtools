@@ -1,8 +1,6 @@
 import ast
 from collections import defaultdict
 
-src_file = open('/home/michael/dev/NeuroUnits/src/neurounits/codegen/python_functor/functor_generator.py').read()
-A = ast.parse(src_file,'??')
 
 
 class MyVisitor(ast.NodeVisitor):
@@ -52,41 +50,63 @@ class MyVisitor(ast.NodeVisitor):
 
     def visit_Assign(self,node):
         self.is_storing = True
+        print node._fields
+        print node.targets
+        #assert False
         for f in ast.iter_child_nodes(node):
+            print f
             self.visit(f)
         self.is_storing = False
 
 
 
-v = MyVisitor()
-v.visit(A)
-#print A
-#print v.variable_names
-#print v.function_line_ranges
-#print v.function_parent_scopes
+
+valid_names = ['None']
+
+import re
+valid_name_re = re.compile(r'''^[a-z_][a-z0-9_]{2,30}$''')
+def is_valid_name(name):
+    if name in valid_names:
+        return True
+    return valid_name_re.match(name)
 
 
 
 
 
 
-# Find which variables are actualy the same in different functions,
-#  -- i.e. closures. Lets make a dictionary of 'root-function, variable-name' ->  'sub-function'
-variable_scopes = {}
-all_variables_in_func_and_children = defaultdict(set)
 
-#Visit each function, starting with the deepest 'function-within-function-within-function'
-for func,parents in sorted( v.function_parent_scopes.items(), key=lambda x: len(x[1]) ):
-    pass
+
+
+
+
+
+
+
+def find_potential_variable_renames(src_filename):
+    src_file = open(src_filename).read()
+    A = ast.parse(src_file,'??')
+
+    v = MyVisitor()
+    v.visit(A)
+    #print A
+    #print v.variable_names
+    #print v.function_line_ranges
+    #print v.function_parent_scopes
+
+
+
+
+
+
+    # Find which variables are actualy the same in different functions,
+    #  -- i.e. closures. Lets make a dictionary of 'root-function, variable-name' ->  'sub-function'
+    all_variables_in_func_and_children = defaultdict(set)
+
 
     # Visit all the variables in this function
     for ((name, function),positions) in v.variable_names.items() :
-        if function != func:
-            continue
-
-
         parental_scopes = [parent_func for parent_func in v.function_parent_scopes[function] if (name,parent_func) in v.variable_names]
-
 
         # OK, there is an enclosing function scope, with a variable by the
         # same name. So, lets join the references to it by copying this
@@ -99,65 +119,67 @@ for func,parents in sorted( v.function_parent_scopes.items(), key=lambda x: len(
             del v.variable_names[(name,function)]
 
         # Add this variable name to all the enclosing scopes, which we need to
-        # amke sure names don't collide:
+        # make sure names don't collide:
         for parent in parental_scopes:
             all_variables_in_func_and_children[parent].add(name)
-        all_variables_in_func_and_children[func].add(name)
-
-
-
-
-valid_names = ['p']
+        all_variables_in_func_and_children[function].add(name)
 
 
 
 
 
-import re
-valid_name_re = re.compile(r'''^[a-z_][a-z0-9_]{2,30}$''')
-def is_valid_name(name):
-    if name in valid_names:
-        return True
-    return valid_name_re.match(name)
-
-variable_renames = {}
-for (name,func),positions in v.variable_names.items():
-    print name, func, len(positions)
-    if is_valid_name(name):
-        continue
-
-    variable_renames[(name,func)] = positions
-
-    print 'Invalid name found', name
-    print "  -- Cant' map to:", all_variables_in_func_and_children[func]
-
-    print func._fields
+    # Find invalid variable names:
+    variable_renames = { (name,func):positions for (name,func),positions in v.variable_names.items() if not is_valid_name(name) }
 
 
+    # Merge into
+    # { filename : {
+    #                full_function_name : {
+    #                   'existing_variables' : [ ]
+    #                   'invalid_variables' : {
+    #                            'var1' : [positions],
+    #                            'var2' : [positions],
+    #                                           }
+    #                                           }
+    #                       ]
+    #                }
+
+    file_data = {}
+    functions = set(f for (n,f) in v.variable_names.keys())
+    for function in functions:
+        invalid_vars = { name:list(positions) for ((name, _function),positions) in variable_renames.items() if function==_function}
+        
+        if not invalid_vars:
+            continue
+
+        file_data[function.name] = {
+                'existing_variables' : list(all_variables_in_func_and_children[function]),
+                'invalid_variables' : invalid_vars,
+                }
+
+    return file_data
 
 
-# Convert into text-only format:
-variable_renames_text = { "%s %s"%(name,func.name): list(positions) for ((name,func),positions) in variable_renames.items() }
-print variable_renames_text
 
+src_dir = '/home/michael/dev/NeuroUnits/src/'
+src_filenames = [
+    'neurounits/codegen/python_functor/functor_generator.py',
+    'neurounits/codegen/python_functor/simulate_component.py'
+    ]
+
+merged_data = { src_filename : find_potential_variable_renames(src_dir+src_filename) for src_filename in src_filenames}
 
 
 import json
-data = {
-    'variable_renames':variable_renames_text,
-    #'all_variables_in_func_and_children': all_variables_in_func_and_children
-    }
-out_file = '/home/michael/Desktop/renames.json'
+out_file = '/home/michael/dart/test_app1/web/renames.json'
 with open(out_file, 'w') as f:
     pass
-    txt = json.dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
+    txt = json.dumps(merged_data, sort_keys=True, indent=4, separators=(',', ': '))
     f.write(txt)
 
 
 #import wx
-#app = wx.App()
-#frame = wx.Frame(None, -1, 'simple.py')
-#frame.Show()
+#app = wx.App() #frame = wx.Frame(None, -1, 'simple.py') #frame.Show()
 #app.MainLoop()
 
 

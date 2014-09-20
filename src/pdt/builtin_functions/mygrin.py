@@ -7,9 +7,9 @@ import os
 # add 'grin', if its available:
     # grin is nicely designed to play with other tools, so the
     # argument parsing is straight forward.
-    
-    
-    
+
+
+
 def do_grin(args):
     import grin
 
@@ -22,8 +22,8 @@ def do_grin(args):
 
     regex = grin.get_regex(args)
     g = grin.GrepText(regex, args)
-    
-    for filename in args.file_targets:
+
+    for filename in args.source_files:
         report = g.grep_a_file(filename, opener=open)
         sys.stdout.write(report)
 
@@ -31,7 +31,7 @@ def do_grin(args):
 
 
 class DoGrinObj(object):
-    
+
     @classmethod
     def build_arg_parser(cls, argparser, parent_parsers):
         try:

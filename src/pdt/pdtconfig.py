@@ -3,12 +3,12 @@
 
 import os
 
-from configobj import ConfigObj
+import configobj# import ConfigObj
 
 
-# glob2 is copied along with this package, 
+# glob2 is copied along with this package,
 # so lets make sure its on the path:
-import dependancies_setup
+#import dependancies_setup
 import glob2
 
 
@@ -46,9 +46,10 @@ class PDTProfile(object):
     def unmerged_changes(self):
         pass
 
-    @property
-    def files(self):
-        src_terms = self.data_dict['source_files'].split(';')
+
+    @classmethod
+    def _get_file_list(self, src_term):
+        src_terms = src_term.split(';')
         all_files = []
         for src_term in src_terms:
             src_files = glob2.glob( os.path.expanduser(src_term) )
@@ -56,6 +57,27 @@ class PDTProfile(object):
             all_files.extend(files)
         print all_files
         return all_files
+
+
+    @property
+    def source_files(self):
+        src_expr = self.data_dict['source_files']
+        return PDTProfile._get_file_list(src_expr)
+    @property
+    def build_files(self):
+        src_expr = self.data_dict.get('build_files', '')
+        return PDTProfile._get_file_list(src_expr)
+
+        #src_terms = self.data_dict['source_files'].split(';')
+        #all_files = []
+        #for src_term in src_terms:
+        #    src_files = glob2.glob( os.path.expanduser(src_term) )
+        #    files = [filename for filename in src_files if os.path.isfile(filename)]
+        #    all_files.extend(files)
+        #print all_files
+        #return all_files
+
+
 
 
 class PDTProfileMgr(object):
@@ -91,8 +113,8 @@ class PDTProfileMgr(object):
 
     @classmethod
     def load_rc_file(cls):
-        pdtrcdata = ConfigObj(infile=cls._pdtrc)
-        
+        pdtrcdata = configobj.ConfigObj(infile=cls._pdtrc)
+
 
         if not pdtrcdata:
             err =  "Nothing defined in %s\n" % (PDTFileLocations.get_rc_file(),)
