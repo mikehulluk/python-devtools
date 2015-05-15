@@ -55,7 +55,6 @@ class PDTProfile(object):
             src_files = glob2.glob( os.path.expanduser(src_term) )
             files = [filename for filename in src_files if os.path.isfile(filename)]
             all_files.extend(files)
-        print all_files
         return all_files
 
 
@@ -68,14 +67,6 @@ class PDTProfile(object):
         src_expr = self.data_dict.get('build_files', '')
         return PDTProfile._get_file_list(src_expr)
 
-        #src_terms = self.data_dict['source_files'].split(';')
-        #all_files = []
-        #for src_term in src_terms:
-        #    src_files = glob2.glob( os.path.expanduser(src_term) )
-        #    files = [filename for filename in src_files if os.path.isfile(filename)]
-        #    all_files.extend(files)
-        #print all_files
-        #return all_files
 
 
 

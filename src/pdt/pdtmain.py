@@ -12,6 +12,7 @@ import pdt.patch_manager
 
 import yapsy.PluginManager
 import sys
+import os
 
 import logging
 logging.getLogger('yapsy').setLevel(logging.DEBUG)
@@ -32,6 +33,10 @@ def do_profile_list(args):
         print ' - %s' % profilegroup_name
     print 'Default Targets: ', PDTProfileMgr.default_targets
 
+def do_profile_details(args):
+    print 'Files in profile:'
+    for fname in sorted(args.source_files):
+        print fname
 
 
 
@@ -64,14 +69,11 @@ class CleanToolMgr(object):
     def build_argparser(self, sp_parser):
         sp_parser.set_defaults(func=self.do_clean)
     def do_clean(self, option_ns):
+        print 'Removing:'
+        for f in option_ns.build_files:
+            print '  -', f
+            os.unlink(f)
 
-        print 'Option-NS', option_ns
-
-        target = option_ns.target
-
-        print target
-        #print kwargs
-        pass
 
 
 
@@ -153,12 +155,12 @@ def _build_argparser():
 
     # Profile management:
     # =================
-    sp_profile_parser = subparsers.add_parser('profile',
-            help='Information about registered profiles')
+    sp_profile_parser = subparsers.add_parser('profile', help='Information about registered profiles')
     sp_profile_subparsers = sp_profile_parser.add_subparsers()
-    sp_profile_list = sp_profile_subparsers.add_parser('list',
-            help='List availble profiles')
+    sp_profile_list = sp_profile_subparsers.add_parser('list', help='List availble profiles')
     sp_profile_list.set_defaults(func=do_profile_list)
+    sp_profile_details = sp_profile_subparsers.add_parser('show', help='Show details about this profile')
+    sp_profile_details.set_defaults(func=do_profile_details)
 
     # Global Searching:
     # =================
