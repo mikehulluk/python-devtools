@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy import Column, Date, Integer, String
+from sqlalchemy import Column, Date, Integer,  Unicode
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -14,7 +14,7 @@ from pdt.filelocations import PDTFileLocations
 
 
 engine = create_engine(PDTFileLocations.get_patch_sqlalchemy_url(),
-                       echo=False)
+                       echo=True)
 Base = declarative_base()
 
 
@@ -25,8 +25,8 @@ class Patch(Base):
     __tablename__ = 'patches'
 
     id = Column(Integer, primary_key=True)
-    target_filename = Column(String)
-    patch_data = Column(String)
+    target_filename = Column(Unicode)
+    patch_data = Column(Unicode)
     patch_set = Column(Integer, ForeignKey('patchsets.id'))
 
     def __init__(self, target_filename, patch_data):
@@ -38,7 +38,7 @@ class PatchSet(Base):
 
     __tablename__ = 'patchsets'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(Unicode)
     release_date = Column(Date)
     patches = relationship('Patch', cascade='all,delete,delete-orphan')
 

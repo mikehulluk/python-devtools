@@ -5,6 +5,7 @@ import datetime
 import difflib
 import subprocess
 import filecmp
+import sqlalchemy
 
 from pdt.util import TmpDir
 from pdt.patch_objects import Patch, PatchSet, session
@@ -40,14 +41,20 @@ class PatchManager(object):
 
         for (filename, (original, modified)) in patching_data.items():
 
-            diffs = \
-                list(difflib.unified_diff(original.splitlines(True),
-                     modified.splitlines(True)))
-            patch = ''.join(diffs)
-            print ' - (%d) %s' % (len(diffs), filename)
+            try:
+                diffs = list(difflib.unified_diff(original.splitlines(True), modified.splitlines(True)))
+                patch = ''.join(diffs)
+                print ' - (%d) %s' % (len(diffs), filename)
 
-            patch = Patch(target_filename=filename, patch_data=patch)
-            patchset.patches.append(patch)
+                patch = Patch(target_filename=filename, patch_data=patch)
+                patchset.patches.append(patch)
+            
+                session.add(patchset)
+                session.commit()
+            except sqlalchemy.exc.ProgrammingError:
+                print("Error Adding patchset for: %s"%filename)
+                session.rollback()
+
 
         session.add(patchset)
         session.commit()
