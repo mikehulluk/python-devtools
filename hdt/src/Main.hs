@@ -11,7 +11,7 @@ import System.Exit
 import Control.Monad (when)
  
 data MyOptions =
-    Mode1   { first_name :: String
+    ModeConfig   { first_name :: String
             , last_name :: String
             }
     |
@@ -20,7 +20,7 @@ data MyOptions =
             } deriving (Data, Typeable, Show, Eq)
  
 mode1 :: MyOptions
-mode1 = Mode1
+mode1 = ModeConfig
     { first_name = "FIRSTNAME" &= help "your first name"
     , last_name = "LASTNAME" &= help "your last name"
     }
@@ -60,7 +60,7 @@ main = do
     optionHandler opts
  
 optionHandler :: MyOptions -> IO ()
-optionHandler opts@Mode1{..}  = do
+optionHandler opts@ModeConfig{..}  = do
     when (null first_name) $ putStrLn "warning: --first-name is blank"
     when (null last_name) $ putStrLn "warning: --last-name is blank"
     exec opts
@@ -69,8 +69,31 @@ optionHandler opts@Mode2{..}  = do
     when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
     exec opts
  
+
+
+-- Executors for the subcommands:
+--
+summariseProject :: Project -> String
+summariseProject project = unlines [
+     projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
+    ,"  Root:" ++  (rootDir project)
+    ,"  Files:" ++ (unwords $ srcFiles project)
+    ]
+
+
 exec :: MyOptions -> IO ()
-exec opts@Mode1{..} = putStrLn $ "Hello, " ++ first_name ++ " " ++ last_name ++ "!"
+exec opts@ModeConfig{..} = 
+    putStrLn $ projectSummaries
+    where projects = getAllProjectConfigs
+          projectSummaries = unlines $ map summariseProject projects
+    --putStrLn $ "Hello, " ++ first_name ++ " " ++ last_name ++ "!"
+
+
+
+
+
+
+
 exec opts@Mode2{..} = putStrLn $ "You are " ++ show height ++ "cm tall, and weigh " ++ show weight ++ "kg!"
 
 
