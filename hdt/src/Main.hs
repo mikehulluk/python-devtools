@@ -12,6 +12,7 @@ import Control.Monad (when)
 
 import System.Console.ANSI
 import Control.Monad
+import Control.Exception
 
 import Text.Regex.Posix   -- for regular expressions
 
@@ -179,31 +180,28 @@ execConfig opts@ModeConfig{..} = do
 execGrep :: MyOptions -> IO ()
 execGrep opts@ModeGrep{..} = do
     putStrLn $ "Grep-time!"
-    execGrepFile "/home/michael/negar_programming/multiplyTablesQ.py" "import" opts
+    projects <- getAllProjectConfigs
+    let activeProjects = filter isActive projects
+    forM activeProjects (grepProject "import" opts)
+    return ()
 
+grepProject ::  String -> MyOptions -> Project -> IO ()
+grepProject grepString opts project = do
+    forM (srcFiles project) (execGrepFile "import" opts)
+    execGrepFile  "import" opts "/home/michael/negar_programming/multiplyTablesQ.py"
 
-execGrepFile :: String -> String -> MyOptions -> IO ()
-execGrepFile filename grepString opts = do
-    contents <- readFile filename
+execGrepFile :: String -> MyOptions -> String -> IO ()
+execGrepFile grepString opts filename= do
+    contents <- catch (readFile filename)
+        (\e -> do 
+                  let err = show (e :: IOException)
+                  putStrLn ("Warning: Couldn't open " ++ filename ++ ": " ++ err)
+                  return "")
     let ls = lines contents
     let lsFiltered = filter (=~grepString) ls
     putStrLn $ show opts
-
     putStrLn $ unlines lsFiltered
 
     return ()
-
-
--- processFile func filename      = readFile filename >>= processContents func
---
--- processStdin func              = getContents >>= processContents func
---
--- processContents func contents  = putStr $ func contents
---
--- grepContents regex             = unlines . filter (grepLine regex) . lines
---
--- grepLine regex line            = line =~ regex
-
-
 
 
