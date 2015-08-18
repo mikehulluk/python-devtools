@@ -189,6 +189,7 @@ grepProject ::  String -> MyOptions -> Project -> IO ()
 grepProject grepString opts project = do
     forM (srcFiles project) (execGrepFile "import" opts)
     execGrepFile  "import" opts "/home/michael/negar_programming/multiplyTablesQ.py"
+    return ()
 
 execGrepFile :: String -> MyOptions -> String -> IO ()
 execGrepFile grepString opts filename= do
