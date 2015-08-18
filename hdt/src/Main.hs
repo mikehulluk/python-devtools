@@ -82,10 +82,11 @@ summariseProject project = unlines [
 
 
 exec :: MyOptions -> IO ()
-exec opts@ModeConfig{..} = 
+exec opts@ModeConfig{..} =  do
+    projects <- getAllProjectConfigs
+    let projectSummaries = unlines $ map summariseProject projects
     putStrLn $ projectSummaries
-    where projects = getAllProjectConfigs
-          projectSummaries = unlines $ map summariseProject projects
+    --where projects = getAllProjectConfigs
     --putStrLn $ "Hello, " ++ first_name ++ " " ++ last_name ++ "!"
 
 

@@ -19,4 +19,6 @@ executable hdt
   hs-source-dirs:src
   -- other-modules:       
   build-depends:       base ==4.6.*,
-                       cmdargs
+                       cmdargs,
+                       filepath,
+                       Glob
