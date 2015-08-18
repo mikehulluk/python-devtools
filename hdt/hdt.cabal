@@ -19,4 +19,5 @@ executable hdt
   hs-source-dirs:src
   -- other-modules:       
   build-depends:       base ==4.6.*,
+                       ansi-terminal,
                        cmdargs
