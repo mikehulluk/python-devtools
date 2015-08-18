@@ -21,4 +21,5 @@ executable hdt
   build-depends:       base ==4.6.*,
                        cmdargs,
                        filepath,
-                       Glob
+                       Glob,
+                       ansi-terminal
