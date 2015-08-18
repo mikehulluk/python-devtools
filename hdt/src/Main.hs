@@ -46,19 +46,26 @@ colorStrLn fgi fg str = do
 
 data MyOptions =
     ModeConfig   { first_name :: String
-            , last_name :: String
-            }
+                 , last_name :: String
+                 }
     |
     Mode2   { height :: Double
             , weight :: Double
-            } 
+            }
     |
-    ModeGrep { height :: Double
-            , weight :: Double
+    ModeGrep {    grepString :: String
+                , ignoreCase :: Bool
+                , doWordRegex :: Bool
+                , doCount :: Bool
+                , doLineNumber :: Bool
+                , doEdit :: Bool
+                , nContextLines :: Int
             } deriving (Data, Typeable, Show, Eq)
 
-mode1 :: MyOptions
-mode1 = ModeConfig
+
+
+modeConfig :: MyOptions
+modeConfig = ModeConfig
     { first_name = "FIRSTNAME" &= help "your first name"
     , last_name = "LASTNAME" &= help "your last name"
     }
@@ -68,7 +75,8 @@ mode1 = ModeConfig
 
 mode2 :: MyOptions
 mode2 = Mode2
-    { height = def &= help "your height, in centimeters"
+    {
+      height = def &= help "your height, in centimeters"
     , weight = def &= help "your weight, in kilograms"
     }
     &= details  [ "Examples:"
@@ -77,8 +85,14 @@ mode2 = Mode2
 
 modeGrep :: MyOptions
 modeGrep = ModeGrep
-    { height = def &= help "your height, in centimeters"
-    , weight = def &= help "your weight, in kilograms"
+    {
+      grepString    = def &= argPos 0 &= typ "GREPSTRING"
+    , ignoreCase    = def &= help "ignoreCase"
+    , doWordRegex   = def &= help "doWordRegex"
+    , doCount       = def &= help "doCount"
+    , doLineNumber  = def &= help "doLineNumber"
+    , doEdit        = def &= help "doEdit"
+    , nContextLines = def &= help "nContextLines"
     }
     &= details  [ "Examples:"
                 , "Blah blah blah again."
@@ -86,7 +100,7 @@ modeGrep = ModeGrep
 
 
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [mode1, mode2, modeGrep]
+myModes = cmdArgsMode $ modes [modeConfig, mode2, modeGrep]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
@@ -111,21 +125,23 @@ optionHandler :: MyOptions -> IO ()
 optionHandler opts@ModeConfig{..}  = do
     when (null first_name) $ putStrLn "warning: --first-name is blank"
     when (null last_name) $ putStrLn "warning: --last-name is blank"
-    exec opts
+    execConfig opts
+
+optionHandler opts@ModeGrep{..}  = do
+    -- when (height == 0.0) $ putStrLn "warning: --height is 0.0"
+    -- when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
+    execGrep opts
+
 optionHandler opts@Mode2{..}  = do
     when (height == 0.0) $ putStrLn "warning: --height is 0.0"
     when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
     exec opts
 
-optionHandler opts@ModeGrep{..}  = do
-    when (height == 0.0) $ putStrLn "warning: --height is 0.0"
-    when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
-    exec opts
-
-
 
 
 -- Executors for the subcommands:
+exec :: MyOptions -> IO ()
+exec opts@Mode2{..} = putStrLn $ "You are " ++ show height ++ "cm tall, and weigh " ++ show weight ++ "kg!"
 
 
 
@@ -146,8 +162,8 @@ summariseProjectConsole project = do
         return ()
     where textcolor = if isActive project then Green else Red
 
-exec :: MyOptions -> IO ()
-exec opts@ModeConfig{..} = do
+execConfig :: MyOptions -> IO ()
+execConfig opts@ModeConfig{..} = do
     projects <- getAllProjectConfigs
     forM projects summariseProjectConsole
     return ()
@@ -155,11 +171,13 @@ exec opts@ModeConfig{..} = do
 
 
 
-exec opts@ModeGrep{..} = putStrLn $ "Grep-time!"
+-- Grepping:
+-- ^^^^^^^^^^^^^^^^^^^^^^^^
+execGrep :: MyOptions -> IO ()
+execGrep opts@ModeGrep{..} = putStrLn $ "Grep-time!"
 
 
 
-exec opts@Mode2{..} = putStrLn $ "You are " ++ show height ++ "cm tall, and weigh " ++ show weight ++ "kg!"
 
 
 
