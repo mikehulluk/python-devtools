@@ -22,4 +22,5 @@ executable hdt
                        cmdargs,
                        filepath,
                        Glob,
-                       ansi-terminal
+                       ansi-terminal,
+                       regex-posix

@@ -13,6 +13,8 @@ import Control.Monad (when)
 import System.Console.ANSI
 import Control.Monad
 
+import Text.Regex.Posix   -- for regular expressions
+
 colorStrLn :: ColorIntensity -> Color -> String -> IO ()
 colorStrLn fgi fg str = do
   setSGR [SetColor Foreground fgi fg]
@@ -128,6 +130,7 @@ optionHandler opts@ModeConfig{..}  = do
     execConfig opts
 
 optionHandler opts@ModeGrep{..}  = do
+    putStrLn  $ "Grepping for: " ++ "'" ++ grepString ++ "'"
     -- when (height == 0.0) $ putStrLn "warning: --height is 0.0"
     -- when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
     execGrep opts
@@ -174,9 +177,32 @@ execConfig opts@ModeConfig{..} = do
 -- Grepping:
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
 execGrep :: MyOptions -> IO ()
-execGrep opts@ModeGrep{..} = putStrLn $ "Grep-time!"
+execGrep opts@ModeGrep{..} = do
+    putStrLn $ "Grep-time!"
+    execGrepFile "/home/michael/negar_programming/multiplyTablesQ.py" "import" opts
 
 
+execGrepFile :: String -> String -> MyOptions -> IO ()
+execGrepFile filename grepString opts = do
+    contents <- readFile filename
+    let ls = lines contents
+    let lsFiltered = filter (=~grepString) ls
+    putStrLn $ show opts
+
+    putStrLn $ unlines lsFiltered
+
+    return ()
+
+
+-- processFile func filename      = readFile filename >>= processContents func
+--
+-- processStdin func              = getContents >>= processContents func
+--
+-- processContents func contents  = putStr $ func contents
+--
+-- grepContents regex             = unlines . filter (grepLine regex) . lines
+--
+-- grepLine regex line            = line =~ regex
 
 
 
