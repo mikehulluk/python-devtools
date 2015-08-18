@@ -182,13 +182,12 @@ execGrep opts@ModeGrep{..} = do
     putStrLn $ "Grep-time!"
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
-    forM activeProjects (grepProject "import" opts)
+    forM activeProjects (grepProject grepString opts)
     return ()
 
 grepProject ::  String -> MyOptions -> Project -> IO ()
 grepProject grepString opts project = do
-    forM (srcFiles project) (execGrepFile "import" opts)
-    execGrepFile  "import" opts "/home/michael/negar_programming/multiplyTablesQ.py"
+    forM (srcFiles project) (execGrepFile grepString opts)
     return ()
 
 execGrepFile :: String -> MyOptions -> String -> IO ()
@@ -200,8 +199,11 @@ execGrepFile grepString opts filename= do
                   return "")
     let ls = lines contents
     let lsFiltered = filter (=~grepString) ls
-    putStrLn $ show opts
-    putStrLn $ unlines lsFiltered
+    case length lsFiltered of
+        0 -> putStrLn "No match found"
+        cnt -> do
+            putStrLn $ "Found matchs:" ++ (show cnt)
+            putStrLn $ unlines lsFiltered
 
     return ()
 
