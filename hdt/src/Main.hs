@@ -245,7 +245,7 @@ execGrepFile compiledRegex opts filename= do
 
     let ls = lines contents
     let ils = zip [0..] ls
-    forM ils (grepLineIO compiledRegex ls)
+    --forM ils (grepLineIO compiledRegex ls)
 
     -- Find all the matching lines:
     grepLinesAll <- mapM (grepLine compiledRegex) ils
@@ -255,7 +255,7 @@ execGrepFile compiledRegex opts filename= do
 
     putStrLn $ "\n\n\n"
 
-    let nContextLines = 7
+    let nContextLines = 3
     -- Add in context lines
     let nLinesFile = (length ls)
     let linesIncludingContext = addContextLinesNew nContextLines nLinesFile grepLines
@@ -274,6 +274,27 @@ execGrepFile compiledRegex opts filename= do
 
 
     return ()
+
+
+data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
+data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
+
+instance Ord GrepLinePrinted where
+    compare a b = compare (grepLineNum a) (grepLineNum b)
+
+
+
+
+grepLine :: Regex -> (Int, String) -> IO [GrepLineMatch]
+grepLine compiledRegex (lineNo, line) = do
+    result <- regexec compiledRegex line
+    case result of
+        Left (returnCode, errorStr) -> return []
+        Right match -> case match of
+            Nothing -> return []
+            Just (pre, matched, post,subexpression) -> return [ GrepLineMatch (pre, matched, post,subexpression) lineNo ]
+
+
 
 grepLineNum :: GrepLinePrinted -> Int
 grepLineNum (MatchLine m0) = l where (GrepLineMatch _ l) = m0
@@ -294,7 +315,7 @@ groupLines x = [x, x]
 
 printGrepLine :: [String] -> GrepLinePrinted -> IO ()
 printGrepLine allLines (MatchLine m) = do
-    putStr $ (show lineNo) ++ " : "
+    putStr $ (show lineNo) ++ " :   "
     setSGR [SetColor Foreground Dull White]
     putStr $ pre
     setSGR [SetColor Foreground Vivid Green]
@@ -307,7 +328,7 @@ printGrepLine allLines (MatchLine m) = do
 
 
 printGrepLine allLines (ContextLine lineNo) = do 
-    putStr $ (show lineNo) ++ " : "
+    putStr $ (show lineNo) ++ " :  "
     setSGR [SetColor Foreground Dull White]
     putStr $ (allLines!!lineNo)
     putStr $ "\n"
@@ -333,11 +354,6 @@ printGroupLines allLines lines = do
 
 
 
-data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
-data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
-
-instance Ord GrepLinePrinted where
-    compare a b = compare (grepLineNum a) (grepLineNum b)
 
 --Ord GrepLinePrinted
 
@@ -391,37 +407,29 @@ instance Ord GrepLinePrinted where
 
 
 
-grepLineIO :: Regex -> [String] -> (Int, String) -> IO ()
-grepLineIO compiledRegex allLines (lineNo, line) = do
-
-    result <- regexec compiledRegex line
-    case result of
-        Left (returnCode, errorStr) -> putStrLn $ "Unexpected error while matching: " ++ errorStr
-        Right match -> case match of
-            Nothing -> return ()
-            Just (pre, matched, post,subexpression) -> do
-                grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines
-
-grepLine :: Regex -> (Int, String) -> IO [GrepLineMatch]
-grepLine compiledRegex (lineNo, line) = do
-    result <- regexec compiledRegex line
-    case result of
-        Left (returnCode, errorStr) -> return []
-        Right match -> case match of
-            Nothing -> return []
-            Just (pre, matched, post,subexpression) -> return [ GrepLineMatch (pre, matched, post,subexpression) lineNo ]
+--grepLineIO :: Regex -> [String] -> (Int, String) -> IO ()
+--grepLineIO compiledRegex allLines (lineNo, line) = do
+--
+--    result <- regexec compiledRegex line
+--    case result of
+--        Left (returnCode, errorStr) -> putStrLn $ "Unexpected error while matching: " ++ errorStr
+--        Right match -> case match of
+--            Nothing -> return ()
+--            Just (pre, matched, post,subexpression) -> do
+--                grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines
 
 
-grepLinePrintMatch :: (String, String, String, [String]) -> Int -> [String] -> IO()
-grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines = do
-    putStr $ (show lineNo) ++ " : "
-    setSGR [SetColor Foreground Dull White]
-    putStr $ pre
-    setSGR [SetColor Foreground Vivid Green]
-    putStr $ matched
-    setSGR [SetColor Foreground Dull White]
-    putStr $ post ++ "\n"
-    setSGR []
 
+--grepLinePrintMatch :: (String, String, String, [String]) -> Int -> [String] -> IO()
+--grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines = do
+--    putStr $ (show lineNo) ++ " : "
+--    setSGR [SetColor Foreground Dull White]
+--    putStr $ pre
+--    setSGR [SetColor Foreground Vivid Green]
+--    putStr $ matched
+--    setSGR [SetColor Foreground Dull White]
+--    putStr $ post ++ "\n"
+--    setSGR []
+--
 
 
