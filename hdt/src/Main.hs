@@ -242,30 +242,32 @@ execGrepFile compiledRegex opts filename= do
                   return "")
 
     let ls = lines contents
-    --let lsFiltered = filter (=~grepString) ls
-    --case length lsFiltered of
-    --    0 -> putStrLn "No match found"
-    --    cnt -> do
-    --        putStrLn $ "Found matchs:" ++ (show cnt)
-    --        putStrLn $ unlines lsFiltered
-
-
-    forM ls (grepLine compiledRegex)
+    let ils = zip [0..] ls
+    forM ils (grepLine compiledRegex ls)
 
     return ()
 
-grepLine :: Regex -> String -> IO ()
-grepLine compiledRegex line = do
+grepLine :: Regex -> [String] -> (Int, String) -> IO ()
+grepLine compiledRegex allLines (lineNo, line) = do
 
-        -- let result = execute regex line
-        result <- regexec compiledRegex line
-        case result of
-            Left error -> putStrLn "Bad match"
-            Right match -> case match of
-                Nothing -> return () --putStrLn "No match found"
-                Just (pre, matched, post,subexpression) -> do
-                    putStrLn $ pre ++ "->>" ++ matched ++ "<<--" ++ post
+    result <- regexec compiledRegex line
+    case result of
+        Left (returnCode, errorStr) -> putStrLn $ "Unexpected error while matching: " ++ errorStr
+        Right match -> case match of
+            Nothing -> return ()
+            Just (pre, matched, post,subexpression) -> do
+                grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines
 
-        --putStrLn line
+grepLinePrintMatch :: (String, String, String, [String]) -> Int -> [String] -> IO()
+grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines = do
+    putStr $ (show lineNo) ++ " : "
+    setSGR [SetColor Foreground Dull White]
+    putStr $ pre
+    setSGR [SetColor Foreground Vivid Green]
+    putStr $ matched
+    setSGR [SetColor Foreground Dull White]
+    putStr $ post ++ "\n"
+    setSGR []
+
 
 
