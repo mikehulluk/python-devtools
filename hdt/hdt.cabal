@@ -23,4 +23,5 @@ executable hdt
                        filepath,
                        Glob,
                        ansi-terminal,
-                       regex-posix
+                       regex-posix,
+                       text-format

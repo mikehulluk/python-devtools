@@ -10,6 +10,7 @@ import System.Environment (getArgs, withArgs)
 import System.Exit
 import Control.Monad (when)
 import Data.List
+import Data.Text.Format
 
 import System.Console.ANSI
 import Control.Monad
@@ -252,7 +253,9 @@ execGrepFile compiledRegex opts filename= do
     putStrLn $ "Filename:" ++ filename
     putStrLn $ intercalate "\n" (map show grepLines)
 
-    let nContextLines = 3
+    putStrLn $ "\n\n\n"
+
+    let nContextLines = 7
     -- Add in context lines
     let nLinesFile = (length ls)
     let linesIncludingContext = addContextLinesNew nContextLines nLinesFile grepLines
@@ -260,15 +263,83 @@ execGrepFile compiledRegex opts filename= do
 
     putStrLn $ "\n\n\n"
 
-    let linesIncludingContextClean = grepLinesWithContextClean nLinesFile linesIncludingContext
-    putStrLn $ intercalate "\n" (map show linesIncludingContextClean)
+    let groupedLinesPrinted = groupLines linesIncludingContext
+    
+
+    putStrLn $ "\n\n\n"
+
+    mapM (printGroupLines ls) groupedLinesPrinted
+    -- let linesIncludingContextClean = grepLinesWithContextClean nLinesFile linesIncludingContext
+    -- putStrLn $ intercalate "\n" (map show linesIncludingContextClean)
 
 
     return ()
 
+grepLineNum :: GrepLinePrinted -> Int
+grepLineNum (MatchLine m0) = l where (GrepLineMatch _ l) = m0
+grepLineNum (ContextLine l0) = l0
+
 addContextLinesNew :: Int -> Int -> [GrepLineMatch] -> [GrepLinePrinted]
 addContextLinesNew nContextLines nLinesFile grepLines =
-    map MatchLine grepLine
+    sort printedLines 
+    where linesWithGrep = map (grepLineNum . MatchLine) grepLines
+          possibleContextLines = nub  $ concat [ [l-nContextLines..l+nContextLines] | l <- linesWithGrep]
+          contextLines = [i | i<- possibleContextLines, not( i `elem` linesWithGrep), i>=0, i<nLinesFile]
+          printedLines = (map MatchLine grepLines ) ++ [ ContextLine i | i <- contextLines]
+
+
+groupLines :: [GrepLinePrinted] -> [ [GrepLinePrinted] ]
+groupLines x = [x, x] 
+
+
+printGrepLine :: [String] -> GrepLinePrinted -> IO ()
+printGrepLine allLines (MatchLine m) = do
+    putStr $ (show lineNo) ++ " : "
+    setSGR [SetColor Foreground Dull White]
+    putStr $ pre
+    setSGR [SetColor Foreground Vivid Green]
+    putStr $ matched
+    setSGR [SetColor Foreground Dull White]
+    putStr $ post ++ "\n"
+    setSGR []
+    where GrepLineMatch (pre, matched, post,subexpression) lineNo = m
+
+
+
+printGrepLine allLines (ContextLine lineNo) = do 
+    putStr $ (show lineNo) ++ " : "
+    setSGR [SetColor Foreground Dull White]
+    putStr $ (allLines!!lineNo)
+    putStr $ "\n"
+    setSGR []
+
+--grepLinePrintMatch :: (String, String, String, [String]) -> Int -> [String] -> IO()
+--grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines = do
+--    putStr $ (show lineNo) ++ " : "
+--    setSGR [SetColor Foreground Dull White]
+--    putStr $ pre
+--    setSGR [SetColor Foreground Vivid Green]
+--    putStr $ matched
+--    setSGR [SetColor Foreground Dull White]
+--    putStr $ post ++ "\n"
+--    setSGR []
+
+
+printGroupLines :: [String] -> [GrepLinePrinted] -> IO ()
+printGroupLines allLines lines = do
+    putStrLn "Printing.."
+    mapM (printGrepLine allLines) lines
+    return ()
+
+
+
+data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
+data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
+
+instance Ord GrepLinePrinted where
+    compare a b = compare (grepLineNum a) (grepLineNum b)
+
+--Ord GrepLinePrinted
 
 
 
@@ -281,28 +352,24 @@ addContextLinesNew nContextLines nLinesFile grepLines =
 
 
 
-
-
-
-
--- Functions for adding context lines:
-buildContextLineList :: Int -> Int -> GrepLineMatch -> [GrepLinePrinted]
-buildContextLineList linesContext lineNo m =
-    [ContextLine (lineNo-i) | i<- reverse [1..linesContext] ] ++
-    [MatchLine m] ++
-    [ContextLine (lineNo+i)| i<-[1..linesContext] ]
-
-addContextLines :: Int -> [GrepLineMatch] -> [GrepLinePrinted]
-addContextLines linesContext ([])         = []
-addContextLines linesContext (mprev:m:[])       = buildContextLineList linesContext lineNo m
-    where GrepLineMatch _ lineNo = m
-
-addContextLines linesContext (mprev:m:mnext:matches) = (buildContextLineList linesContext lineNo m) ++ (addContextLines linesContext m:next:matches)
-    where GrepLineMatch _ lineNo = undefined --m
-
-
-grepLinesWithContextClean :: Int -> [GrepLinePrinted] -> [GrepLinePrinted]
-grepLinesWithContextClean nLinesMax lines = lines
+-- -- Functions for adding context lines:
+-- buildContextLineList :: Int -> Int -> GrepLineMatch -> [GrepLinePrinted]
+-- buildContextLineList linesContext lineNo m =
+--     [ContextLine (lineNo-i) | i<- reverse [1..linesContext] ] ++
+--     [MatchLine m] ++
+--     [ContextLine (lineNo+i)| i<-[1..linesContext] ]
+--
+-- addContextLines :: Int -> [GrepLineMatch] -> [GrepLinePrinted]
+-- addContextLines linesContext ([])         = []
+-- addContextLines linesContext (mprev:m:[])       = buildContextLineList linesContext lineNo m
+--     where GrepLineMatch _ lineNo = m
+--
+-- addContextLines linesContext (mprev:m:mnext:matches) = (buildContextLineList linesContext lineNo m) ++ (addContextLines linesContext m:next:matches)
+--     where GrepLineMatch _ lineNo = undefined --m
+--
+--
+-- grepLinesWithContextClean :: Int -> [GrepLinePrinted] -> [GrepLinePrinted]
+-- grepLinesWithContextClean nLinesMax lines = lines
 --grepLinesWithContextClean nLinesMax [] = []
 --grepLinesWithContextClean nLinesMax [ContextLine m0] = [ContextLine m0]
 --grepLinesWithContextClean nLinesMax [MatchLine m0] = [MatchLine m0]
@@ -319,8 +386,8 @@ grepLinesWithContextClean nLinesMax lines = lines
 
 
 
-data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
-data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
+-- data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
+-- data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
 
 
 
