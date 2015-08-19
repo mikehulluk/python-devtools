@@ -252,13 +252,13 @@ execGrepFile compiledRegex opts filename= do
     putStrLn $ "Filename:" ++ filename
     putStrLn $ intercalate "\n" (map show grepLines)
 
-    let nContextLines = 2
+    let nContextLines = 3
     -- Add in context lines
-    let linesIncludingContext = addContextLines nContextLines  grepLines
     let nLinesFile = (length ls)
+    let linesIncludingContext = addContextLinesNew nContextLines nLinesFile grepLines
     putStrLn $ intercalate "\n" (map show linesIncludingContext)
 
-    putStrLn $ "\n\n\n" 
+    putStrLn $ "\n\n\n"
 
     let linesIncludingContextClean = grepLinesWithContextClean nLinesFile linesIncludingContext
     putStrLn $ intercalate "\n" (map show linesIncludingContextClean)
@@ -266,33 +266,61 @@ execGrepFile compiledRegex opts filename= do
 
     return ()
 
+addContextLinesNew :: Int -> Int -> [GrepLineMatch] -> [GrepLinePrinted]
+addContextLinesNew nContextLines nLinesFile grepLines =
+    map MatchLine grepLine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -- Functions for adding context lines:
 buildContextLineList :: Int -> Int -> GrepLineMatch -> [GrepLinePrinted]
-buildContextLineList linesContext lineNo m = 
-    [ContextLine (lineNo-i) | i<- reverse [1..linesContext] ] ++ 
-    [MatchLine m] ++ 
+buildContextLineList linesContext lineNo m =
+    [ContextLine (lineNo-i) | i<- reverse [1..linesContext] ] ++
+    [MatchLine m] ++
     [ContextLine (lineNo+i)| i<-[1..linesContext] ]
 
 addContextLines :: Int -> [GrepLineMatch] -> [GrepLinePrinted]
 addContextLines linesContext ([])         = []
-addContextLines linesContext (m:[])       = buildContextLineList linesContext lineNo m
+addContextLines linesContext (mprev:m:[])       = buildContextLineList linesContext lineNo m
     where GrepLineMatch _ lineNo = m
-addContextLines linesContext (m:matches)  = (buildContextLineList linesContext lineNo m) ++ (addContextLines linesContext matches)
-    where GrepLineMatch _ lineNo = m
+
+addContextLines linesContext (mprev:m:mnext:matches) = (buildContextLineList linesContext lineNo m) ++ (addContextLines linesContext m:next:matches)
+    where GrepLineMatch _ lineNo = undefined --m
 
 
 grepLinesWithContextClean :: Int -> [GrepLinePrinted] -> [GrepLinePrinted]
---grepLinesWithContextClean nLinesMax lines = lines 
-grepLinesWithContextClean nLinesMax (MatchLine   m0 : MatchLine m1   : ms) = [] 
-grepLinesWithContextClean nLinesMax (ContextLine m0 : MatchLine m1   : ms) = [] 
-grepLinesWithContextClean nLinesMax (MatchLine   m0 : ContextLine m1 : ms) = [] 
-grepLinesWithContextClean nLinesMax (ContextLine m0 : ContextLine m1 : ms) = [] 
+grepLinesWithContextClean nLinesMax lines = lines
+--grepLinesWithContextClean nLinesMax [] = []
+--grepLinesWithContextClean nLinesMax [ContextLine m0] = [ContextLine m0]
+--grepLinesWithContextClean nLinesMax [MatchLine m0] = [MatchLine m0]
+--
+--grepLinesWithContextClean nLinesMax (MatchLine   m0 : MatchLine m1   : ms) = [MatchLine m0] ++ (grepLinesWithContextClean nLinesMax (MatchLine m1:ms))
+--
+--
+--grepLinesWithContextClean nLinesMax (ContextLine m0 : MatchLine m1   : ms) = [ContextLine m0] ++ (grepLinesWithContextClean nLinesMax (MatchLine m1:ms))
+--grepLinesWithContextClean nLinesMax (MatchLine   m0 : ContextLine m1 : ms) = [MatchLine m0] ++ (grepLinesWithContextClean nLinesMax (ContextLine m1:ms))
+--
+--grepLinesWithContextClean nLinesMax (ContextLine l0 : ContextLine l1 : ms)
+--    | l0 < l1   = [ContextLine l0] ++ (grepLinesWithContextClean nLinesMax (ContextLine l1:ms))     -- Drop sequential contextlines if the numbering is not sequential
+--    | otherwise = grepLinesWithContextClean nLinesMax (ContextLine l0:ms)
 
 
-data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq) 
-data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq) 
+
+data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
+data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
 
 
 
@@ -309,9 +337,9 @@ grepLineIO compiledRegex allLines (lineNo, line) = do
 
 grepLine :: Regex -> (Int, String) -> IO [GrepLineMatch]
 grepLine compiledRegex (lineNo, line) = do
-    result <- regexec compiledRegex line 
+    result <- regexec compiledRegex line
     case result of
-        Left (returnCode, errorStr) -> return [] 
+        Left (returnCode, errorStr) -> return []
         Right match -> case match of
             Nothing -> return []
             Just (pre, matched, post,subexpression) -> return [ GrepLineMatch (pre, matched, post,subexpression) lineNo ]
