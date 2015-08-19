@@ -15,6 +15,7 @@ import Control.Monad
 import Control.Exception
 
 import Text.Regex.Posix   -- for regular expressions
+import Text.Regex.Posix.String
 
 colorStrLn :: ColorIntensity -> Color -> String -> IO ()
 colorStrLn fgi fg str = do
@@ -210,15 +211,27 @@ execConfig opts@ModeConfig{..} = do
 execGrep :: MyOptions -> IO ()
 execGrep opts@ModeGrep{..} = do
     putStrLn $ "Grep-time!"
+    -- Get the active projects
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
-    forM activeProjects (grepProject grepString opts)
-    return ()
+
+    -- Compile the regular expression:
+    regexCompRes <- compile defaultCompOpt execBlank grepString
+    case regexCompRes of
+        Left wrapError -> do
+            putStrLn "Unable to compile"
+            return ()
+        Right compiledRegex -> do
+            putStrLn "Compiled OK"
+
+            forM activeProjects (grepProject grepString opts)
+            return ()
 
 grepProject ::  String -> MyOptions -> Project -> IO ()
 grepProject grepString opts project = do
     forM (srcFiles project) (execGrepFile grepString opts)
     return ()
+
 
 execGrepFile :: String -> MyOptions -> String -> IO ()
 execGrepFile grepString opts filename= do
@@ -235,6 +248,28 @@ execGrepFile grepString opts filename= do
             putStrLn $ "Found matchs:" ++ (show cnt)
             putStrLn $ unlines lsFiltered
 
+
+    forM lsFiltered (grepLine grepString)
+
     return ()
+
+grepLine :: String -> String -> IO ()
+grepLine grepString line = do
+    regexCompRes <- compile defaultCompOpt execBlank grepString
+    case regexCompRes of
+        Left wrapError -> putStrLn "Unable to compile"
+        Right regex -> do
+            putStrLn "Compiled OK"
+
+            -- let result = execute regex line
+            result <- regexec regex line
+            case result of
+                Left error -> putStrLn "Bad match"
+                Right match -> case match of
+                    Nothing -> putStrLn "No match found"
+                    Just (pre, matched, post,subexpression) -> do
+                        putStrLn $ pre ++ "->>" ++ matched ++ "<<--" ++ post
+
+            putStrLn line
 
 
