@@ -56,14 +56,23 @@ data MyOptions =
             , weight :: Double
             }
     |
-    ModeGrep {    grepString :: String
-                , ignoreCase :: Bool
-                , doWordRegex :: Bool
-                , doCount :: Bool
-                , doLineNumber :: Bool
-                , doEdit :: Bool
+    ModeGrep {    grepString    :: String
+                , ignoreCase    :: Bool
+                , doWordRegex   :: Bool
+                , doCount       :: Bool
+                , doLineNumber  :: Bool
+                , doEdit        :: Bool
                 , nContextLines :: Int
-            } deriving (Data, Typeable, Show, Eq)
+            }
+    |
+    ModeReplace {
+          searchString  :: String
+        , replaceString  :: String
+        , ignoreCase  :: Bool
+        , doWordRegex :: Bool
+
+    }
+    deriving (Data, Typeable, Show, Eq)
 
 
 
@@ -101,9 +110,21 @@ modeGrep = ModeGrep
                 , "Blah blah blah again."
                 ]
 
+modeReplace :: MyOptions
+modeReplace = ModeReplace
+    {
+          searchString  = def &= argPos 0 &= typ "GREPSTRING"
+        , replaceString = def &= argPos 1 &= typ "replaceString" 
+        , ignoreCase    = def &= help "GREPSTRING"
+        , doWordRegex   = def &= help "GREPSTRING"
+
+    }
+    &= details  [ "Examples:"
+                , "Blah blah blah again."
+                ]
 
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [modeConfig, mode2, modeGrep]
+myModes = cmdArgsMode $ modes [modeConfig, mode2, modeGrep, modeReplace]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
@@ -136,6 +157,12 @@ optionHandler opts@ModeGrep{..}  = do
     -- when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
     execGrep opts
 
+optionHandler opts@ModeReplace{..}  = do
+    putStrLn  $ "Replacing for: " ++ "'" ++ searchString ++ "'"
+    -- when (height == 0.0) $ putStrLn "warning: --height is 0.0"
+    -- when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
+    execReplace opts
+
 optionHandler opts@Mode2{..}  = do
     when (height == 0.0) $ putStrLn "warning: --height is 0.0"
     when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
@@ -147,6 +174,9 @@ optionHandler opts@Mode2{..}  = do
 exec :: MyOptions -> IO ()
 exec opts@Mode2{..} = putStrLn $ "You are " ++ show height ++ "cm tall, and weigh " ++ show weight ++ "kg!"
 
+
+execReplace :: MyOptions -> IO ()
+execReplace opts@ModeReplace{..} = putStrLn $ "Replacing " ++ show searchString ++ " with " ++ show replaceString ++ ""
 
 
 -- Printing to the screen:
