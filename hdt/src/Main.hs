@@ -115,7 +115,7 @@ modeReplace :: MyOptions
 modeReplace = ModeReplace
     {
           searchString  = def &= argPos 0 &= typ "GREPSTRING"
-        , replaceString = def &= argPos 1 &= typ "replaceString" 
+        , replaceString = def &= argPos 1 &= typ "replaceString"
         , ignoreCase    = def &= help "GREPSTRING"
         , doWordRegex   = def &= help "GREPSTRING"
 
@@ -224,52 +224,48 @@ execGrep opts@ModeGrep{..} = do
         Right compiledRegex -> do
             putStrLn "Compiled OK"
 
-            forM activeProjects (grepProject grepString opts)
+            forM activeProjects (grepProject compiledRegex opts)
             return ()
 
-grepProject ::  String -> MyOptions -> Project -> IO ()
-grepProject grepString opts project = do
-    forM (srcFiles project) (execGrepFile grepString opts)
+grepProject ::  Regex -> MyOptions -> Project -> IO ()
+grepProject compiledRegex opts project = do
+    forM (srcFiles project) (execGrepFile compiledRegex opts)
     return ()
 
 
-execGrepFile :: String -> MyOptions -> String -> IO ()
-execGrepFile grepString opts filename= do
+execGrepFile :: Regex -> MyOptions -> String -> IO ()
+execGrepFile compiledRegex opts filename= do
     contents <- catch (readFile filename)
-        (\e -> do 
+        (\e -> do
                   let err = show (e :: IOException)
                   putStrLn ("Warning: Couldn't open " ++ filename ++ ": " ++ err)
                   return "")
+
     let ls = lines contents
-    let lsFiltered = filter (=~grepString) ls
-    case length lsFiltered of
-        0 -> putStrLn "No match found"
-        cnt -> do
-            putStrLn $ "Found matchs:" ++ (show cnt)
-            putStrLn $ unlines lsFiltered
+    --let lsFiltered = filter (=~grepString) ls
+    --case length lsFiltered of
+    --    0 -> putStrLn "No match found"
+    --    cnt -> do
+    --        putStrLn $ "Found matchs:" ++ (show cnt)
+    --        putStrLn $ unlines lsFiltered
 
 
-    forM lsFiltered (grepLine grepString)
+    forM ls (grepLine compiledRegex)
 
     return ()
 
-grepLine :: String -> String -> IO ()
-grepLine grepString line = do
-    regexCompRes <- compile defaultCompOpt execBlank grepString
-    case regexCompRes of
-        Left wrapError -> putStrLn "Unable to compile"
-        Right regex -> do
-            putStrLn "Compiled OK"
+grepLine :: Regex -> String -> IO ()
+grepLine compiledRegex line = do
 
-            -- let result = execute regex line
-            result <- regexec regex line
-            case result of
-                Left error -> putStrLn "Bad match"
-                Right match -> case match of
-                    Nothing -> putStrLn "No match found"
-                    Just (pre, matched, post,subexpression) -> do
-                        putStrLn $ pre ++ "->>" ++ matched ++ "<<--" ++ post
+        -- let result = execute regex line
+        result <- regexec compiledRegex line
+        case result of
+            Left error -> putStrLn "Bad match"
+            Right match -> case match of
+                Nothing -> return () --putStrLn "No match found"
+                Just (pre, matched, post,subexpression) -> do
+                    putStrLn $ pre ++ "->>" ++ matched ++ "<<--" ++ post
 
-            putStrLn line
+        --putStrLn line
 
 
