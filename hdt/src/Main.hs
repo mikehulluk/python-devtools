@@ -4,6 +4,7 @@
 import HdtTypes
 import CmdLineOpts
 import ActionGrep
+import ActionConfig
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
@@ -92,28 +93,6 @@ execReplace :: MyOptions -> IO ()
 execReplace opts@ModeReplace{..} = putStrLn $ "Replacing " ++ show searchString ++ " with " ++ show replaceString ++ ""
 
 
--- Printing to the screen:
--- ^^^^^^^^^^^^^^^^^^^^^^^^
-summariseProject :: Project -> String
-summariseProject project = unlines [
-     projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
-    ,"  Root:" ++  (rootDir project)
-    ,"  Files:" ++ (unwords $ srcFiles project)
-    ]
-
-summariseProjectConsole :: Project -> IO ()
-summariseProjectConsole project = do
-        setSGR [SetColor Foreground Vivid textcolor]
-        putStrLn $ summariseProject project
-        setSGR []
-        return ()
-    where textcolor = if isActive project then Green else Red
-
-execConfig :: MyOptions -> IO ()
-execConfig opts@ModeConfig{..} = do
-    projects <- getAllProjectConfigs
-    forM projects summariseProjectConsole
-    return ()
 
 
 
