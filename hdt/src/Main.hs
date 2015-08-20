@@ -313,9 +313,19 @@ groupLines :: [GrepLinePrinted] -> [ [GrepLinePrinted] ]
 groupLines x = [x, x] 
 
 
-printGrepLine :: [String] -> GrepLinePrinted -> IO ()
-printGrepLine allLines (MatchLine m) = do
-    putStr $ (show lineNo) ++ " :   "
+printGrepLineNo :: (Maybe Int) -> Int -> String
+printGrepLineNo Nothing _ = ""
+printGrepLineNo (Just lineNumberWidth) x = x_out --(show x) ++ ":"
+    where suffix = ": "
+          x_str = (show x) ++ ": "
+          padding_needed = (lineNumberWidth+ (length suffix)) - (length x_str) + 1
+          padding = ( concat $ (replicate padding_needed " ") )
+          x_out = padding ++ x_str
+
+printGrepLine :: [String] -> (Maybe Int) -> GrepLinePrinted  -> IO ()
+printGrepLine allLines lineNumberWidth (MatchLine m) = do
+    putStr $ printGrepLineNo lineNumberWidth lineNo
+    --putStr $ (show lineNo) ++ " :   "
     setSGR [SetColor Foreground Dull White]
     putStr $ pre
     setSGR [SetColor Foreground Vivid Green]
@@ -327,12 +337,13 @@ printGrepLine allLines (MatchLine m) = do
 
 
 
-printGrepLine allLines (ContextLine lineNo) = do 
-    putStr $ (show lineNo) ++ " :  "
+printGrepLine allLines lineNumberWidth (ContextLine lineNo)  = do 
+    putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
     putStr $ (allLines!!lineNo)
     putStr $ "\n"
     setSGR []
+
 
 --grepLinePrintMatch :: (String, String, String, [String]) -> Int -> [String] -> IO()
 --grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines = do
@@ -349,7 +360,8 @@ printGrepLine allLines (ContextLine lineNo) = do
 printGroupLines :: [String] -> [GrepLinePrinted] -> IO ()
 printGroupLines allLines lines = do
     putStrLn "Printing.."
-    mapM (printGrepLine allLines) lines
+    let lineNumberWidth = Just 3
+    mapM (printGrepLine allLines lineNumberWidth) lines
     return ()
 
 
