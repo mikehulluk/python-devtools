@@ -56,7 +56,6 @@ execGrepFile compiledRegex opts filename= do
 
     let ls = lines contents
     let ils = zip [0..] ls
-    --forM ils (grepLineIO compiledRegex ls)
 
     -- Find all the matching lines:
     grepLinesAll <- mapM (grepLine compiledRegex) ils
@@ -78,11 +77,13 @@ execGrepFile compiledRegex opts filename= do
     
 
     putStrLn $ "\n\n\n"
-
-    mapM (printGroupLines ls) groupedLinesPrinted
-    -- let linesIncludingContextClean = grepLinesWithContextClean nLinesFile linesIncludingContext
-    -- putStrLn $ intercalate "\n" (map show linesIncludingContextClean)
-
+    -- Print out the lines by group
+    case length groupedLinesPrinted of
+        0 -> return ()
+        _ -> do
+            putStrLn $ "In file:" ++ filename
+            mapM (printGroupLines ls) groupedLinesPrinted
+            return ()
 
     return ()
 
