@@ -19,12 +19,12 @@ import Control.Exception
 import Text.Regex.Posix   -- for regular expressions
 import Text.Regex.Posix.String
 
-colorStrLn :: ColorIntensity -> Color -> String -> IO ()
-colorStrLn fgi fg str = do
-  setSGR [SetColor Foreground fgi fg]
-  putStr str
-  setSGR []
-  putStrLn ""
+--colorStrLn :: ColorIntensity -> Color -> String -> IO ()
+--colorStrLn fgi fg str = do
+--  setSGR [SetColor Foreground fgi fg]
+--  putStr str
+--  setSGR []
+--  putStrLn ""
 
 --colorStrLn :: ColorIntensity -> Color -> String -> IO ()
 --colorStrLn fgi fg bgi bg str = do
@@ -118,70 +118,5 @@ execConfig opts@ModeConfig{..} = do
 
 
 
-
-
--- -- Functions for adding context lines:
--- buildContextLineList :: Int -> Int -> GrepLineMatch -> [GrepLinePrinted]
--- buildContextLineList linesContext lineNo m =
---     [ContextLine (lineNo-i) | i<- reverse [1..linesContext] ] ++
---     [MatchLine m] ++
---     [ContextLine (lineNo+i)| i<-[1..linesContext] ]
---
--- addContextLines :: Int -> [GrepLineMatch] -> [GrepLinePrinted]
--- addContextLines linesContext ([])         = []
--- addContextLines linesContext (mprev:m:[])       = buildContextLineList linesContext lineNo m
---     where GrepLineMatch _ lineNo = m
---
--- addContextLines linesContext (mprev:m:mnext:matches) = (buildContextLineList linesContext lineNo m) ++ (addContextLines linesContext m:next:matches)
---     where GrepLineMatch _ lineNo = undefined --m
---
---
--- grepLinesWithContextClean :: Int -> [GrepLinePrinted] -> [GrepLinePrinted]
--- grepLinesWithContextClean nLinesMax lines = lines
---grepLinesWithContextClean nLinesMax [] = []
---grepLinesWithContextClean nLinesMax [ContextLine m0] = [ContextLine m0]
---grepLinesWithContextClean nLinesMax [MatchLine m0] = [MatchLine m0]
---
---grepLinesWithContextClean nLinesMax (MatchLine   m0 : MatchLine m1   : ms) = [MatchLine m0] ++ (grepLinesWithContextClean nLinesMax (MatchLine m1:ms))
---
---
---grepLinesWithContextClean nLinesMax (ContextLine m0 : MatchLine m1   : ms) = [ContextLine m0] ++ (grepLinesWithContextClean nLinesMax (MatchLine m1:ms))
---grepLinesWithContextClean nLinesMax (MatchLine   m0 : ContextLine m1 : ms) = [MatchLine m0] ++ (grepLinesWithContextClean nLinesMax (ContextLine m1:ms))
---
---grepLinesWithContextClean nLinesMax (ContextLine l0 : ContextLine l1 : ms)
---    | l0 < l1   = [ContextLine l0] ++ (grepLinesWithContextClean nLinesMax (ContextLine l1:ms))     -- Drop sequential contextlines if the numbering is not sequential
---    | otherwise = grepLinesWithContextClean nLinesMax (ContextLine l0:ms)
-
-
-
--- data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
--- data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
-
-
-
---grepLineIO :: Regex -> [String] -> (Int, String) -> IO ()
---grepLineIO compiledRegex allLines (lineNo, line) = do
---
---    result <- regexec compiledRegex line
---    case result of
---        Left (returnCode, errorStr) -> putStrLn $ "Unexpected error while matching: " ++ errorStr
---        Right match -> case match of
---            Nothing -> return ()
---            Just (pre, matched, post,subexpression) -> do
---                grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines
-
-
-
---grepLinePrintMatch :: (String, String, String, [String]) -> Int -> [String] -> IO()
---grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines = do
---    putStr $ (show lineNo) ++ " : "
---    setSGR [SetColor Foreground Dull White]
---    putStr $ pre
---    setSGR [SetColor Foreground Vivid Green]
---    putStr $ matched
---    setSGR [SetColor Foreground Dull White]
---    putStr $ post ++ "\n"
---    setSGR []
---
 
 

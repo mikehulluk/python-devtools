@@ -4,17 +4,6 @@ module CmdLineOpts where
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
-import System.Exit
-import Control.Monad (when)
-import Data.List
-import Data.Text.Format
-
-import System.Console.ANSI
-import Control.Monad
-import Control.Exception
-
-import Text.Regex.Posix   -- for regular expressions
-import Text.Regex.Posix.String
 
 
 
