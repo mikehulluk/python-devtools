@@ -12,6 +12,18 @@ import Control.Monad (when)
 import Data.List
 import Data.Text.Format
 
+
+
+
+
+
+
+
+
+
+
+
+
 import System.Console.ANSI
 import Control.Monad
 import Control.Exception
@@ -61,23 +73,14 @@ execGrepFile compiledRegex opts filename= do
     grepLinesAll <- mapM (grepLine compiledRegex) ils
     let grepLines = concat(grepLinesAll)
 
-    --putStrLn $ "Filename:" ++ filename
-    --putStrLn $ intercalate "\n" (map show grepLines)
 
-    --putStrLn $ "\n\n\n"
-
-    let nContextLines = 3
     -- Add in context lines
+    let nContextLines = 3
     let nLinesFile = (length ls)
     let linesIncludingContext = addContextLinesNew nContextLines nLinesFile grepLines
-    --putStrLn $ intercalate "\n" (map show linesIncludingContext)
-
-    --putStrLn $ "\n\n\n"
 
     let groupedLinesPrinted = groupLines linesIncludingContext
 
-
-    --putStrLn $ "\n\n\n"
     -- Print out the lines by group
     case length groupedLinesPrinted of
         0 -> return ()
@@ -125,17 +128,17 @@ addContextLinesNew nContextLines nLinesFile grepLines =
 
 
 groupLines :: [GrepLinePrinted] -> [ [GrepLinePrinted] ]
--- groupLines x = groupLines' [] x -- [x, x]
-groupLines x = [x, x]
+groupLines x = groupLines' [] x 
+--groupLines x = [x, x]
 
 
 groupLines' :: [GrepLinePrinted] -> [GrepLinePrinted] -> [[GrepLinePrinted]]
 --groupLines' currentBlk remainingLines = ??
 
-groupLines' _ [] = []
+groupLines' x [] = [x]
 groupLines' [] (x:xs) = groupLines' [x] xs
 groupLines' currentBlk (x:xs)
-        | thisLineNo > lastLineNo + maxSep = [currentBlk] ++ (groupLines' [x] xs )             -- New Block
+        | thisLineNo > (lastLineNo + maxSep) = [currentBlk] ++ (groupLines' [x] xs )             -- New Block
         | otherwise  = groupLines' (currentBlk ++ [x]) xs
 
 
