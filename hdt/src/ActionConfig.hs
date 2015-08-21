@@ -17,7 +17,7 @@ summariseProject :: Project -> String
 summariseProject project = unlines [
      projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
     ,"  Root:" ++  (rootDir project)
-    ,"  Files:" ++ (unwords $ srcFiles project)
+    ,"  Files:" ++ (unwords $ (map filename (srcFiles project)) )
     ]
 
 summariseProjectConsole :: Project -> IO ()

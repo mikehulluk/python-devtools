@@ -63,7 +63,7 @@ execGrep opts@ModeGrep{..} = do
 
 grepProject ::  Regex -> MyOptions -> Project -> IO ()
 grepProject compiledRegex opts project = do
-    forM (srcFiles project) (execGrepFile compiledRegex opts)
+    forM (map filename (srcFiles project)) (execGrepFile compiledRegex opts)
     return ()
 
 
@@ -85,44 +85,45 @@ execGrepFile compiledRegex opts filename= do
     grepLinesAll <- mapM (grepLine compiledRegex) ils
     let grepLines = concat(grepLinesAll)
 
-
-
-    -- Add in context lines
-    let nContextLines_ = nContextLines opts --3
-    let nLinesFile = (length ls)
-
-
-    case nContextLines_ of
-        -- No context?
-        0 -> do
-            let defaultLineNumberWidth = Just 1
-            let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
-            let includeFilename = True
-            let optfilename = if includeFilename then (Just filename) else Nothing
-            mapM (  printLineSimple lineNumberWidth optfilename ) grepLines
-            return ()
-
-        -- With context:
+    case length grepLines of 
+        0 -> return ()
         _ -> do
+            -- Add in context lines
+            let nContextLines_ = nContextLines opts --3
+            let nLinesFile = (length ls)
 
-            -- By default, print line numbers:
-            let defaultLineNumberWidth = Just 4
-            let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
 
-            -- Add context lines, group the lines, then strip empty leading/trailing context lines:
-            let linesIncludingContext = addContextLinesNew nContextLines_ nLinesFile grepLines
-            let groupedLinesPrinted = groupLines linesIncludingContext
-            let groupedLinesPrintedStripped = map (stripEmptyContextLines ls)  groupedLinesPrinted
-
-            -- Print out the lines by group
-            case length groupedLinesPrinted of
-                0 -> return ()
-                _ -> do
-                    setSGR [SetColor Foreground Dull Yellow]
-                    putStrLn $ filename
-                    setSGR []
-                    mapM (printGroupLines ls filename lineNumberWidth) groupedLinesPrintedStripped
+            case nContextLines_ of
+                -- No context?
+                0 -> do
+                    let defaultLineNumberWidth = Just 1
+                    let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
+                    let includeFilename = True
+                    let optfilename = if includeFilename then (Just filename) else Nothing
+                    mapM (  printLineSimple lineNumberWidth optfilename ) grepLines
                     return ()
+
+                -- With context:
+                _ -> do
+
+                    -- By default, print line numbers:
+                    let defaultLineNumberWidth = Just 4
+                    let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
+
+                    -- Add context lines, group the lines, then strip empty leading/trailing context lines:
+                    let linesIncludingContext = addContextLinesNew nContextLines_ nLinesFile grepLines
+                    let groupedLinesPrinted = groupLines linesIncludingContext
+                    let groupedLinesPrintedStripped = map (stripEmptyContextLines ls)  groupedLinesPrinted
+
+                    -- Print out the lines by group
+                    case length groupedLinesPrinted of
+                        0 -> return ()
+                        _ -> do
+                            setSGR [SetColor Foreground Dull Yellow]
+                            putStrLn $ filename
+                            setSGR []
+                            mapM (printGroupLines ls filename lineNumberWidth) groupedLinesPrintedStripped
+                            return ()
 
     return ()
 
@@ -153,7 +154,9 @@ isEmptyLine allLines (ContextLine l) =  (trim (allLines!!l) ) == ""
 isEmptyLine allLines _ = False
 
 stripEmptyContextLinesHeads ::  [String] -> [GrepLinePrinted] ->[GrepLinePrinted] 
-stripEmptyContextLinesHeads allLines ( x:xs) 
+stripEmptyContextLinesHeads allLines []  = []
+stripEmptyContextLinesHeads allLines [x] = if isEmptyLine allLines x then [] else [x] 
+stripEmptyContextLinesHeads allLines (x:xs) 
     | isEmptyLine allLines x = stripEmptyContextLinesHeads allLines xs 
     | otherwise = (x:xs)
 
