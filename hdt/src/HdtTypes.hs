@@ -22,3 +22,11 @@ getAllProjectConfigs = do
         Project { projectName ="Project2",isActive=False,rootDir="dir2/", srcFiles=["File3","File4"] },
         Project { projectName ="Project3",isActive=False, rootDir="dir3/", srcFiles=["File4","File5"] }
         ]
+
+data File = File {
+      filename :: String 
+    , isClean  :: Bool 
+    , tags :: [String]
+    }
+
+--isFileClean

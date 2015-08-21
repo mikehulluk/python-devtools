@@ -4,6 +4,7 @@
 import HdtTypes
 import CmdLineOpts
 import ActionGrep
+import ActionReplace
 import ActionConfig
 
 import System.Console.CmdArgs
@@ -89,8 +90,9 @@ exec :: MyOptions -> IO ()
 exec opts@Mode2{..} = putStrLn $ "You are " ++ show height ++ "cm tall, and weigh " ++ show weight ++ "kg!"
 
 
-execReplace :: MyOptions -> IO ()
-execReplace opts@ModeReplace{..} = putStrLn $ "Replacing " ++ show searchString ++ " with " ++ show replaceString ++ ""
+--execReplace :: MyOptions -> IO ()
+--execReplace opts@ModeReplace{..} = do
+--    putStrLn $ "Replacing " ++ show searchString ++ " with " ++ show replaceString ++ ""
 
 
 
