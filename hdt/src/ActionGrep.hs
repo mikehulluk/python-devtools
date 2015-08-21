@@ -75,7 +75,7 @@ execGrepFile compiledRegex opts filename= do
                   putStrLn ("Warning: Couldn't open " ++ filename ++ ": " ++ err)
                   return "")
 
-    putStrLn $ show opts
+    --putStrLn $ show opts
 
 
     let ls = lines contents
@@ -95,9 +95,11 @@ execGrepFile compiledRegex opts filename= do
     case nContextLines_ of
         -- No context?
         0 -> do
-            let defaultLineNumberWidth = Just 4
+            let defaultLineNumberWidth = Just 1
             let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
-            mapM (  (printGrepLine ls lineNumberWidth) . MatchLine ) grepLines
+            let includeFilename = True
+            let optfilename = if includeFilename then (Just filename) else Nothing
+            mapM (  printLineSimple lineNumberWidth optfilename ) grepLines
             return ()
 
         -- With context:
@@ -126,9 +128,11 @@ execGrepFile compiledRegex opts filename= do
 
 
 
-printLineSimple :: Bool -> Bool -> String -> IO () 
-printLineSimple    includeLineNumber includeFilename filename lineMatch = do 
-    (printGrepLine ls lineNumberWidth) . MatchLine )
+printLineSimple :: PrintLineNumberWidth -> Maybe String -> GrepLineMatch -> IO () 
+printLineSimple    lineNumberWidth filename lineMatch = do 
+    putStr $ maybe "" (++":") filename
+    (printGrepLine [] lineNumberWidth ) $ MatchLine lineMatch
+    return ()
 
 data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
 data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
@@ -210,6 +214,7 @@ printGrepLineNo (Just lineNumberWidth) x = x_out
 
 printGrepLine :: [String] -> PrintLineNumberWidth -> GrepLinePrinted  -> IO ()
 printGrepLine allLines lineNumberWidth (MatchLine m) = do
+    setSGR [SetColor Foreground Vivid Blue]
     putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
     putStr $ pre
@@ -223,6 +228,7 @@ printGrepLine allLines lineNumberWidth (MatchLine m) = do
 
 
 printGrepLine allLines lineNumberWidth (ContextLine lineNo)  = do
+    setSGR [SetColor Foreground Vivid Blue]
     putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
     putStr $ (allLines!!lineNo)
