@@ -60,23 +60,24 @@ execGrepFile compiledRegex opts filename= do
     -- Find all the matching lines:
     grepLinesAll <- mapM (grepLine compiledRegex) ils
     let grepLines = concat(grepLinesAll)
-    putStrLn $ "Filename:" ++ filename
-    putStrLn $ intercalate "\n" (map show grepLines)
 
-    putStrLn $ "\n\n\n"
+    --putStrLn $ "Filename:" ++ filename
+    --putStrLn $ intercalate "\n" (map show grepLines)
+
+    --putStrLn $ "\n\n\n"
 
     let nContextLines = 3
     -- Add in context lines
     let nLinesFile = (length ls)
     let linesIncludingContext = addContextLinesNew nContextLines nLinesFile grepLines
-    putStrLn $ intercalate "\n" (map show linesIncludingContext)
+    --putStrLn $ intercalate "\n" (map show linesIncludingContext)
 
-    putStrLn $ "\n\n\n"
+    --putStrLn $ "\n\n\n"
 
     let groupedLinesPrinted = groupLines linesIncludingContext
-    
 
-    putStrLn $ "\n\n\n"
+
+    --putStrLn $ "\n\n\n"
     -- Print out the lines by group
     case length groupedLinesPrinted of
         0 -> return ()
@@ -114,15 +115,37 @@ grepLineNum (ContextLine l0) = l0
 
 addContextLinesNew :: Int -> Int -> [GrepLineMatch] -> [GrepLinePrinted]
 addContextLinesNew nContextLines nLinesFile grepLines =
-    sort printedLines 
+    sort printedLines
     where linesWithGrep = map (grepLineNum . MatchLine) grepLines
           possibleContextLines = nub  $ concat [ [l-nContextLines..l+nContextLines] | l <- linesWithGrep]
           contextLines = [i | i<- possibleContextLines, not( i `elem` linesWithGrep), i>=0, i<nLinesFile]
           printedLines = (map MatchLine grepLines ) ++ [ ContextLine i | i <- contextLines]
 
 
+
+
 groupLines :: [GrepLinePrinted] -> [ [GrepLinePrinted] ]
-groupLines x = [x, x] 
+-- groupLines x = groupLines' [] x -- [x, x]
+groupLines x = [x, x]
+
+
+groupLines' :: [GrepLinePrinted] -> [GrepLinePrinted] -> [[GrepLinePrinted]]
+--groupLines' currentBlk remainingLines = ??
+
+groupLines' _ [] = []
+groupLines' [] (x:xs) = groupLines' [x] xs
+groupLines' currentBlk (x:xs)
+        | thisLineNo > lastLineNo + maxSep = [currentBlk] ++ (groupLines' [x] xs )             -- New Block
+        | otherwise  = groupLines' (currentBlk ++ [x]) xs
+
+
+    where maxSep = 1
+          lastLineNo = grepLineNum $ last currentBlk
+          thisLineNo = grepLineNum x
+
+
+
+
 
 
 printGrepLineNo :: (Maybe Int) -> Int -> String
@@ -149,7 +172,7 @@ printGrepLine allLines lineNumberWidth (MatchLine m) = do
 
 
 
-printGrepLine allLines lineNumberWidth (ContextLine lineNo)  = do 
+printGrepLine allLines lineNumberWidth (ContextLine lineNo)  = do
     putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
     putStr $ (allLines!!lineNo)
