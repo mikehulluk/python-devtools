@@ -16,12 +16,12 @@ data MyOptions =
             , weight :: Double
             }
     |
-    ModeGrep {    grepString    :: String
-                , ignoreCase    :: Bool
-                , doWordRegex   :: Bool
-                , doCount       :: Bool
-                , doLineNumber  :: Bool
-                , doEdit        :: Bool
+    ModeGrep {    grepString   :: String
+                , ignoreCase   :: Bool
+                , word         :: Bool
+                , count        :: Bool
+                , lineNumbers   :: Bool
+                , doEdit       :: Bool
                 , nContextLines :: Int
             }
     |
@@ -58,13 +58,13 @@ mode2 = Mode2
 modeGrep :: MyOptions
 modeGrep = ModeGrep
     {
-      grepString    = def &= argPos 0 &= typ "GREPSTRING"
-    , ignoreCase    = def &= help "ignoreCase"
-    , doWordRegex   = def &= help "doWordRegex"
-    , doCount       = def &= help "doCount"
-    , doLineNumber  = def &= help "doLineNumber"
-    , doEdit        = def &= help "doEdit"
-    , nContextLines = def &= help "nContextLines"
+      grepString    = def   &= argPos 0 &= typ "GREPSTRING"
+    , ignoreCase    = True  &= help "ignoreCase"
+    , word          = False &= name "jkl" &= help "doWordRegex"
+    , count         = False &= help "doCount"
+    , lineNumbers   = False  &= help "doLineNumber"
+    , doEdit        = False &= help "doEdit"
+    , nContextLines = 0      &= name "contextlines" &= help "nContextLines"
     }
     &= details  [ "Examples:"
                 , "Blah blah blah again."

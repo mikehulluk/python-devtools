@@ -31,6 +31,15 @@ import Control.Exception
 import Text.Regex.Posix   -- for regular expressions
 import Text.Regex.Posix.String
 
+
+import Data.Char (isSpace)
+
+trim :: String -> String
+trim = f . f
+   where f = reverse . dropWhile isSpace
+
+
+
 -- Grepping:
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
 execGrep :: MyOptions -> IO ()
@@ -66,6 +75,9 @@ execGrepFile compiledRegex opts filename= do
                   putStrLn ("Warning: Couldn't open " ++ filename ++ ": " ++ err)
                   return "")
 
+    putStrLn $ show opts
+
+
     let ls = lines contents
     let ils = zip [0..] ls
 
@@ -74,32 +86,72 @@ execGrepFile compiledRegex opts filename= do
     let grepLines = concat(grepLinesAll)
 
 
+
     -- Add in context lines
-    let nContextLines = 3
+    let nContextLines_ = nContextLines opts --3
     let nLinesFile = (length ls)
-    let linesIncludingContext = addContextLinesNew nContextLines nLinesFile grepLines
 
-    let groupedLinesPrinted = groupLines linesIncludingContext
 
-    -- Print out the lines by group
-    case length groupedLinesPrinted of
-        0 -> return ()
-        _ -> do
-            putStrLn $ "In file:" ++ filename
-            mapM (printGroupLines ls) groupedLinesPrinted
+    case nContextLines_ of
+        -- No context?
+        0 -> do
+            let defaultLineNumberWidth = Just 4
+            let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
+            mapM (  (printGrepLine ls lineNumberWidth) . MatchLine ) grepLines
             return ()
+
+        -- With context:
+        _ -> do
+
+            -- By default, print line numbers:
+            let defaultLineNumberWidth = Just 4
+            let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
+
+            -- Add context lines, group the lines, then strip empty leading/trailing context lines:
+            let linesIncludingContext = addContextLinesNew nContextLines_ nLinesFile grepLines
+            let groupedLinesPrinted = groupLines linesIncludingContext
+            let groupedLinesPrintedStripped = map (stripEmptyContextLines ls)  groupedLinesPrinted
+
+            -- Print out the lines by group
+            case length groupedLinesPrinted of
+                0 -> return ()
+                _ -> do
+                    setSGR [SetColor Foreground Dull Yellow]
+                    putStrLn $ filename
+                    setSGR []
+                    mapM (printGroupLines ls filename lineNumberWidth) groupedLinesPrintedStripped
+                    return ()
 
     return ()
 
 
+
+printLineSimple :: Bool -> Bool -> String -> IO () 
+printLineSimple    includeLineNumber includeFilename filename lineMatch = do 
+    (printGrepLine ls lineNumberWidth) . MatchLine )
+
 data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
 data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int deriving (Data, Typeable, Show, Eq)
+
+type PrintLineNumberWidth = Maybe Int
 
 instance Ord GrepLinePrinted where
     compare a b = compare (grepLineNum a) (grepLineNum b)
 
 
+stripEmptyContextLines ::  [String] -> [GrepLinePrinted] ->[GrepLinePrinted] 
+stripEmptyContextLines allLines x = striphead $ striptail x
+    where striphead = stripEmptyContextLinesHeads allLines
+          striptail = reverse . (stripEmptyContextLinesHeads allLines) . reverse
 
+isEmptyLine :: [String] -> GrepLinePrinted -> Bool
+isEmptyLine allLines (ContextLine l) =  (trim (allLines!!l) ) == ""
+isEmptyLine allLines _ = False
+
+stripEmptyContextLinesHeads ::  [String] -> [GrepLinePrinted] ->[GrepLinePrinted] 
+stripEmptyContextLinesHeads allLines ( x:xs) 
+    | isEmptyLine allLines x = stripEmptyContextLinesHeads allLines xs 
+    | otherwise = (x:xs)
 
 grepLine :: Regex -> (Int, String) -> IO [GrepLineMatch]
 grepLine compiledRegex (lineNo, line) = do
@@ -128,20 +180,16 @@ addContextLinesNew nContextLines nLinesFile grepLines =
 
 
 groupLines :: [GrepLinePrinted] -> [ [GrepLinePrinted] ]
-groupLines x = groupLines' [] x 
---groupLines x = [x, x]
+groupLines x = groupLines' [] x
 
 
 groupLines' :: [GrepLinePrinted] -> [GrepLinePrinted] -> [[GrepLinePrinted]]
 --groupLines' currentBlk remainingLines = ??
-
 groupLines' x [] = [x]
 groupLines' [] (x:xs) = groupLines' [x] xs
 groupLines' currentBlk (x:xs)
         | thisLineNo > (lastLineNo + maxSep) = [currentBlk] ++ (groupLines' [x] xs )             -- New Block
         | otherwise  = groupLines' (currentBlk ++ [x]) xs
-
-
     where maxSep = 1
           lastLineNo = grepLineNum $ last currentBlk
           thisLineNo = grepLineNum x
@@ -151,19 +199,18 @@ groupLines' currentBlk (x:xs)
 
 
 
-printGrepLineNo :: (Maybe Int) -> Int -> String
+printGrepLineNo :: (PrintLineNumberWidth) -> Int -> String
 printGrepLineNo Nothing _ = ""
-printGrepLineNo (Just lineNumberWidth) x = x_out --(show x) ++ ":"
+printGrepLineNo (Just lineNumberWidth) x = x_out
     where suffix = ": "
           x_str = (show x) ++ ": "
           padding_needed = (lineNumberWidth+ (length suffix)) - (length x_str) + 1
           padding = ( concat $ (replicate padding_needed " ") )
           x_out = padding ++ x_str
 
-printGrepLine :: [String] -> (Maybe Int) -> GrepLinePrinted  -> IO ()
+printGrepLine :: [String] -> PrintLineNumberWidth -> GrepLinePrinted  -> IO ()
 printGrepLine allLines lineNumberWidth (MatchLine m) = do
     putStr $ printGrepLineNo lineNumberWidth lineNo
-    --putStr $ (show lineNo) ++ " :   "
     setSGR [SetColor Foreground Dull White]
     putStr $ pre
     setSGR [SetColor Foreground Vivid Green]
@@ -183,22 +230,13 @@ printGrepLine allLines lineNumberWidth (ContextLine lineNo)  = do
     setSGR []
 
 
---grepLinePrintMatch :: (String, String, String, [String]) -> Int -> [String] -> IO()
---grepLinePrintMatch (pre, matched, post,subexpression) lineNo allLines = do
---    putStr $ (show lineNo) ++ " : "
---    setSGR [SetColor Foreground Dull White]
---    putStr $ pre
---    setSGR [SetColor Foreground Vivid Green]
---    putStr $ matched
---    setSGR [SetColor Foreground Dull White]
---    putStr $ post ++ "\n"
---    setSGR []
 
 
-printGroupLines :: [String] -> [GrepLinePrinted] -> IO ()
-printGroupLines allLines lines = do
-    putStrLn "Printing.."
-    let lineNumberWidth = Just 3
+printGroupLines :: [String] -> String -> PrintLineNumberWidth -> [GrepLinePrinted] -> IO ()
+printGroupLines allLines filename lineNumberWidth lines = do
+    --putStrLn "Printing.."
+    putStrLn $ "In file:" ++ filename
+    --let lineNumberWidth = Just 3
     mapM (printGrepLine allLines lineNumberWidth) lines
     return ()
 
