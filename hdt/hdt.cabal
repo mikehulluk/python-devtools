@@ -21,7 +21,10 @@ executable hdt
   build-depends:       base ==4.6.*,
                        cmdargs,
                        filepath,
+                       directory,
+                       system-filepath,
                        Glob,
                        ansi-terminal,
                        regex-posix,
+                       sqlite-simple,
                        text-format
