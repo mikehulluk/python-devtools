@@ -18,6 +18,7 @@ summariseProject project = unlines [
      projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
     ,"  Root:" ++  (rootDir project)
     ,"  Files:" ++ (unwords $ (map filename (srcFiles project)) )
+    -- ,"  Files:" ++ concat ($ (map (("\n\t\t" ++) . filename) (srcFiles project)) )
     ]
 
 summariseProjectConsole :: Project -> IO ()
