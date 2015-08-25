@@ -9,23 +9,29 @@ import CmdLineOpts
 
 import System.Console.ANSI
 import Control.Monad
+import Data.List
 
 
 -- Printing to the screen
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
-summariseProject :: Project -> String
-summariseProject project = unlines [
-     projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
-    ,"  Root:" ++  (rootDir project)
-    ,"  Files:" ++ (unwords $ (map filename (srcFiles project)) )
-    -- ,"  Files:" ++ concat ($ (map (("\n\t\t" ++) . filename) (srcFiles project)) )
-    ]
+
+summariseFileLine :: File -> IO()
+summariseFileLine file = do
+    putStrLn $ "\t" ++ (filename file)
+
 
 summariseProjectConsole :: Project -> IO ()
 summariseProjectConsole project = do
         setSGR [SetColor Foreground Vivid textcolor]
-        putStrLn $ summariseProject project
+        -- putStrLn $ summariseProject project
+    
+        putStrLn $ projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
+        putStrLn $ "  Root:" ++  (rootDir project)
+
+        putStrLn "  Files:"
+        mapM summariseFileLine (srcFiles project)
         setSGR []
+        putStrLn ""
         return ()
     where textcolor = if isActive project then Green else Red
 

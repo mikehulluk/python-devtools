@@ -13,3 +13,7 @@ execReplace opts@ModeReplace{..} = do
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
     putStrLn "OK"
+
+
+
+

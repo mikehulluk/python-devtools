@@ -5,7 +5,7 @@ module HdtTypes where
 
 import qualified  Prelude as P
 import Prelude (String, Bool, IO, Bool(True,False), return, (++), map )
-import Prelude (putStrLn, ($))
+import Prelude (putStrLn, ($), (==) )
 
 import System.FilePath.Glob
 import System.Directory
@@ -13,6 +13,7 @@ import Filesystem.Path
 import Control.Applicative
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
+import Data.List
 
 data File = File {
       filename :: String 
@@ -29,7 +30,7 @@ data Project = Project {
 
 
 srcFiles :: Project -> [File]
-srcFiles  project = map _buildFile (_rawSrcFiles project)
+srcFiles  project = map _buildFile ( sort $ _rawSrcFiles project)
     where _buildFile s = File {filename=s, isClean=True, tags=[]}
 
 
@@ -60,16 +61,30 @@ getDBFilename project = do
     configPath <- getHDTConfigPath
     let path = configPath ++"/" ++ (projectName project ++ ".sqlite")
     return path
-    
+
 
 getProjectDBHandle :: Project -> IO(Connection)
 getProjectDBHandle project = do
     dbFilename <- getDBFilename project
+    putStrLn $ "Database file:" ++ dbFilename
 
     -- Build the database tables, if they don't exist:
     conn <-open dbFilename
     execute_ conn "CREATE TABLE IF NOT EXISTS Files(id INTEGER PRIMARY KEY, filename TEXT);"
     execute_ conn "CREATE TABLE IF NOT EXISTS FilePatches(id INTEGER PRIMARY KEY, file INTEGER, timestamp INTEGER, description TEXT, blob TEXT);"
+
+    -- Add entries for files, if they don't exist:
+    --
     return (conn )
 
 
+getProjectFileChanges :: Project -> String -> IO( [String] )
+getProjectFileChanges project filename = do
+    return []
+
+
+fileHasOutstandingChanges :: Project -> String -> IO(Bool)
+fileHasOutstandingChanges project filename = do
+    changes <- getProjectFileChanges project filename
+    let isChanged = (changes == [])
+    return isChanged
