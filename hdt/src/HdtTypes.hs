@@ -29,7 +29,7 @@ data Project = Project {
 data FileSelector = FileSelector {
       globString :: String
     , addTags :: [String]
-}
+} deriving (P.Show)
 
 
 findFiles :: String -> FileSelector -> IO( [File] )

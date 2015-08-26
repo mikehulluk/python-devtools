@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module HdtConfigFile where
 
+import qualified HdtTypes
 
 import Data.Aeson
 import Control.Applicative
@@ -24,9 +25,19 @@ data ConfigFileSetup = MHNothing | ConfigFileSetup {
 
 
 data ConfigFileProject = ConfigFileProject {
-      projectName :: Text
+      projectName :: String 
     , isActive :: Bool
+    , rootDir :: String
+    , fileSelectors :: [HdtTypes.FileSelector]
 } deriving (Show)
+
+
+
+instance FromJSON HdtTypes.FileSelector where
+    parseJSON (Object o) = do
+        globString <- o .: "glob"
+        return $ HdtTypes.FileSelector{HdtTypes.globString=globString,HdtTypes.addTags=[]}
+        
 
 instance FromJSON ConfigFileSetup where
     parseJSON (Object o) = do
@@ -38,7 +49,9 @@ instance FromJSON ConfigFileProject where
     parseJSON (Object v) = do
         name <- v .: "name"
         isActive <- v .:? "active" .!= False
-        return ConfigFileProject{projectName=name, isActive=isActive}
+        rootDir <- v .: "rootdir"
+        fileSelectors <- parseJSON =<< (v.: "files")
+        return ConfigFileProject{projectName=name, isActive=isActive, rootDir=rootDir, fileSelectors=fileSelectors}
 
     parseJSON _ = mzero
 
