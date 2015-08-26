@@ -24,7 +24,8 @@ data ConfigFileSetup = MHNothing | ConfigFileSetup {
 
 
 data ConfigFileProject = ConfigFileProject {
-    name :: Text
+      projectName :: Text
+    , isActive :: Bool
 } deriving (Show)
 
 instance FromJSON ConfigFileSetup where
@@ -34,21 +35,25 @@ instance FromJSON ConfigFileSetup where
     parseJSON _ = mzero
 
 instance FromJSON ConfigFileProject where
-    parseJSON (Object v) = ConfigFileProject <$>
-                            v.: "name"
+    parseJSON (Object v) = do
+        name <- v .: "name"
+        isActive <- v .:? "active" .!= False
+        return ConfigFileProject{projectName=name, isActive=isActive}
+
     parseJSON _ = mzero
-        
+
 
 
 getConfigFileSetup :: IO(ConfigFileSetup)
 getConfigFileSetup = do
     contents <- sampleConfigFileContents
-    let mjson = decode contents
+    let mjson = eitherDecode contents
     case mjson of
-        Nothing -> do
-            putStrLn "Unable to read Configfile"
-            return MHNothing 
-        Just result ->  do
+        Left err -> do
+            -- putStrLn
+            putStrLn ("Unable to read Configfile: " ++ err)
+            return MHNothing
+        Right result ->  do
             putStrLn $ show result
             return result
 

@@ -5,7 +5,7 @@ module ActionConfig where
 
 import HdtTypes
 import CmdLineOpts
-import HdtConfigFile
+import qualified HdtConfigFile as Cfg
 
 import System.Console.ANSI
 import Control.Monad
@@ -35,6 +35,6 @@ execConfig opts@ModeConfig{..} = do
     forM projects summariseProjectConsole
     forM projects getProjectDBHandle
 
-    x <- getConfigFileSetup
+    x <- Cfg.getConfigFileSetup
     return ()
 

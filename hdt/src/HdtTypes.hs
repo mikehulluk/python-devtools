@@ -36,8 +36,9 @@ srcFiles  project = map _buildFile (_rawSrcFiles project)
 
 getAllProjectConfigs :: IO [Project] 
 getAllProjectConfigs = do
-    files1 <- globDir1 (compile "*.hs") "/home/mike/dev/python-devtools/hdt/src/"
-    files2 <- globDir1 (compile "*.hs") "/home/michael/hw/python-devtools/hdt/src/"
+    --files1 <- globDir1 (compile "*.hs") "/home/mike/dev/python-devtools/hdt/src/"
+    let files1 = []
+    files2 <- globDir1 (compile "src/**/*.hs") "/home/michael/hw/python-devtools/hdt/"
     return [
         Project { projectName ="Project1",isActive=True, rootDir="dir1/",  _rawSrcFiles= (files1++files2) },
         Project { projectName ="Project2",isActive=False,rootDir="dir2/",  _rawSrcFiles=["File3","File4"] },
