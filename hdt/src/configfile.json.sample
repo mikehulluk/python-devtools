@@ -3,7 +3,7 @@
         
         { "name": "project1",
           "active":false,
-          "rootdir":"/home/michael/hw/python-devtools/src/",
+          "rootdir":"/home/michael/hw/python-devtools/",
           "files": [
                 {"glob":"src/**/*.py", "tags":"src"}
             ]

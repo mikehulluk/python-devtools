@@ -14,6 +14,19 @@ import Control.Applicative
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
 
+-- import HdtConfigFile
+-- 
+-- import qualified HdtTypes
+-- import  HdtTypes as H
+
+import Data.Aeson
+import Control.Applicative
+import Control.Monad
+import Data.Text as T
+import qualified Data.ByteString.Lazy as LB
+import qualified Data.Text.Encoding as TE
+
+
 data File = File {
       filename :: String
     , isClean  :: Bool
@@ -24,7 +37,7 @@ data Project = Project {
     , rootDir :: String
     , isActive :: Bool
     , fileSelectors :: [FileSelector]
-}
+} deriving (P.Show)
 
 data FileSelector = FileSelector {
       globString :: String
@@ -35,7 +48,7 @@ data FileSelector = FileSelector {
 findFiles :: String -> FileSelector -> IO( [File] )
 findFiles rootDir fileSelector = do
     files <- globDir1 (compile $ globString fileSelector) rootDir
-    return $ map _buildFile files
+    return $ P.map _buildFile files
     where _buildFile s = File {filename=s, isClean=True}
 
 
@@ -50,15 +63,17 @@ srcFiles project =  do
 
 getAllProjectConfigs :: IO [Project]
 getAllProjectConfigs = do
-    let fs = FileSelector{ globString="src/**/*.hs", addTags=[]}
-    return [
-        Project { projectName ="Project1",
-                  isActive=True,
-                  rootDir="/home/michael/hw/python-devtools/hdt/",
-                  fileSelectors=[fs] },
-        Project { projectName ="Project2",isActive=False,rootDir="dir2/",  fileSelectors=[] },
-        Project { projectName ="Project3",isActive=False, rootDir="dir3/", fileSelectors=[] }
-        ]
+    conf <- getConfigFileSetup
+    return $ projects conf
+    -- let fs = FileSelector{ globString="src/**/*.hs", addTags=[]}
+    -- return [
+    --     Project { projectName ="Project1",
+    --               isActive=True,
+    --               rootDir="/home/michael/hw/python-devtools/hdt/",
+    --               fileSelectors=[fs] },
+    --     Project { projectName ="Project2",isActive=False,rootDir="dir2/",  fileSelectors=[] },
+    --     Project { projectName ="Project3",isActive=False, rootDir="dir3/", fileSelectors=[] }
+    --     ]
 
 
 
@@ -88,4 +103,75 @@ getProjectDBHandle project = do
     execute_ conn "CREATE TABLE IF NOT EXISTS FilePatches(id INTEGER PRIMARY KEY, file INTEGER, timestamp INTEGER, description TEXT, blob TEXT);"
     return (conn )
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sampleConfigFileContents :: IO( LB.ByteString )
+sampleConfigFileContents = do
+    contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
+    return $ contents
+
+
+
+data ConfigFileSetup = MHNothing | ConfigFileSetup {
+    projects :: [Project]
+
+} deriving (P.Show)
+
+
+
+
+
+instance FromJSON HdtTypes.FileSelector where
+    parseJSON (Object o) = do
+        globString <- o .: "glob"
+        return $ HdtTypes.FileSelector{HdtTypes.globString=globString,HdtTypes.addTags=[]}
+
+
+instance FromJSON ConfigFileSetup where
+    parseJSON (Object o) = do
+        projects <- parseJSON =<< (o.: "projects")
+        return $ ConfigFileSetup{projects=projects}
+    parseJSON _ = mzero
+
+instance FromJSON Project where
+    parseJSON (Object v) = do
+        name <- v .: "name"
+        isActive <- v .:? "active" .!= False
+        rootDir <- v .: "rootdir"
+        fileSelectors <- parseJSON =<< (v.: "files")
+        return Project{projectName=name, isActive=isActive, rootDir=rootDir, fileSelectors=fileSelectors}
+
+    parseJSON _ = mzero
+
+
+
+getConfigFileSetup :: IO(ConfigFileSetup)
+getConfigFileSetup = do
+    contents <- sampleConfigFileContents
+    let mjson = eitherDecode contents
+    case mjson of
+        P.Left err -> do
+            -- putStrLn
+            putStrLn ("Unable to read Configfile: " ++ err)
+            return MHNothing
+        P.Right result ->  do
+            P.putStrLn $ P.show result
+            return result
 
