@@ -63,7 +63,8 @@ execGrep opts@ModeGrep{..} = do
 
 grepProject ::  Regex -> MyOptions -> Project -> IO ()
 grepProject compiledRegex opts project = do
-    forM (map filename (srcFiles project)) (execGrepFile compiledRegex opts)
+    srcfiles <-(srcFiles project)
+    forM (map filename srcfiles) (execGrepFile compiledRegex opts)
     return ()
 
 

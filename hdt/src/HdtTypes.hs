@@ -15,9 +15,8 @@ import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
 
 data File = File {
-      filename :: String 
-    , isClean  :: Bool 
-    , tags :: [String]
+      filename :: String
+    , isClean  :: Bool
     }
 
 data Project = Project {
@@ -25,24 +24,41 @@ data Project = Project {
     , rootDir :: String
     , isActive :: Bool
     , _rawSrcFiles :: [String] -- deprecated
+    , fileSelectors :: [FileSelector]
+}
+
+data FileSelector = FileSelector {
+      globString :: String
+    , addTags :: [String]
 }
 
 
-srcFiles :: Project -> [File]
-srcFiles  project = map _buildFile (_rawSrcFiles project)
-    where _buildFile s = File {filename=s, isClean=True, tags=[]}
+findFiles :: String -> FileSelector -> IO([File])
+findFiles rootDir fileSelector = do
+    files <- globDir1 (compile $ globString fileSelector) rootDir
+    return $ map _buildFile files
+    where _buildFile s = File {filename=s, isClean=True}
+
+srcFiles :: Project -> IO( [File] )
+srcFiles  project = return $ map _buildFile (_rawSrcFiles project)
+    where _buildFile s = File {filename=s, isClean=True}
 
 
 
-getAllProjectConfigs :: IO [Project] 
+
+getAllProjectConfigs :: IO [Project]
 getAllProjectConfigs = do
     --files1 <- globDir1 (compile "*.hs") "/home/mike/dev/python-devtools/hdt/src/"
     let files1 = []
     files2 <- globDir1 (compile "src/**/*.hs") "/home/michael/hw/python-devtools/hdt/"
+    let fs = FileSelector{ globString="src/**/*.hs", addTags=[]}
     return [
-        Project { projectName ="Project1",isActive=True, rootDir="dir1/",  _rawSrcFiles= (files1++files2) },
-        Project { projectName ="Project2",isActive=False,rootDir="dir2/",  _rawSrcFiles=["File3","File4"] },
-        Project { projectName ="Project3",isActive=False, rootDir="dir3/", _rawSrcFiles=["File4","File5"] }
+        Project { projectName ="Project1",
+                  isActive=True,
+                  rootDir="/home/michael/hw/python-devtools/hdt/",
+                  _rawSrcFiles= (files1++files2), fileSelectors=[fs] },
+        Project { projectName ="Project2",isActive=False,rootDir="dir2/",  _rawSrcFiles=["File3","File4"], fileSelectors=[] },
+        Project { projectName ="Project3",isActive=False, rootDir="dir3/", _rawSrcFiles=["File4","File5"], fileSelectors=[] }
         ]
 
 
@@ -61,7 +77,7 @@ getDBFilename project = do
     configPath <- getHDTConfigPath
     let path = configPath ++"/" ++ (projectName project ++ ".sqlite")
     return path
-    
+
 
 getProjectDBHandle :: Project -> IO(Connection)
 getProjectDBHandle project = do

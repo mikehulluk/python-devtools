@@ -5,7 +5,12 @@
           "active":false
         },
         { "name": "project2",
-          "active":true
+          "active":true,
+          "rootdir":"/home/michael/hw/python-devtools/hdt/",
+          "files": [
+                {"glob":"src/**/*.hs", "tags":"src"}
+            ]
+
         }
     ]
 }

@@ -13,18 +13,21 @@ import Control.Monad
 
 -- Printing to the screen
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
-summariseProject :: Project -> String
-summariseProject project = unlines [
-     projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
-    ,"  Root:" ++  (rootDir project)
-    ,"  Files:" ++ (unwords $ (map filename (srcFiles project)) )
-    -- ,"  Files:" ++ concat ($ (map (("\n\t\t" ++) . filename) (srcFiles project)) )
-    ]
+summariseProject :: Project -> IO(String)
+summariseProject project = do
+    files <- (srcFiles project)
+    return $ unlines [
+        projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
+        ,"  Root:" ++  (rootDir project)
+        ,"  Files:" ++ (unwords $ (map filename files) )
+        -- ,"  Files:" ++ concat ($ (map (("\n\t\t" ++) . filename) (srcFiles project)) )
+        ]
 
 summariseProjectConsole :: Project -> IO ()
 summariseProjectConsole project = do
         setSGR [SetColor Foreground Vivid textcolor]
-        putStrLn $ summariseProject project
+        v <-summariseProject project
+        putStrLn $ v
         setSGR []
         return ()
     where textcolor = if isActive project then Green else Red
