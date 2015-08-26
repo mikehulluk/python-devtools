@@ -5,6 +5,7 @@ module ActionConfig where
 
 import HdtTypes
 import CmdLineOpts
+import MHUtil as U
 
 
 import System.Console.ANSI
@@ -15,21 +16,23 @@ import Data.List
 -- Printing to the screen
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
 
-summariseFileLine :: File -> IO()
-summariseFileLine file = do
-    putStrLn $ "\t" ++ (filename file)
+summariseFileLine :: Int -> File -> IO()
+summariseFileLine filenamePadding file = do
+    putStrLn $ "\t" ++ paddedFname ++ "<<<--" ++ fileChangesOutstanding
+    where paddedFname = pad ' ' filenamePadding (filename file)
+          fileChangesOutstanding = "??"
 
 
 summariseProjectConsole :: Project -> IO ()
 summariseProjectConsole project = do
         setSGR [SetColor Foreground Vivid textcolor]
-        -- putStrLn $ summariseProject project
     
         putStrLn $ projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
         putStrLn $ "  Root:" ++  (rootDir project)
 
         putStrLn "  Files:"
-        mapM summariseFileLine (srcFiles project)
+        let nFnamePadding = 60
+        mapM (summariseFileLine nFnamePadding) (srcFiles project)
         setSGR []
         putStrLn ""
         return ()

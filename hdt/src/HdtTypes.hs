@@ -5,11 +5,11 @@ module HdtTypes where
 
 import qualified  Prelude as P
 import Prelude (String, Bool, IO, Bool(True,False), return, (++), map )
-import Prelude (putStrLn, ($), (==) )
+import Prelude (putStrLn, ($), (==), Show)
 
 import System.FilePath.Glob
 import System.Directory
-import Filesystem.Path
+import Filesystem.Path hiding (filename)
 import Control.Applicative
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
@@ -19,7 +19,7 @@ data File = File {
       filename :: String 
     , isClean  :: Bool 
     , tags :: [String]
-    }
+    } deriving (Show)
 
 data Project = Project {
       projectName :: String
@@ -78,13 +78,21 @@ getProjectDBHandle project = do
     return (conn )
 
 
-getProjectFileChanges :: Project -> String -> IO( [String] )
-getProjectFileChanges project filename = do
+getFileChanges :: File -> IO( [String] )
+getFileChanges file = do
     return []
 
 
-fileHasOutstandingChanges :: Project -> String -> IO(Bool)
-fileHasOutstandingChanges project filename = do
-    changes <- getProjectFileChanges project filename
+fileHasOutstandingChanges :: File -> IO(Bool)
+fileHasOutstandingChanges file = do
+    changes <- getFileChanges file
     let isChanged = (changes == [])
     return isChanged
+
+
+
+
+addFileOutstandingChanges :: File -> String -> IO()
+addFileOutstandingChanges file newContents = 
+    putStrLn $ "Saving new file changes for: " ++ filename file
+

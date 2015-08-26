@@ -12,6 +12,12 @@ execReplace opts@ModeReplace{..} = do
     -- Get the active projects
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
+    let activeFile = head $ srcFiles $ head activeProjects
+    putStrLn $ show activeFile
+
+    addFileOutstandingChanges activeFile "New contents"
+
+
     putStrLn "OK"
 
 
