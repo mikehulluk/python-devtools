@@ -23,7 +23,6 @@ data Project = Project {
       projectName :: String
     , rootDir :: String
     , isActive :: Bool
-    , _rawSrcFiles :: [String] -- deprecated
     , fileSelectors :: [FileSelector]
 }
 
@@ -45,29 +44,20 @@ srcFiles :: Project -> IO( [File] )
 srcFiles project =  do
     files <- P.mapM (findFiles (rootDir project)) ( fileSelectors project )
     return $ P.concat files
-    --return $ concat files
-
--- srcFiles :: Project -> IO( [File] )
--- srcFiles  project = return $ map _buildFile (_rawSrcFiles project)
---     where _buildFile s = File {filename=s, isClean=True}
 
 
 
 
 getAllProjectConfigs :: IO [Project]
 getAllProjectConfigs = do
-    --files1 <- globDir1 (compile "*.hs") "/home/mike/dev/python-devtools/hdt/src/"
-    let files1 = []
-    let files2 = []
-    --files2 <- globDir1 (compile "src/**/*.hs") "/home/michael/hw/python-devtools/hdt/"
     let fs = FileSelector{ globString="src/**/*.hs", addTags=[]}
     return [
         Project { projectName ="Project1",
                   isActive=True,
                   rootDir="/home/michael/hw/python-devtools/hdt/",
-                  _rawSrcFiles= (files1++files2), fileSelectors=[fs] }
-        Project { projectName ="Project2",isActive=False,rootDir="dir2/",  _rawSrcFiles=["File3","File4"], fileSelectors=[] },
-        Project { projectName ="Project3",isActive=False, rootDir="dir3/", _rawSrcFiles=["File4","File5"], fileSelectors=[] }
+                  fileSelectors=[fs] },
+        Project { projectName ="Project2",isActive=False,rootDir="dir2/",  fileSelectors=[] },
+        Project { projectName ="Project3",isActive=False, rootDir="dir3/", fileSelectors=[] }
         ]
 
 
