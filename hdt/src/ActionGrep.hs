@@ -195,7 +195,7 @@ groupLines' :: [GrepLinePrinted] -> [GrepLinePrinted] -> [[GrepLinePrinted]]
 groupLines' x [] = [x]
 groupLines' [] (x:xs) = groupLines' [x] xs
 groupLines' currentBlk (x:xs)
-        | thisLineNo > (lastLineNo + maxSep) = (currentBlk:groupLines' [x] xs )             -- New Block
+        | thisLineNo > (lastLineNo + maxSep) = currentBlk:groupLines' [x] xs              -- New Block
         | otherwise  = groupLines' (currentBlk ++ [x]) xs
     where maxSep = 1
           lastLineNo = grepLineNum $ last currentBlk
@@ -206,13 +206,13 @@ groupLines' currentBlk (x:xs)
 
 
 
-printGrepLineNo :: (PrintLineNumberWidth) -> Int -> String
+printGrepLineNo :: PrintLineNumberWidth -> Int -> String
 printGrepLineNo Nothing _ = ""
 printGrepLineNo (Just lineNumberWidth) x = x_out
     where suffix = ": "
-          x_str = (show x) ++ ": "
-          padding_needed = (lineNumberWidth+ (length suffix)) - (length x_str) + 1
-          padding = ( concat $ (replicate padding_needed " ") )
+          x_str = show x ++ ": "
+          padding_needed = lineNumberWidth + length suffix - length x_str + 1
+          padding =  concat $ replicate padding_needed " "
           x_out = padding ++ x_str
 
 printGrepLine :: [String] -> PrintLineNumberWidth -> GrepLinePrinted  -> IO ()
@@ -220,9 +220,9 @@ printGrepLine allLines lineNumberWidth (MatchLine m) = do
     setSGR [SetColor Foreground Vivid Blue]
     putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
-    putStr $ pre
+    putStr  pre
     setSGR [SetColor Foreground Vivid Green]
-    putStr $ matched
+    putStr  matched
     setSGR [SetColor Foreground Dull White]
     putStr $ post ++ "\n"
     setSGR []
@@ -234,8 +234,8 @@ printGrepLine allLines lineNumberWidth (ContextLine lineNo)  = do
     setSGR [SetColor Foreground Vivid Blue]
     putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
-    putStr $ (allLines!!lineNo)
-    putStr $ "\n"
+    putStr $ allLines!!lineNo
+    putStr "\n"
     setSGR []
 
 
@@ -243,10 +243,8 @@ printGrepLine allLines lineNumberWidth (ContextLine lineNo)  = do
 
 printGroupLines :: [String] -> String -> PrintLineNumberWidth -> [GrepLinePrinted] -> IO ()
 printGroupLines allLines filename lineNumberWidth lines = do
-    --putStrLn "Printing.."
     putStrLn $ "In file:" ++ filename
-    --let lineNumberWidth = Just 3
-    mapM (printGrepLine allLines lineNumberWidth) lines
+    mapM_ (printGrepLine allLines lineNumberWidth) lines
     return ()
 
 
