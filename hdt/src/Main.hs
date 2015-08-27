@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
+--{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
+{-# LANGUAGE RecordWildCards #-}
 
 
 import HdtTypes
@@ -19,30 +20,8 @@ import System.Console.ANSI
 import Control.Monad
 import Control.Exception
 
-import Text.Regex.Posix   -- for regular expressions
+import Text.Regex.Posix   
 import Text.Regex.Posix.String
-
---colorStrLn :: ColorIntensity -> Color -> String -> IO ()
---colorStrLn fgi fg str = do
---  setSGR [SetColor Foreground fgi fg]
---  putStr str
---  setSGR []
---  putStrLn ""
-
---colorStrLn :: ColorIntensity -> Color -> String -> IO ()
---colorStrLn fgi fg bgi bg str = do
---  setSGR [SetColor Foreground fgi fg, SetColor Background bgi bg]
---  putStr str
---  setSGR []
---  putStrLn ""
-
---main = do
---  colorStrLn Vivid White Vivid Red "This is red on white."
---  colorStrLn Vivid White Dull Blue "This is white on blue."
---  colorStrLn Vivid Green Dull Black "This is green on black."
---  colorStrLn Vivid Yellow Dull Black "This is yellow on black."
---  colorStrLn Dull Black Vivid Blue "This is black on light blue."
-
 
 
 
