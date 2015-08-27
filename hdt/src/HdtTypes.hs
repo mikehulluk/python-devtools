@@ -147,7 +147,8 @@ addFileOutstandingChanges file newContents =
 
 sampleConfigFileContents :: IO( LB.ByteString )
 sampleConfigFileContents = do
-    contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
+    --contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
+    contents <- LB.readFile "/home/mike/dev/python-devtools/hdt/src/configfile.json.sample"
     return $ contents
 
 

@@ -32,7 +32,8 @@ summariseProjectConsole project = do
 
         putStrLn "  Files:"
         let nFnamePadding = 60
-        mapM (summariseFileLine nFnamePadding) (srcFiles project)
+        srcfiles <-(srcFiles project)
+        mapM (summariseFileLine nFnamePadding)  srcfiles
         setSGR []
         putStrLn ""
         return ()

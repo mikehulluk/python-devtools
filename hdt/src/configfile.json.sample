@@ -15,6 +15,21 @@
                 {"glob":"src/**/*.hs", "tags":"src"}
             ]
 
+        },
+        { "name": "project1B",
+          "active":false,
+          "rootdir":"/home/mike/dev/python-devtools/",
+          "files": [
+                {"glob":"src/**/*.py", "tags":"src"}
+            ]
+        },
+        { "name": "project2B",
+          "active":true,
+          "rootdir":"/home/mike/dev/python-devtools/hdt/",
+          "files": [
+                {"glob":"src/**/*.hs", "tags":"src"}
+            ]
+
         }
     ]
 }
