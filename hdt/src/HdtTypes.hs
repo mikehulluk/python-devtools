@@ -28,6 +28,10 @@ data Project = Project {
     , _rawSrcFiles :: [String] -- deprecated
 }
 
+--data DBFile = Int String seriving (Show)
+--instance 
+
+
 
 srcFiles :: Project -> [File]
 srcFiles  project = map _buildFile ( sort $ _rawSrcFiles project)
