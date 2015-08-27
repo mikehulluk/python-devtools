@@ -4,9 +4,6 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 module HdtFileChangeStack where
 
--- import qualified  Prelude as P
--- import Prelude (String, Bool, IO, Bool(True,False), return, (++), map )
--- import Prelude (putStrLn, ($), (==), Show)
 
 import System.FilePath.Glob
 import System.Directory
@@ -20,9 +17,6 @@ import Data.Aeson
 import Control.Applicative
 import Control.Monad
 import Data.Time.Clock.POSIX
---import Data.Text as T
---import qualified Data.ByteString.Lazy as LB
---import qualified Data.Text.Encoding as TE
 
 
 import HdtTypes
@@ -33,7 +27,7 @@ import HdtProject
 getDBFilename :: Project -> IO(String)
 getDBFilename project = do
     configPath <- getHDTConfigPath
-    let path = configPath ++"/" ++ (projectName project ++ ".sqlite")
+    let path = configPath ++ "/" ++ (projectName project ++ ".sqlite")
     return path
 
 

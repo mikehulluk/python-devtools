@@ -30,7 +30,9 @@ data MyOptions =
         , replaceString  :: String
         , ignoreCase  :: Bool
         , doWordRegex :: Bool
-
+        }
+    |
+    ModeApply {
     }
     deriving (Data, Typeable, Show, Eq)
 
@@ -83,8 +85,18 @@ modeReplace = ModeReplace
                 , "Blah blah blah again."
                 ]
 
+modeApply :: MyOptions
+modeApply = ModeApply
+    { }
+    &= details  [ "Examples:"
+                , "Blah blah blah again."
+                ]
+
+
+
+
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [modeConfig, mode2, modeGrep, modeReplace]
+myModes = cmdArgsMode $ modes [modeConfig, mode2, modeGrep, modeReplace, modeApply]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)

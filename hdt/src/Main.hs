@@ -6,6 +6,7 @@ import CmdLineOpts
 import ActionGrep
 import ActionReplace
 import ActionConfig
+import ActionApply
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
@@ -83,6 +84,8 @@ optionHandler opts@Mode2{..}  = do
     when (weight == 0.0) $ putStrLn "warning: --weight is 0.0"
     exec opts
 
+optionHandler opts@ModeApply{..}  = do
+    execApply opts
 
 
 -- Executors for the subcommands:
