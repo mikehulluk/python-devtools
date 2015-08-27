@@ -11,29 +11,21 @@ data MyOptions =
     ModeConfig   { first_name :: String
                  , last_name :: String
                  }
-    |
---    Mode2   { height :: Double
---            , weight :: Double
---            }
---    |
-    ModeGrep {    grepString   :: String
-                , ignoreCase   :: Bool
-                , word         :: Bool
-                , count        :: Bool
+    | ModeGrep {  grepString    :: String
+                , ignoreCase    :: Bool
+                , word          :: Bool
+                , count         :: Bool
                 , lineNumbers   :: Bool
-                , doEdit       :: Bool
+                , doEdit        :: Bool
                 , nContextLines :: Int
             }
-    |
-    ModeReplace {
-          searchString  :: String
+    | ModeReplace {
+          searchString   :: String
         , replaceString  :: String
-        , ignoreCase  :: Bool
-        , doWordRegex :: Bool
+        , ignoreCase     :: Bool
+        , doWordRegex    :: Bool
         }
-    |
-    ModeApply {
-    }
+    | ModeApply { }
     deriving (Data, Typeable, Show, Eq)
 
 
@@ -47,15 +39,6 @@ modeConfig = ModeConfig
                 , "Blah blah blah."
                 ]
 
---mode2 :: MyOptions
---mode2 = Mode2
---    {
---      height = def &= help "your height, in centimeters"
---    , weight = def &= help "your weight, in kilograms"
---    }
---    &= details  [ "Examples:"
---                , "Blah blah blah again."
---                ]
 
 modeGrep :: MyOptions
 modeGrep = ModeGrep
