@@ -7,6 +7,7 @@ import HdtTypes
 import CmdLineOpts
 import MHUtil as U
 import HdtProject
+import HdtFileChangeStack
 
 
 import System.Console.ANSI

@@ -9,17 +9,17 @@ import System.FilePath.Glob
 import Prelude hiding (findFiles)
 
 
-findFiles :: String -> FileSelector -> IO( [File] )
-findFiles rootDir fileSelector = do
-    files <- globDir1 (compile $ globString fileSelector) rootDir
+findFiles :: Project -> FileSelector -> IO( [File] )
+findFiles project fileSelector = do
+    files <- globDir1 (compile $ globString fileSelector) (rootDir project)
     return $ map _buildFile files
-    where _buildFile s = File {filename=s, isClean=True, tags=addTags fileSelector}
+    where _buildFile s = File {filename=s, tags=addTags fileSelector, project=project}
 
 
 
 srcFiles :: Project -> IO( [File] )
 srcFiles project =  do
-    files <- mapM (findFiles $  rootDir project) ( fileSelectors project )
+    files <- mapM (findFiles project) ( fileSelectors project )
     return $ concat files
 
 

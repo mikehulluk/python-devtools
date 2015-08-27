@@ -15,11 +15,6 @@ import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
 import Data.List
 
--- import HdtConfigFile
--- 
--- import qualified HdtTypes
--- import  HdtTypes as H
-
 import Data.Aeson
 import Control.Applicative
 import Control.Monad
@@ -28,11 +23,6 @@ import qualified Data.ByteString.Lazy as LB
 import qualified Data.Text.Encoding as TE
 
 
-data File = File {
-      filename :: String 
-    , isClean  :: Bool 
-    , tags :: [String]
-    } deriving (Show)
 
 data Project = Project {
       projectName :: String
@@ -46,6 +36,11 @@ data FileSelector = FileSelector {
     , addTags :: [String]
 } deriving (P.Show)
 
+data File = File {
+      filename :: String 
+    , tags :: [String]
+    , project :: Project
+    } deriving (Show)
 
 
 
@@ -64,49 +59,6 @@ getHDTConfigPath  = do
 
 --data DBFile = Int String seriving (Show)
 --instance 
-
-
--- TODO: replace the string concatentaion with "</>"
-getDBFilename :: Project -> IO(String)
-getDBFilename project = do
-    configPath <- getHDTConfigPath
-    let path = configPath ++"/" ++ (projectName project ++ ".sqlite")
-    return path
-
-
-getProjectDBHandle :: Project -> IO(Connection)
-getProjectDBHandle project = do
-    dbFilename <- getDBFilename project
-    putStrLn $ "Database file:" ++ dbFilename
-
-    -- Build the database tables, if they don't exist:
-    conn <-open dbFilename
-    execute_ conn "CREATE TABLE IF NOT EXISTS Files(id INTEGER PRIMARY KEY, filename TEXT);"
-    execute_ conn "CREATE TABLE IF NOT EXISTS FilePatches(id INTEGER PRIMARY KEY, file INTEGER, timestamp INTEGER, description TEXT, blob TEXT);"
-
-    -- Add entries for files, if they don't exist:
-    --
-    return (conn )
-
-
-getFileChanges :: File -> IO( [String] )
-getFileChanges file = do
-    return []
-
-
-fileHasOutstandingChanges :: File -> IO(Bool)
-fileHasOutstandingChanges file = do
-    changes <- getFileChanges file
-    let isChanged = (changes == [])
-    return isChanged
-
-
-addFileOutstandingChanges :: File -> String -> IO()
-addFileOutstandingChanges file newContents = 
-    putStrLn $ "Saving new file changes for: " ++ filename file
-
-
-
 
 
 
