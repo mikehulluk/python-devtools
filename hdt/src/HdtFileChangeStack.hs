@@ -41,15 +41,15 @@ getDBFilename project = do
 ensureFileInDB :: Connection -> File -> IO()
 ensureFileInDB conn file = do
     let fname = filename file
-    putStrLn $ "Adding file:" ++ fname
-    execute conn "INSERT OR IGNORE INTO Files (filename) VALUES (?);" (Only (fname :: String))
+    --putStrLn $ "Adding file:" ++ fname
+    execute conn "INSERT OR IGNORE INTO Files (filename) VALUES (?);" (Only (fname :: String)) 
     return ()
 
 
 getProjectDBHandle :: Project -> IO(Connection)
 getProjectDBHandle project = do
     dbFilename <- getDBFilename project
-    putStrLn $ "Database file:" ++ dbFilename
+    --putStrLn $ "Database file:" ++ dbFilename
 
     -- Build the database tables, if they don't exist:
     conn <-open dbFilename

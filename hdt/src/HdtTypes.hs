@@ -14,11 +14,12 @@ import Control.Applicative
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
 import Data.List
+import Data.List
 
 import Data.Aeson
 import Control.Applicative
 import Control.Monad
-import Data.Text as T
+import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.Text.Encoding as TE
 
@@ -43,6 +44,10 @@ data File = File {
     } deriving (Show)
 
 
+relativeFilename :: File -> String
+relativeFilename file= if rootdir `isPrefixOf` fname then drop (length rootdir) fname else fname
+    where fname = filename file
+          rootdir = rootDir $ project file
 
 
 getHDTConfigPath :: IO(String)
