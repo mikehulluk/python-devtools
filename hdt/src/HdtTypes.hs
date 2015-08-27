@@ -1,13 +1,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
---{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 module HdtTypes where
 
---import qualified  Prelude as P
---import Prelude (String, Bool, IO, Bool(True,False), return, (++), map )
---import Prelude (putStrLn, ($), (==), Show)
-
---import System.FilePath.Glob
 import System.Directory
 import Filesystem.Path hiding (filename)
 import Control.Applicative
@@ -15,9 +9,7 @@ import Data.List
 
 import Data.Aeson
 import Control.Monad
-import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as LB
-import qualified Data.Text.Encoding as TE
 
 
 
@@ -52,19 +44,6 @@ getHDTConfigPath  = do
     let thepath = homeDir ++ "/.hdt/"
     createDirectoryIfMissing True thepath
     return thepath
-
-
-
-
-
-
---data DBFile = Int String seriving (Show)
---instance 
-
-
-
-
-
 
 
 

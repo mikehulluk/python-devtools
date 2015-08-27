@@ -12,10 +12,10 @@ data MyOptions =
                  , last_name :: String
                  }
     |
-    Mode2   { height :: Double
-            , weight :: Double
-            }
-    |
+--    Mode2   { height :: Double
+--            , weight :: Double
+--            }
+--    |
     ModeGrep {    grepString   :: String
                 , ignoreCase   :: Bool
                 , word         :: Bool
@@ -47,15 +47,15 @@ modeConfig = ModeConfig
                 , "Blah blah blah."
                 ]
 
-mode2 :: MyOptions
-mode2 = Mode2
-    {
-      height = def &= help "your height, in centimeters"
-    , weight = def &= help "your weight, in kilograms"
-    }
-    &= details  [ "Examples:"
-                , "Blah blah blah again."
-                ]
+--mode2 :: MyOptions
+--mode2 = Mode2
+--    {
+--      height = def &= help "your height, in centimeters"
+--    , weight = def &= help "your weight, in kilograms"
+--    }
+--    &= details  [ "Examples:"
+--                , "Blah blah blah again."
+--                ]
 
 modeGrep :: MyOptions
 modeGrep = ModeGrep
@@ -96,7 +96,7 @@ modeApply = ModeApply
 
 
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [modeConfig, mode2, modeGrep, modeReplace, modeApply]
+myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)

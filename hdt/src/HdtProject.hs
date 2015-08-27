@@ -1,6 +1,5 @@
 
 {-# LANGUAGE OverloadedStrings #-}
---{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 module HdtProject where
 
 import HdtTypes
@@ -15,15 +14,10 @@ findFiles project fileSelector = do
     return $ map _buildFile files
     where _buildFile s = File {filename=s, tags=addTags fileSelector, project=project}
 
-
-
 srcFiles :: Project -> IO [File]
 srcFiles project =  do
-    files <- mapM (findFiles project) ( fileSelectors project )
+    files <- mapM (findFiles project) (fileSelectors project)
     return $ concat files
-
-
-
 
 getAllProjectConfigs :: IO [Project]
 getAllProjectConfigs = do

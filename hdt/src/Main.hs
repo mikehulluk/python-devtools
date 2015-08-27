@@ -23,15 +23,6 @@ import Text.Regex.Posix
 import Text.Regex.Posix.String
 
 
-
-
-
-
-
-
-
-
-
 main :: IO ()
 main = do
     args <- getArgs
