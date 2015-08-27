@@ -31,7 +31,6 @@ execReplace opts@ModeReplace{..} = do
 
     -- Apply the patchs to each file:
     mapM_ (actionReplace searchString replaceString) files
-    --return ()
 
 
 actionReplace :: String -> String -> File -> IO()

@@ -1,14 +1,14 @@
 
 
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
+--{-# LANGUAGE RecordWildCards #-}
 module HdtFilePatchStack where
 
 
 import System.FilePath.Glob
 import System.Directory
-import Filesystem.Path hiding (filename)
-import Control.Applicative
+import Filesystem.Path hiding (filename,null)
+--import Control.Applicative
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
 import Data.List
@@ -24,7 +24,7 @@ import HdtProject
 
 
 -- TODO: replace the string concatentaion with "</>"
-getDBFilename :: Project -> IO(String)
+getDBFilename :: Project -> IO String
 getDBFilename project = do
     configPath <- getHDTConfigPath
     let path = configPath ++ "/" ++ (projectName project ++ ".sqlite")
@@ -40,7 +40,7 @@ ensureFileInDB conn file = do
     return ()
 
 
-getProjectDBHandle :: Project -> IO(Connection)
+getProjectDBHandle :: Project -> IO Connection
 getProjectDBHandle project = do
     dbFilename <- getDBFilename project
     --putStrLn $ "Database file:" ++ dbFilename
@@ -52,11 +52,11 @@ getProjectDBHandle project = do
 
     -- Add entries for files, if they don't exist:
     files <- srcFiles project
-    mapM (ensureFileInDB conn) files
+    mapM_ (ensureFileInDB conn) files
 
     -- Todo: trim out old entries:
 
-    return (conn )
+    return conn
 
 
 data DbFileEntry = DbFileEntry Int String deriving (Show)
@@ -83,7 +83,7 @@ instance ToRow DbFilePatchEntry where
     toRow (DbFilePatchEntry primaryKey fileId insertionIdx timestamp description blob) = toRow (primaryKey, fileId, insertionIdx, timestamp, description, blob)
 
 
-getFilePatchs :: Connection -> File -> IO( [DbFilePatchEntry] )
+getFilePatchs :: Connection -> File -> IO [DbFilePatchEntry] 
 getFilePatchs conn file = do
     id_ <- getFileId conn file 
     r <- query conn "SELECT * FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]
@@ -91,14 +91,13 @@ getFilePatchs conn file = do
 
 
 
-fileHasOutstandingPatchs :: Connection -> File -> IO(Bool)
+fileHasOutstandingPatchs :: Connection -> File -> IO Bool
 fileHasOutstandingPatchs conn file = do
     patchs <- getFilePatchs conn file
-    let isPatched = (length patchs == 0)
-    return isPatched
+    return $ null patchs --(length patchs == 0) 
 
 
-getFileId :: Connection -> File -> IO(Int)
+getFileId :: Connection -> File -> IO Int
 getFileId dbConn file = do
     let fname = filename file
     r <- query dbConn "SELECT * FROM Files where(filename=?);" (Only (fname :: String))  :: IO [DbFileEntry]
