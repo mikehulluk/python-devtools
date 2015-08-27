@@ -47,35 +47,6 @@ data FileSelector = FileSelector {
 } deriving (P.Show)
 
 
-findFiles :: String -> FileSelector -> IO( [File] )
-findFiles rootDir fileSelector = do
-    files <- globDir1 (compile $ globString fileSelector) rootDir
-    return $ P.map _buildFile files
-    where _buildFile s = File {filename=s, isClean=True, tags=addTags fileSelector}
-
-
-
-srcFiles :: Project -> IO( [File] )
-srcFiles project =  do
-    files <- P.mapM (findFiles (rootDir project)) ( fileSelectors project )
-    return $ P.concat files
-
-
-
-
-getAllProjectConfigs :: IO [Project]
-getAllProjectConfigs = do
-    conf <- getConfigFileSetup
-    return $ projects conf
-    -- let fs = FileSelector{ globString="src/**/*.hs", addTags=[]}
-    -- return [
-    --     Project { projectName ="Project1",
-    --               isActive=True,
-    --               rootDir="/home/michael/hw/python-devtools/hdt/",
-    --               fileSelectors=[fs] },
-    --     Project { projectName ="Project2",isActive=False,rootDir="dir2/",  fileSelectors=[] },
-    --     Project { projectName ="Project3",isActive=False, rootDir="dir3/", fileSelectors=[] }
-    --     ]
 
 
 
@@ -147,8 +118,8 @@ addFileOutstandingChanges file newContents =
 
 sampleConfigFileContents :: IO( LB.ByteString )
 sampleConfigFileContents = do
-    --contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
-    contents <- LB.readFile "/home/mike/dev/python-devtools/hdt/src/configfile.json.sample"
+    contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
+    --contents <- LB.readFile "/home/mike/dev/python-devtools/hdt/src/configfile.json.sample"
     return $ contents
 
 

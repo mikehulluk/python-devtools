@@ -4,6 +4,7 @@ module ActionGrep where
 
 import HdtTypes
 import CmdLineOpts
+import HdtProject
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)

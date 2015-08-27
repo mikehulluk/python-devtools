@@ -5,6 +5,7 @@ module ActionReplace where
 
 import HdtTypes
 import CmdLineOpts
+import HdtProject
 
 execReplace :: MyOptions -> IO ()
 execReplace opts@ModeReplace{..} = do

@@ -6,6 +6,7 @@ module ActionConfig where
 import HdtTypes
 import CmdLineOpts
 import MHUtil as U
+import HdtProject
 
 
 import System.Console.ANSI
