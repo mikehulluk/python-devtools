@@ -92,7 +92,6 @@ execGrepFile compiledRegex opts filename= do
             let nContextLines_ = nContextLines opts --3
             let nLinesFile = (length ls)
 
-
             case nContextLines_ of
                 -- No context?
                 0 -> do
