@@ -1,0 +1,20 @@
+{
+    "projects" : [
+        
+        { "name": "project1",
+          "active":false,
+          "rootdir":"/home/michael/hw/python-devtools/",
+          "files": [
+                {"glob":"src/**/*.py", "tags":"src"}
+            ]
+        },
+        { "name": "project2",
+          "active":true,
+          "rootdir":"/home/michael/hw/python-devtools/hdt/",
+          "files": [
+                {"glob":"src/**/*.hs", "tags":"src"}
+            ]
+
+        }
+    ]
+}

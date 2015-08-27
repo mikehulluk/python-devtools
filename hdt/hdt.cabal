@@ -27,4 +27,7 @@ executable hdt
                        ansi-terminal,
                        regex-posix,
                        sqlite-simple,
-                       text-format
+                       text,
+                       text-format,
+                       aeson,
+                       bytestring

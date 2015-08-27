@@ -43,5 +43,7 @@ execConfig opts@ModeConfig{..} = do
     projects <- getAllProjectConfigs
     forM projects summariseProjectConsole
     forM projects getProjectDBHandle
+
+    x <- getConfigFileSetup
     return ()
 
