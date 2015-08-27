@@ -2,7 +2,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
-module HdtFileChangeStack where
+module HdtFilePatchStack where
 
 
 import System.FilePath.Glob
@@ -83,19 +83,19 @@ instance ToRow DbFilePatchEntry where
     toRow (DbFilePatchEntry primaryKey fileId insertionIdx timestamp description blob) = toRow (primaryKey, fileId, insertionIdx, timestamp, description, blob)
 
 
-getFileChanges :: Connection -> File -> IO( [DbFilePatchEntry] )
-getFileChanges conn file = do
+getFilePatchs :: Connection -> File -> IO( [DbFilePatchEntry] )
+getFilePatchs conn file = do
     id_ <- getFileId conn file 
     r <- query conn "SELECT * FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]
     return r
 
 
 
-fileHasOutstandingChanges :: Connection -> File -> IO(Bool)
-fileHasOutstandingChanges conn file = do
-    patchs <- getFileChanges conn file
-    let isChanged = (length patchs == 0)
-    return isChanged
+fileHasOutstandingPatchs :: Connection -> File -> IO(Bool)
+fileHasOutstandingPatchs conn file = do
+    patchs <- getFilePatchs conn file
+    let isPatched = (length patchs == 0)
+    return isPatched
 
 
 getFileId :: Connection -> File -> IO(Int)
@@ -108,8 +108,8 @@ getFileId dbConn file = do
         otherwise -> error ""
 
 
-addFileOutstandingChanges :: File -> String -> String -> IO()
-addFileOutstandingChanges file description newBlob = do
+addFileOutstandingPatchs :: File -> String -> String -> IO()
+addFileOutstandingPatchs file description newBlob = do
     -- putStrLn $ "Saving new file patchs for: " ++ filename file
     -- putStrLn  "New File:"
     -- putStrLn  newBlob
@@ -124,7 +124,7 @@ addFileOutstandingChanges file description newBlob = do
     -- putStrLn $ "Found id: " ++ (show id_) ++ " for filename: " ++ fname
 
     -- Find existing patchs:
-    patchs <- getFileChanges dbConn file
+    patchs <- getFilePatchs dbConn file
     --putStrLn $ "Found existing patchs: "
     --putStrLn $ unlines $ map show patchs
 
@@ -141,8 +141,8 @@ addFileOutstandingChanges file description newBlob = do
 
 
 
-dropOutstandingChanges :: File -> IO()
-dropOutstandingChanges file = do
+dropOutstandingPatchs :: File -> IO()
+dropOutstandingPatchs file = do
     let proj = project file
     let fname = filename file
     putStrLn $ "Dropping patchs for: " ++ fname

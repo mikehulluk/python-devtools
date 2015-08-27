@@ -6,7 +6,7 @@ module ActionReplace where
 import HdtTypes
 import CmdLineOpts
 import HdtProject
-import HdtFileChangeStack
+import HdtFilePatchStack
 
 import Data.String.Utils
 
@@ -46,7 +46,7 @@ actionReplace findStr replStr file = do
                     return ()
         Just newContents -> do
             let description = "(s/" ++ findStr ++ "/" ++ replStr ++ ")"
-            addFileOutstandingChanges file description newContents
+            addFileOutstandingPatchs file description newContents
 
 
 

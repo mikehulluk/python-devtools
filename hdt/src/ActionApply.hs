@@ -7,7 +7,7 @@ module ActionApply where
 import HdtTypes
 import CmdLineOpts
 import HdtProject
-import HdtFileChangeStack
+import HdtFilePatchStack
 
 import System.IO.Temp
 --import GHC.IO.Handle
@@ -36,7 +36,7 @@ applyFile file = do
     let fname = filename file
     putStrLn $ "Applying patches to: " ++ fname
     dbConn <- getProjectDBHandle $ project file
-    patches <- getFileChanges dbConn file
+    patches <- getFilePatchs dbConn file
 
     case length patches of
         0 -> do
@@ -52,7 +52,7 @@ applyFile file = do
             putStrLn $ " --- Finished with exit code: " ++ show exitCode
 
             -- 3. If it completed ok, then remove the diffs from the database.
-            dropOutstandingChanges file
+            dropOutstandingPatchs file
 
             return ()
 

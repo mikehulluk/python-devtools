@@ -7,7 +7,7 @@ import HdtTypes
 import CmdLineOpts
 import MHUtil as U
 import HdtProject
-import HdtFileChangeStack
+import HdtFilePatchStack
 
 
 import System.Console.ANSI
@@ -23,10 +23,10 @@ import Database.SQLite.Simple
 summariseFileLine :: Connection -> Int -> File -> IO()
 summariseFileLine conn filenamePadding file = do
 
-    patchs <-getFileChanges conn file
-    let nChanges = show $ length  patchs
-    let outstandingChanges = "Patches: " ++ nChanges ++ "  "
-    putStrLn $ "\t" ++ paddedFname ++ "[" ++ outstandingChanges ++ tagString ++ "]"
+    patchs <-getFilePatchs conn file
+    let nPatchs = show $ length  patchs
+    let outstandingPatchs = "Patches: " ++ nPatchs ++ "  "
+    putStrLn $ "\t" ++ paddedFname ++ "[" ++ outstandingPatchs ++ tagString ++ "]"
     where paddedFname = pad ' ' filenamePadding (relativeFilename file)
           tagString = "tags:[" ++ (intercalate "," (tags file) ) ++ "]"
 
