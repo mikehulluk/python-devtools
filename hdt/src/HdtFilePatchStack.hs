@@ -102,7 +102,7 @@ getFileId dbConn file = do
     let fname = filename file
     r <- query dbConn "SELECT * FROM Files where(filename=?);" (Only (fname :: String))  :: IO [DbFileEntry]
     case length r of
-        1 -> return $ id_
+        1 -> return id_
             where DbFileEntry id_ _ = head r
         otherwise -> error ""
 
@@ -127,7 +127,7 @@ addFileOutstandingPatchs file description newBlob = do
     --putStrLn $ "Found existing patchs: "
     --putStrLn $ unlines $ map show patchs
 
-    let insertionIdx = ((length patchs) +1) * 10
+    let insertionIdx = (length patchs +1) * 10
     --let description = "DUMMY REPLACEMENT"
     timestamp <- round `fmap` getPOSIXTime
 
