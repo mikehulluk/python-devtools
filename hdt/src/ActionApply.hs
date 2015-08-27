@@ -1,6 +1,6 @@
 
 
-{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module ActionApply where
 
@@ -18,15 +18,14 @@ import System.Exit
 
 execApply :: MyOptions -> IO ()
 execApply opts@ModeApply{..} = do
-    putStrLn $ "Applying!!"
 
 
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
     let proj = head activeProjects
-    files <- srcFiles $ proj
-    mapM applyFile files
-    return()
+    files <- srcFiles proj
+    mapM_ applyFile files
+    --return()
 
 
 
@@ -39,9 +38,8 @@ applyFile file = do
     patches <- getFilePatchs dbConn file
 
     case length patches of
-        0 -> do
-            putStrLn "No patches"
-        otherwise -> do
+        0 -> putStrLn "No patches"
+        _ -> do
 
             putStrLn $ unlines $ map show patches
             -- 1. Calculate the final output file, from the diffs:
@@ -73,7 +71,7 @@ mergePatches file patches = blob $ last patches
 
 
 
-runMergeTool :: File -> String -> FilePath -> Handle -> IO(Bool)
+runMergeTool :: File -> String -> FilePath -> Handle -> IO Bool
 runMergeTool file newBlob tmpFilePath hFile = do
     putStrLn $ "Writing into temp file:" ++ tmpFilePath
 

@@ -1,5 +1,4 @@
-
-{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module ActionConfig where
 
@@ -28,7 +27,7 @@ summariseFileLine conn filenamePadding file = do
     let outstandingPatchs = "Patches: " ++ nPatchs ++ "  "
     putStrLn $ "\t" ++ paddedFname ++ "[" ++ outstandingPatchs ++ tagString ++ "]"
     where paddedFname = pad ' ' filenamePadding (relativeFilename file)
-          tagString = "tags:[" ++ (intercalate "," (tags file) ) ++ "]"
+          tagString = "tags:[" ++ intercalate "," (tags file)  ++ "]"
 
 
 summariseProjectConsole :: Project -> IO ()
@@ -37,15 +36,15 @@ summariseProjectConsole project = do
         conn <- getProjectDBHandle project
         setSGR [SetColor Foreground Vivid textcolor]
 
-        putStrLn $ projectName project ++ ": " ++ (if (isActive project) then "<active>" else "<inactive>")
+        putStrLn $ projectName project ++ ": " ++ if isActive project then "<active>" else "<inactive>"
         let rootdir = rootDir project
         putStrLn $ "  Root:" ++  rootdir
 
         putStrLn "  Files:"
         srcfiles' <-(srcFiles project)
 
-        let nFnamePadding = (maximum $ map (length.relativeFilename) srcfiles') + 3
-        mapM (summariseFileLine conn nFnamePadding)  srcfiles'
+        let nFnamePadding = (maximum $ map (length.relativeFilename) srcfiles' ) + 3
+        mapM_ (summariseFileLine conn nFnamePadding)  srcfiles'
         setSGR []
         putStrLn ""
         return ()
@@ -54,8 +53,8 @@ summariseProjectConsole project = do
 execConfig :: MyOptions -> IO ()
 execConfig opts@ModeConfig{..} = do
     projects <- getAllProjectConfigs
-    forM projects summariseProjectConsole
-    forM projects getProjectDBHandle
+    forM_ projects summariseProjectConsole
+    forM_ projects getProjectDBHandle
 
     x <- getConfigFileSetup
     return ()

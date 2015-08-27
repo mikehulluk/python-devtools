@@ -9,7 +9,7 @@ import HdtProject
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
 import System.Exit
-import Control.Monad (when)
+import Control.Monad
 import Data.List
 import Data.Text.Format
 
@@ -26,7 +26,6 @@ import Data.Text.Format
 
 
 import System.Console.ANSI
-import Control.Monad
 import Control.Exception
 
 import Text.Regex.Posix   -- for regular expressions
@@ -45,7 +44,6 @@ trim = f . f
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
 execGrep :: MyOptions -> IO ()
 execGrep opts@ModeGrep{..} = do
-    putStrLn $ "Grep-time!"
     -- Get the active projects
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
@@ -59,13 +57,13 @@ execGrep opts@ModeGrep{..} = do
         Right compiledRegex -> do
             putStrLn "Compiled OK"
 
-            forM activeProjects (grepProject compiledRegex opts)
+            forM_ activeProjects (grepProject compiledRegex opts)
             return ()
 
 grepProject ::  Regex -> MyOptions -> Project -> IO ()
 grepProject compiledRegex opts project = do
-    srcfiles <-(srcFiles project)
-    forM (map filename srcfiles) (execGrepFile compiledRegex opts)
+    srcfiles <- srcFiles project
+    forM_ (map filename srcfiles) (execGrepFile compiledRegex opts)
     return ()
 
 
@@ -85,7 +83,7 @@ execGrepFile compiledRegex opts filename= do
 
     -- Find all the matching lines:
     grepLinesAll <- mapM (grepLine compiledRegex) ils
-    let grepLines = concat(grepLinesAll)
+    let grepLines = concat grepLinesAll
 
     case length grepLines of 
         0 -> return ()
@@ -101,8 +99,8 @@ execGrepFile compiledRegex opts filename= do
                     let defaultLineNumberWidth = Just 1
                     let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
                     let includeFilename = True
-                    let optfilename = if includeFilename then (Just filename) else Nothing
-                    mapM (  printLineSimple lineNumberWidth optfilename ) grepLines
+                    let optfilename = if includeFilename then Just filename else Nothing
+                    mapM_ (  printLineSimple lineNumberWidth optfilename ) grepLines
                     return ()
 
                 -- With context:
@@ -122,9 +120,9 @@ execGrepFile compiledRegex opts filename= do
                         0 -> return ()
                         _ -> do
                             setSGR [SetColor Foreground Dull Yellow]
-                            putStrLn $ filename
+                            putStrLn  filename
                             setSGR []
-                            mapM (printGroupLines ls filename lineNumberWidth) groupedLinesPrintedStripped
+                            mapM_ (printGroupLines ls filename lineNumberWidth) groupedLinesPrintedStripped
                             return ()
 
     return ()
@@ -149,10 +147,10 @@ instance Ord GrepLinePrinted where
 stripEmptyContextLines ::  [String] -> [GrepLinePrinted] ->[GrepLinePrinted] 
 stripEmptyContextLines allLines x = striphead $ striptail x
     where striphead = stripEmptyContextLinesHeads allLines
-          striptail = reverse . (stripEmptyContextLinesHeads allLines) . reverse
+          striptail = reverse . stripEmptyContextLinesHeads allLines . reverse
 
 isEmptyLine :: [String] -> GrepLinePrinted -> Bool
-isEmptyLine allLines (ContextLine l) =  (trim (allLines!!l) ) == ""
+isEmptyLine allLines (ContextLine l) =  trim (allLines!!l)  == ""
 isEmptyLine allLines _ = False
 
 stripEmptyContextLinesHeads ::  [String] -> [GrepLinePrinted] ->[GrepLinePrinted] 
@@ -160,7 +158,7 @@ stripEmptyContextLinesHeads allLines []  = []
 stripEmptyContextLinesHeads allLines [x] = if isEmptyLine allLines x then [] else [x] 
 stripEmptyContextLinesHeads allLines (x:xs) 
     | isEmptyLine allLines x = stripEmptyContextLinesHeads allLines xs 
-    | otherwise = (x:xs)
+    | otherwise = x:xs
 
 grepLine :: Regex -> (Int, String) -> IO [GrepLineMatch]
 grepLine compiledRegex (lineNo, line) = do
@@ -182,14 +180,14 @@ addContextLinesNew nContextLines nLinesFile grepLines =
     sort printedLines
     where linesWithGrep = map (grepLineNum . MatchLine) grepLines
           possibleContextLines = nub  $ concat [ [l-nContextLines..l+nContextLines] | l <- linesWithGrep]
-          contextLines = [i | i<- possibleContextLines, not( i `elem` linesWithGrep), i>=0, i<nLinesFile]
+          contextLines = [i | i<- possibleContextLines, i `notElem` linesWithGrep, i>=0, i<nLinesFile]
           printedLines = (map MatchLine grepLines ) ++ [ ContextLine i | i <- contextLines]
 
 
 
 
 groupLines :: [GrepLinePrinted] -> [ [GrepLinePrinted] ]
-groupLines x = groupLines' [] x
+groupLines = groupLines' []
 
 
 groupLines' :: [GrepLinePrinted] -> [GrepLinePrinted] -> [[GrepLinePrinted]]
@@ -197,7 +195,7 @@ groupLines' :: [GrepLinePrinted] -> [GrepLinePrinted] -> [[GrepLinePrinted]]
 groupLines' x [] = [x]
 groupLines' [] (x:xs) = groupLines' [x] xs
 groupLines' currentBlk (x:xs)
-        | thisLineNo > (lastLineNo + maxSep) = [currentBlk] ++ (groupLines' [x] xs )             -- New Block
+        | thisLineNo > (lastLineNo + maxSep) = (currentBlk:groupLines' [x] xs )             -- New Block
         | otherwise  = groupLines' (currentBlk ++ [x]) xs
     where maxSep = 1
           lastLineNo = grepLineNum $ last currentBlk
