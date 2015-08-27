@@ -18,9 +18,12 @@ import Data.List
 
 summariseFileLine :: Int -> File -> IO()
 summariseFileLine filenamePadding file = do
-    putStrLn $ "\t" ++ paddedFname ++ "<<<--" ++ fileChangesOutstanding
+    putStrLn $ "\t" ++ paddedFname ++ "<<<--" ++ fileChangesOutstanding ++ tagString
     where paddedFname = pad ' ' filenamePadding (filename file)
           fileChangesOutstanding = "??"
+          ts = (tags file) :: [String]
+          tagString' = intercalate "," ts
+          tagString = "[" ++ tagString' ++ "]"
 
 
 summariseProjectConsole :: Project -> IO ()
@@ -31,7 +34,7 @@ summariseProjectConsole project = do
         putStrLn $ "  Root:" ++  (rootDir project)
 
         putStrLn "  Files:"
-        let nFnamePadding = 60
+        let nFnamePadding = 75
         srcfiles <-(srcFiles project)
         mapM (summariseFileLine nFnamePadding)  srcfiles
         setSGR []

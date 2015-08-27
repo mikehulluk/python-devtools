@@ -5,14 +5,14 @@
           "active":false,
           "rootdir":"/home/michael/hw/python-devtools/",
           "files": [
-                {"glob":"src/**/*.py", "tags":"src"}
+                {"glob":"src/**/*.py", "tags":["src"]}
             ]
         },
         { "name": "project2",
           "active":true,
           "rootdir":"/home/michael/hw/python-devtools/hdt/",
           "files": [
-                {"glob":"src/**/*.hs", "tags":"src"}
+                {"glob":"src/**/*.hs", "tags":["src"]}
             ]
 
         },
@@ -20,14 +20,14 @@
           "active":false,
           "rootdir":"/home/mike/dev/python-devtools/",
           "files": [
-                {"glob":"src/**/*.py", "tags":"src"}
+                {"glob":"src/**/*.py", "tags":["src",".py"]}
             ]
         },
         { "name": "project2B",
           "active":true,
           "rootdir":"/home/mike/dev/python-devtools/hdt/",
           "files": [
-                {"glob":"src/**/*.hs", "tags":"src"}
+                {"glob":"src/**/*.hs", "tags":["src",".hs"]}
             ]
 
         }

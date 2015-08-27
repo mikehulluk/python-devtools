@@ -51,7 +51,7 @@ findFiles :: String -> FileSelector -> IO( [File] )
 findFiles rootDir fileSelector = do
     files <- globDir1 (compile $ globString fileSelector) rootDir
     return $ P.map _buildFile files
-    where _buildFile s = File {filename=s, isClean=True}
+    where _buildFile s = File {filename=s, isClean=True, tags=addTags fileSelector}
 
 
 
@@ -165,7 +165,8 @@ data ConfigFileSetup = MHNothing | ConfigFileSetup {
 instance FromJSON HdtTypes.FileSelector where
     parseJSON (Object o) = do
         globString <- o .: "glob"
-        return $ HdtTypes.FileSelector{HdtTypes.globString=globString,HdtTypes.addTags=[]}
+        addTags' <- o .: "tags"
+        return $ HdtTypes.FileSelector{HdtTypes.globString=globString,HdtTypes.addTags=addTags'}
 
 
 instance FromJSON ConfigFileSetup where
