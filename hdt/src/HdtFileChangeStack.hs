@@ -110,9 +110,9 @@ getFileId dbConn file = do
 
 addFileOutstandingChanges :: File -> String -> String -> IO()
 addFileOutstandingChanges file description newBlob = do
-    putStrLn $ "Saving new file changes for: " ++ filename file
-    putStrLn  "New File:"
-    putStrLn  newBlob
+    -- putStrLn $ "Saving new file changes for: " ++ filename file
+    -- putStrLn  "New File:"
+    -- putStrLn  newBlob
 
     let proj = project file
     let fname = filename file
@@ -121,29 +121,35 @@ addFileOutstandingChanges file description newBlob = do
 
     -- Get the file-id:
     id_ <- getFileId dbConn file
-    putStrLn $ "Found id: " ++ (show id_) ++ " for filename: " ++ fname
+    -- putStrLn $ "Found id: " ++ (show id_) ++ " for filename: " ++ fname
 
     -- Find existing changes:
     changes <- getFileChanges dbConn file
-    putStrLn $ "Found existing changes: "
-    putStrLn $ unlines $ map show changes
+    --putStrLn $ "Found existing changes: "
+    --putStrLn $ unlines $ map show changes
 
     let insertionIdx = ((length changes) +1) * 10
     --let description = "DUMMY REPLACEMENT"
     timestamp <- round `fmap` getPOSIXTime
 
-
-
-
     -- Create the new change entry:
-    putStrLn $ "Running query"
+    --putStrLn $ "Running query"
     execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id_ :: Int, insertionIdx :: Int, timestamp :: Int, description :: String, newBlob :: String ) 
-    putStrLn $ "Done Running query"
+    --putStrLn $ "Done Running query"
 
     return ()
 
 
 
+dropOutstandingChanges :: File -> IO()
+dropOutstandingChanges file = do
+    let proj = project file
+    let fname = filename file
+    putStrLn $ "Dropping changes for: " ++ fname
+    dbConn <- getProjectDBHandle proj
+    id_ <- getFileId dbConn file 
+    r <- query dbConn "DELETE FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]
+    return ()
 
 
 

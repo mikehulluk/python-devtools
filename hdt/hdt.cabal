@@ -33,4 +33,5 @@ executable hdt
                        aeson,
                        bytestring,
                        temporary,
-                       process
+                       process,
+                       MissingH

@@ -34,24 +34,43 @@ execApply opts@ModeApply{..} = do
 applyFile :: File -> IO()
 applyFile file = do
     let fname = filename file
-    putStrLn $ "Applying changes to: " ++ fname
+    putStrLn $ "Applying patches to: " ++ fname
     dbConn <- getProjectDBHandle $ project file
-    changes <- getFileChanges dbConn file
-    putStrLn $ unlines $ map show changes
+    patches <- getFileChanges dbConn file
 
-    case length changes of
+    case length patches of
         0 -> do
-            putStrLn "No changes"
+            putStrLn "No patches"
         otherwise -> do
+
+            putStrLn $ unlines $ map show patches
             -- 1. Calculate the final output file, from the diffs:
-            let finalBlob = blob $ last changes
+            let finalBlob = mergePatches file patches 
 
             -- 2. Write it to a tempfile, and run the mergetool
-            withTempFile "/home/michael/.hdt/" "tmp.mergefile" (runMergeTool file finalBlob)
-            
+            exitCode <- withTempFile "/home/michael/.hdt/" "tmp.mergefile" (runMergeTool file finalBlob)
+            putStrLn $ " --- Finished with exit code: " ++ show exitCode
 
             -- 3. If it completed ok, then remove the diffs from the database.
+            dropOutstandingChanges file
+
             return ()
+
+    putStrLn ""
+
+
+
+
+mergePatches :: File -> [DbFilePatchEntry]  -> String 
+mergePatches file patches = blob $ last patches
+
+
+
+
+
+
+
+
 
 
 runMergeTool :: File -> String -> FilePath -> Handle -> IO(Bool)
@@ -68,6 +87,8 @@ runMergeTool file newBlob tmpFilePath hFile = do
     putStrLn $ "Finished with exit code: " ++ show exitCode
     case exitCode of
         ExitSuccess -> return True
-        ExitFailure _ -> return False
+        ExitFailure _ ->  do
+            error "Failed to merge - terminating"
+            return False
 
 
