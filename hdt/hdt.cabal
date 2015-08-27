@@ -31,4 +31,6 @@ executable hdt
                        text-format,
                        time,
                        aeson,
-                       bytestring
+                       bytestring,
+                       temporary,
+                       process

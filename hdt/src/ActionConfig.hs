@@ -44,11 +44,7 @@ summariseProjectConsole project = do
         putStrLn "  Files:"
         srcfiles' <-(srcFiles project)
 
-        --let srcfiles = map  (\x -> if rootdir `isPrefixOf` x then drop (length rootdir) x else x) srcfiles'
-
-
         let nFnamePadding = (maximum $ map (length.relativeFilename) srcfiles') + 3
-        --let nFnamePadding = maxFilenameLength + 3
         mapM (summariseFileLine conn nFnamePadding)  srcfiles'
         setSGR []
         putStrLn ""
