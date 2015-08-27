@@ -23,8 +23,8 @@ import Database.SQLite.Simple
 summariseFileLine :: Connection -> Int -> File -> IO()
 summariseFileLine conn filenamePadding file = do
 
-    changes <-getFileChanges conn file
-    let nChanges = show $ length  changes
+    patchs <-getFileChanges conn file
+    let nChanges = show $ length  patchs
     let outstandingChanges = "Patches: " ++ nChanges ++ "  "
     putStrLn $ "\t" ++ paddedFname ++ "[" ++ outstandingChanges ++ tagString ++ "]"
     where paddedFname = pad ' ' filenamePadding (relativeFilename file)

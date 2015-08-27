@@ -33,7 +33,7 @@ execReplace opts@ModeReplace{..} = do
     let allFullFilename = map filename files
     putStrLn $ unlines allFullFilename
 
-    -- Apply the changes to each file:
+    -- Apply the patchs to each file:
     mapM_ (actionReplace searchString replaceString) files
     --return ()
 

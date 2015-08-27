@@ -93,8 +93,8 @@ getFileChanges conn file = do
 
 fileHasOutstandingChanges :: Connection -> File -> IO(Bool)
 fileHasOutstandingChanges conn file = do
-    changes <- getFileChanges conn file
-    let isChanged = (length changes == 0)
+    patchs <- getFileChanges conn file
+    let isChanged = (length patchs == 0)
     return isChanged
 
 
@@ -110,7 +110,7 @@ getFileId dbConn file = do
 
 addFileOutstandingChanges :: File -> String -> String -> IO()
 addFileOutstandingChanges file description newBlob = do
-    -- putStrLn $ "Saving new file changes for: " ++ filename file
+    -- putStrLn $ "Saving new file patchs for: " ++ filename file
     -- putStrLn  "New File:"
     -- putStrLn  newBlob
 
@@ -123,16 +123,16 @@ addFileOutstandingChanges file description newBlob = do
     id_ <- getFileId dbConn file
     -- putStrLn $ "Found id: " ++ (show id_) ++ " for filename: " ++ fname
 
-    -- Find existing changes:
-    changes <- getFileChanges dbConn file
-    --putStrLn $ "Found existing changes: "
-    --putStrLn $ unlines $ map show changes
+    -- Find existing patchs:
+    patchs <- getFileChanges dbConn file
+    --putStrLn $ "Found existing patchs: "
+    --putStrLn $ unlines $ map show patchs
 
-    let insertionIdx = ((length changes) +1) * 10
+    let insertionIdx = ((length patchs) +1) * 10
     --let description = "DUMMY REPLACEMENT"
     timestamp <- round `fmap` getPOSIXTime
 
-    -- Create the new change entry:
+    -- Create the new patch entry:
     --putStrLn $ "Running query"
     execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id_ :: Int, insertionIdx :: Int, timestamp :: Int, description :: String, newBlob :: String ) 
     --putStrLn $ "Done Running query"
@@ -145,7 +145,7 @@ dropOutstandingChanges :: File -> IO()
 dropOutstandingChanges file = do
     let proj = project file
     let fname = filename file
-    putStrLn $ "Dropping changes for: " ++ fname
+    putStrLn $ "Dropping patchs for: " ++ fname
     dbConn <- getProjectDBHandle proj
     id_ <- getFileId dbConn file 
     r <- query dbConn "DELETE FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]
