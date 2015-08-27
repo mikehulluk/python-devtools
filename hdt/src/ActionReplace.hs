@@ -1,5 +1,5 @@
 
-{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module ActionReplace where
 
@@ -11,10 +11,6 @@ import HdtFilePatchStack
 import Data.String.Utils
 
 
--- mapWhile f (a:b) = case f a of
---     Just x -> x : mapWhile f b
---     Nothing -> []
--- mapWhile f [] = []
 
 execReplace :: MyOptions -> IO ()
 execReplace opts@ModeReplace{..} = do
@@ -42,8 +38,7 @@ actionReplace :: String -> String -> File -> IO()
 actionReplace findStr replStr file = do
     x <- tryReplace findStr replStr file
     case x of
-        Nothing -> do
-                    return ()
+        Nothing -> return ()
         Just newContents -> do
             let description = "(s/" ++ findStr ++ "/" ++ replStr ++ ")"
             addFileOutstandingPatchs file description newContents
@@ -54,9 +49,7 @@ tryReplace :: String -> String -> File -> IO( Maybe String)
 tryReplace findStr replStr file = do
     oldContents <- readFile $ filename file
     let newContents  = replace findStr replStr oldContents
-    case newContents==oldContents of
-        True -> return Nothing
-        False -> return $ Just newContents
+    if newContents==oldContents then return Nothing else return $ Just newContents
 
 
 
