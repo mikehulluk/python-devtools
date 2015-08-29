@@ -138,7 +138,9 @@ addFileOutstandingPatchs file description newBlob = do
 
     -- Create the new patch entry:
     --putStrLn $ "Running query"
-    execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id_ :: Int, insertionIdx :: Int, timestamp :: Int, description :: String, newBlob :: String ) 
+    let newBlob' = B.pack newBlob
+
+    execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id_ :: Int, insertionIdx :: Int, timestamp :: Int, description :: String, newBlob' :: B.ByteString ) 
     --putStrLn $ "Done Running query"
 
     return ()
