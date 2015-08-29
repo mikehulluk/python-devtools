@@ -99,7 +99,7 @@ mergePatches file patches = do
     -- 1. Diff each revision against the original:
     originalBlob <- B.readFile $ filename file
     let blobs = map blob patches
-    diffs <- mapM ( (extDiff originalBlob). B.pack ) blobs
+    diffs <- mapM ( (extDiff originalBlob) ) blobs
 
     --putStrLn $ "\nDiffs: "  ++ (show $ length diffs)
     --putStrLn $ unlines $ map (show . B.unpack) diffs

@@ -67,11 +67,9 @@ data DbFilePatchEntry = DbFilePatchEntry {
     , insertionIdx :: Int
     , timestamp :: Int
     , description :: String
-    , blob_ :: B.ByteString
+    , blob :: B.ByteString
     } deriving (Show)
 
-blob :: DbFilePatchEntry -> String
-blob entry = B.unpack( blob_  entry )
 
 
 
