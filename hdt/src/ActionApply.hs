@@ -31,6 +31,7 @@ execApply opts@ModeApply{..} = do
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
 
+    -- Apply to each active project:
     mapM_ execApplyProject activeProjects 
 
 execApplyProject :: Project -> IO ()
@@ -39,7 +40,7 @@ execApplyProject proj = getProjectFileMergeInfos proj >>= applyProjectFileMergeI
 
 data FileMergeInfo = FileMergeInfo {
       file    :: File
-    , newBlob :: String
+    , newBlob :: B.ByteString
 } deriving (Show)
 
 
@@ -52,7 +53,7 @@ getFileMergeInfo dbConn file = do
         0 -> return Nothing
         _ -> do
             newBlob <- mergePatches file patches
-            return $ Just FileMergeInfo{file=file,newBlob=newBlob}
+            return $ Just FileMergeInfo{file=file,newBlob= B.pack newBlob}
 
 
 getProjectFileMergeInfos :: Project -> IO [ Maybe FileMergeInfo] 

@@ -32,6 +32,14 @@ data File = File {
     } deriving (Show)
 
 
+
+
+
+
+
+
+
+
 relativeFilename :: File -> String
 relativeFilename file= if rootdir `isPrefixOf` fname then drop (length rootdir) fname else fname
     where fname = filename file
