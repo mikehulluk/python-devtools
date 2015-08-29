@@ -32,8 +32,8 @@ extDiff originalBlob newBlob = do
 
     (_, Just hOut, _, hProcess) <- createProcess (proc "diff" ["-u", p0, p1] ){std_out=CreatePipe}
     exitCode <- waitForProcess hProcess
-    contents <- hGetContents hOut
-    putStrLn contents
+    contents <- B.hGetContents hOut
+    B.putStrLn $ contents
 
     putStrLn $ "Finished with exit code: " ++ show exitCode
     -- 'diff' returns
@@ -43,10 +43,10 @@ extDiff originalBlob newBlob = do
     case exitCode of
         ExitSuccess -> do
             mapM_ removeFile [p0,p1]
-            return $ B.pack contents
+            return $ contents
         ExitFailure 1 ->  do
             mapM_ removeFile [p0,p1]
-            return $ B.pack contents
+            return $ contents
         ExitFailure _ ->  do
             error "Failed to diff - terminating"
             return $ B.pack ""
