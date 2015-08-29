@@ -27,15 +27,12 @@ extDiff originalBlob newBlob = do
     (p1, h1) <- openTempFile "/home/michael/.hdt/" "diff"
     B.hPutStr h0 originalBlob
     B.hPutStr h1 newBlob
-    hClose h0
-    hClose h1
+    mapM_ hClose [h0,h1]
 
     (_, Just hOut, _, hProcess) <- createProcess (proc "diff" ["-u", p0, p1] ){std_out=CreatePipe}
     exitCode <- waitForProcess hProcess
     contents <- B.hGetContents hOut
-    B.putStrLn $ contents
 
-    putStrLn $ "Finished with exit code: " ++ show exitCode
     -- 'diff' returns
     --   0 - No difference
     --   1 - Differences
@@ -49,6 +46,7 @@ extDiff originalBlob newBlob = do
             return $ contents
         ExitFailure _ ->  do
             error "Failed to diff - terminating"
+            B.putStrLn $ contents
             return $ B.pack ""
 
 
