@@ -53,7 +53,7 @@ getFileMergeInfo dbConn file = do
         0 -> return Nothing
         _ -> do
             newBlob <- mergePatches file patches
-            return $ Just FileMergeInfo{file=file,newBlob= B.pack newBlob}
+            return $ Just FileMergeInfo{file=file,newBlob=newBlob}
 
 
 getProjectFileMergeInfos :: Project -> IO [ Maybe FileMergeInfo] 
@@ -93,7 +93,7 @@ applyProjectFileMergeInfos  infos = do
 
 
 
-mergePatches :: File -> [DbFilePatchEntry]  -> IO String
+mergePatches :: File -> [DbFilePatchEntry]  -> IO B.ByteString
 mergePatches file patches = do
 
     -- 1. Diff each revision against the original:
@@ -107,10 +107,10 @@ mergePatches file patches = do
     -- 2. Now sequentially apply the patches:
     -- If something fails to merge, this probably suggests
     -- that we are trying to do too much in a single place.
-    result <- mergePatchList originalBlob diffs
+    result <- mergePatchList originalBlob ( diffs)
     case result of
         Nothing -> error "Unable to merge patches"
-        Just output -> return $ B.unpack output
+        Just output -> return $ output
 
 
 
