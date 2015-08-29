@@ -25,8 +25,8 @@ extDiff :: B.ByteString -> B.ByteString -> IO B.ByteString
 extDiff originalBlob newBlob = do
     (p0, h0) <- openTempFile "/home/michael/.hdt/" "diff"
     (p1, h1) <- openTempFile "/home/michael/.hdt/" "diff"
-    hPutStr h0 (B.unpack originalBlob)
-    hPutStr h1 (B.unpack newBlob)
+    B.hPutStr h0 originalBlob
+    B.hPutStr h1 newBlob
     hClose h0
     hClose h1
 
@@ -36,18 +36,16 @@ extDiff originalBlob newBlob = do
     putStrLn contents
 
     putStrLn $ "Finished with exit code: " ++ show exitCode
-    -- 'diff' returns 
+    -- 'diff' returns
     --   0 - No difference
     --   1 - Differences
     --   2 - Error
     case exitCode of
         ExitSuccess -> do
-            removeFile p0
-            removeFile p1
+            mapM_ removeFile [p0,p1]
             return $ B.pack contents
         ExitFailure 1 ->  do
-            removeFile p0
-            removeFile p1
+            mapM_ removeFile [p0,p1]
             return $ B.pack contents
         ExitFailure _ ->  do
             error "Failed to diff - terminating"
@@ -87,7 +85,7 @@ runMergeTool fname newBlob tmpFilePath hFile = do
     putStrLn $ "Writing into temp file:" ++ tmpFilePath
 
     -- Write the newBlob into the temp-file:
-    B.hPutStr hFile (newBlob)
+    B.hPutStr hFile newBlob
     hClose hFile
 
     (_, _, _, hProcess) <- createProcess (proc "meld" [fname, tmpFilePath ])
