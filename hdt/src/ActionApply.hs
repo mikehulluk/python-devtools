@@ -10,21 +10,18 @@ import HdtProject
 import HdtFilePatchStack
 
 import System.IO.Temp
---import GHC.IO.Handle
 import System.IO
 
 import System.Process
 import System.Exit
 import System.Directory
 
---import Data.Algorithm.Diff
---import Data.ByteString.Delta
---import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as B
+
+import ExtTools
 
 execApply :: MyOptions -> IO ()
 execApply opts@ModeApply{..} = do
-
 
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
@@ -68,68 +65,6 @@ applyFile file = do
 
 
 
-extDiff :: B.ByteString -> B.ByteString -> IO B.ByteString
-extDiff originalBlob newBlob = do
-    (p0, h0) <- openTempFile "/home/michael/.hdt/" "diff"
-    (p1, h1) <- openTempFile "/home/michael/.hdt/" "diff"
-    hPutStr h0 (B.unpack originalBlob)
-    hPutStr h1 (B.unpack newBlob)
-    hClose h0
-    hClose h1
-
-    (_, Just hOut, _, hProcess) <- createProcess (proc "diff" ["-u", p0, p1] ){std_out=CreatePipe}
-    exitCode <- waitForProcess hProcess
-    contents <- hGetContents hOut
-    putStrLn contents
-
-    putStrLn $ "Finished with exit code: " ++ show exitCode
-    -- 'diff' returns 
-    --   0 - No difference
-    --   1 - Differences
-    --   2 - Error
-    case exitCode of
-        ExitSuccess -> do
-            removeFile p0
-            removeFile p1
-            return $ B.pack contents
-        ExitFailure 1 ->  do
-            removeFile p0
-            removeFile p1
-            return $ B.pack contents
-        ExitFailure _ ->  do
-            error "Failed to diff - terminating"
-            return $ B.pack ""
-
-
-
-    --
-
-
-extPatch :: B.ByteString -> B.ByteString -> IO ( Maybe B.ByteString)
-extPatch originalBlob patch = do
-    (p0, h0) <- openTempFile "/home/michael/.hdt/" "merge"
-    hPutStr h0 (B.unpack originalBlob)
-    hClose h0
-    (Just hIn, Just hOut, _, hProcess) <- createProcess (proc "patch" ["-u", p0] ){std_out=CreatePipe, std_in=CreatePipe}
-    hPutStr hIn (B.unpack patch)
-    hClose hIn
-    exitCode <- waitForProcess hProcess
-    stdOut <- hGetContents hOut
-
-    putStrLn $ "Output of patch:" ++ stdOut
-
-
-
-
-
-    case exitCode of
-        ExitSuccess -> do
-            contents <- readFile p0
-            return $ Just ( B.pack contents)
-        ExitFailure _ ->  do
-            error "Failed to patch - terminating"
-            return $ Nothing
-
 
 
 
@@ -138,13 +73,13 @@ extPatch originalBlob patch = do
 mergePatches' :: B.ByteString -> [B.ByteString] -> IO (Maybe B.ByteString)
 mergePatches' originalBlob [] = return $ Just originalBlob
 mergePatches' originalBlob [p] = do
-    pch <- (extPatch originalBlob p)
+    pch <- (runExtPatch originalBlob p)
     case pch of
         Nothing  -> return $ Nothing
         Just p -> return $ (Just p)
 
 mergePatches' originalBlob (p:ps) = do
-    pch <- extPatch originalBlob p
+    pch <- runExtPatch originalBlob p
     case pch of
         Nothing   -> return $ Nothing
         Just res  ->  do
@@ -185,23 +120,5 @@ mergePatches file patches = do
 
 
 
-
-runMergeTool :: File -> String -> FilePath -> Handle -> IO Bool
-runMergeTool file newBlob tmpFilePath hFile = do
-    putStrLn $ "Writing into temp file:" ++ tmpFilePath
-
-    -- Write the newBlob into the temp-file:
-    hPutStr hFile newBlob
-    hClose hFile
-
-    (_, _, _, hProcess) <- createProcess (proc "meld" [filename file, tmpFilePath ])
-    exitCode <- waitForProcess hProcess
-
-    putStrLn $ "Finished with exit code: " ++ show exitCode
-    case exitCode of
-        ExitSuccess -> return True
-        ExitFailure _ ->  do
-            error "Failed to merge - terminating"
-            return False
 
 

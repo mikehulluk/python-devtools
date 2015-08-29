@@ -16,8 +16,8 @@ run: build
 	#./dist/build/hdt/hdt modereplace -- 'execApply' '--execApply'
 	#./dist/build/hdt/hdt modereplace -- 'execApply' '--execApply'
 	./dist/build/hdt/hdt modereplace -- 'patch' 'change'
-	#./dist/build/hdt/hdt modereplace -- 'execApply' '--execApply'
-	-#./dist/build/hdt/hdt modereplace -- 'execApply' '--execApply'
+	./dist/build/hdt/hdt modereplace -- 'execApply' '--execApply'
+	./dist/build/hdt/hdt modereplace -- 'execApply' '--execApply'
 	./dist/build/hdt/hdt modeapply
 
 
