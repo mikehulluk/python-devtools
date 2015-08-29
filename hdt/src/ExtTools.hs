@@ -100,3 +100,7 @@ runMergeTool fname newBlob tmpFilePath hFile = do
             error "Failed to merge - terminating"
             return False
 
+uiMergeFile :: String -> String -> IO ()
+uiMergeFile fname newBlob  = do
+    exitCode <- withTempFile "/home/michael/.hdt/" "tmp.mergefile" (runMergeTool fname newBlob)
+    putStrLn $ " --- Finished with exit code: " ++ show exitCode
