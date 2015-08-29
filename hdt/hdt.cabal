@@ -34,5 +34,7 @@ executable hdt
                        bytestring,
                        temporary,
                        process,
-                       MissingH,
-                       Diff
+                       MissingH
+                       --Diff,
+                       --gdiff
+                       --bytestring-delta
