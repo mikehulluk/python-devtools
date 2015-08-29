@@ -107,7 +107,7 @@ mergePatches file patches = do
     -- 2. Now sequentially apply the patches:
     -- If something fails to merge, this probably suggests
     -- that we are trying to do too much in a single place.
-    result <- mergePatchList originalBlob ( diffs)
+    result <- mergePatchList originalBlob diffs
     case result of
         Nothing -> error "Unable to merge patches"
         Just output -> return $ output

@@ -18,6 +18,7 @@ import Control.Applicative
 import Control.Monad
 import Data.Time.Clock.POSIX
 
+import qualified Data.ByteString.Char8 as B
 
 import HdtTypes
 import HdtProject
@@ -66,8 +67,12 @@ data DbFilePatchEntry = DbFilePatchEntry {
     , insertionIdx :: Int
     , timestamp :: Int
     , description :: String
-    , blob :: String
+    , blob_ :: B.ByteString
     } deriving (Show)
+
+blob :: DbFilePatchEntry -> String
+blob entry = B.unpack( blob_  entry )
+
 
 
 instance FromRow DbFileEntry where
