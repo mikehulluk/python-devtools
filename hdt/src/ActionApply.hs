@@ -70,21 +70,18 @@ applyFile file = do
 
 
 
-mergePatches' :: B.ByteString -> [B.ByteString] -> IO (Maybe B.ByteString)
-mergePatches' originalBlob [] = return $ Just originalBlob
-mergePatches' originalBlob [p] = do
-    pch <- (runExtPatch originalBlob p)
-    case pch of
-        Nothing  -> return $ Nothing
-        Just p -> return $ (Just p)
+mergePatchList :: B.ByteString -> [B.ByteString] -> IO (Maybe B.ByteString)
+mergePatchList originalBlob [] = return $ Just originalBlob
+mergePatchList originalBlob [p] = return =<< (runExtPatch originalBlob p)
+--mergePatchList originalBlob [p] = do
+--    pch <- (runExtPatch originalBlob p)
+--    return pch
 
-mergePatches' originalBlob (p:ps) = do
+mergePatchList originalBlob (p:ps) = do
     pch <- runExtPatch originalBlob p
     case pch of
         Nothing   -> return $ Nothing
-        Just res  ->  do
-            rs <- (mergePatches' res ps)
-            return $ rs
+        Just res  ->  return =<< (mergePatchList res ps)
 
 
 
@@ -108,7 +105,7 @@ mergePatches file patches = do
     -- 2. Now sequentially apply the patches:
     -- If something fails to merge, this probably suggests
     -- that we are trying to do too much in a single place.
-    result <- mergePatches' originalBlob' diffs
+    result <- mergePatchList originalBlob' diffs
     case result of
         Nothing -> error "Unable to merge patches"
         Just output -> return $ B.unpack output
