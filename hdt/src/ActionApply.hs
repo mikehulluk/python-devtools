@@ -101,9 +101,6 @@ mergePatches file patches = do
     let blobs = map blob patches
     diffs <- mapM ( (extDiff originalBlob) ) blobs
 
-    --putStrLn $ "\nDiffs: "  ++ (show $ length diffs)
-    --putStrLn $ unlines $ map (show . B.unpack) diffs
-
     -- 2. Now sequentially apply the patches:
     -- If something fails to merge, this probably suggests
     -- that we are trying to do too much in a single place.
