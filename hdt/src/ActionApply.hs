@@ -16,6 +16,8 @@ import System.IO
 import System.Process
 import System.Exit
 
+import Data.Algorith.Diff
+
 execApply :: MyOptions -> IO ()
 execApply opts@ModeApply{..} = do
 
@@ -63,6 +65,8 @@ mergePatches :: File -> [DbFilePatchEntry]  -> String
 mergePatches file patches = blob $ last patches
 
 
+mergePatches' :: File -> [DbFilePatchEntry]  -> String 
+mergePatches' file patches = blob $ last patches
 
 
 
