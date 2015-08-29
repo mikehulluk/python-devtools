@@ -33,6 +33,13 @@ execApply opts@ModeApply{..} = do
 
 
 
+uiMergeFile :: String -> String -> IO ()
+uiMergeFile fname newBlob  = do
+    exitCode <- withTempFile "/home/michael/.hdt/" "tmp.mergefile" (runMergeTool fname newBlob)
+    putStrLn $ " --- Finished with exit code: " ++ show exitCode
+
+
+
 applyFile :: File -> IO()
 applyFile file = do
     let fname = filename file
@@ -46,11 +53,12 @@ applyFile file = do
 
             putStrLn $ unlines $ map show patches
             -- 1. Calculate the final output file, from the diffs:
-            finalBlob <- mergePatches file patches
+            newBlob <- mergePatches file patches
 
             -- 2. Write it to a tempfile, and run the mergetool
-            exitCode <- withTempFile "/home/michael/.hdt/" "tmp.mergefile" (runMergeTool file finalBlob)
-            putStrLn $ " --- Finished with exit code: " ++ show exitCode
+            uiMergeFile fname newBlob
+            --exitCode <- withTempFile "/home/michael/.hdt/" "tmp.mergefile" (runMergeTool (filename file) finalBlob)
+            --putStrLn $ " --- Finished with exit code: " ++ show exitCode
 
             -- 3. If it completed ok, then remove the diffs from the database.
             dropOutstandingPatchs file
@@ -71,17 +79,13 @@ applyFile file = do
 
 
 mergePatchList :: B.ByteString -> [B.ByteString] -> IO (Maybe B.ByteString)
-mergePatchList originalBlob [] = return $ Just originalBlob
+mergePatchList originalBlob []  = return $ Just originalBlob
 mergePatchList originalBlob [p] = return =<< (runExtPatch originalBlob p)
---mergePatchList originalBlob [p] = do
---    pch <- (runExtPatch originalBlob p)
---    return pch
-
 mergePatchList originalBlob (p:ps) = do
     pch <- runExtPatch originalBlob p
     case pch of
-        Nothing   -> return $ Nothing
-        Just res  ->  return =<< (mergePatchList res ps)
+        Nothing  -> return $ Nothing
+        Just res -> return =<< (mergePatchList res ps)
 
 
 

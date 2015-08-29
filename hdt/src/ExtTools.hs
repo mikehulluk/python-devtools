@@ -82,15 +82,15 @@ runExtPatch originalBlob patch = do
 
 
 
-runMergeTool :: File -> String -> FilePath -> Handle -> IO Bool
-runMergeTool file newBlob tmpFilePath hFile = do
+runMergeTool :: String -> String -> FilePath -> Handle -> IO Bool
+runMergeTool fname newBlob tmpFilePath hFile = do
     putStrLn $ "Writing into temp file:" ++ tmpFilePath
 
     -- Write the newBlob into the temp-file:
     hPutStr hFile newBlob
     hClose hFile
 
-    (_, _, _, hProcess) <- createProcess (proc "meld" [filename file, tmpFilePath ])
+    (_, _, _, hProcess) <- createProcess (proc "meld" [fname, tmpFilePath ])
     exitCode <- waitForProcess hProcess
 
     putStrLn $ "Finished with exit code: " ++ show exitCode
