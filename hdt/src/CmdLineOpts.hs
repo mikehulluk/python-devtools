@@ -1,13 +1,13 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
 module CmdLineOpts(
-    MyOptions(ModeConfig,ModeGrep,ModeReplace,ModeApply,ModeDrop), 
+    MyOptions(ModeConfig,ModeGrep,Repl,ModeApply,ModeDrop), 
     modeConfig,
         first_name, last_name,
     modeGrep,
         grepString, ignoreCase, word, count, lineNumbers, doEdit, nContextLines,
     modeReplace,
-        searchString, replaceString, doWordRegex,
+        searchString, replaceString, doWordRegex, noApply,
     modeApply,
     modeDrop,
     myModes
@@ -31,11 +31,12 @@ data MyOptions =
                 , doEdit        :: Bool
                 , nContextLines :: Int
             }
-    | ModeReplace {
+    | Repl {
           searchString   :: String
         , replaceString  :: String
         , ignoreCase     :: Bool
         , doWordRegex    :: Bool
+        , noApply        :: Bool
         }
     | ModeApply { }
     | ModeDrop { }
@@ -69,12 +70,13 @@ modeGrep = ModeGrep
                 ]
 
 modeReplace :: MyOptions
-modeReplace = ModeReplace
+modeReplace = Repl
     {
           searchString  = def &= argPos 0 &= typ "GREPSTRING"
         , replaceString = def &= argPos 1 &= typ "replaceString"
         , ignoreCase    = def &= help "GREPSTRING"
         , doWordRegex   = def &= help "GREPSTRING"
+        , noApply       = False &= help "GREPSTRING"
 
     }
     &= details  [ "Examples:"

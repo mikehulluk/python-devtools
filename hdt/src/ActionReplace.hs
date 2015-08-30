@@ -3,6 +3,7 @@
 
 module ActionReplace where
 
+import ActionApply
 import HdtTypes
 import CmdLineOpts
 import HdtProject
@@ -27,7 +28,7 @@ import Text.Regex.Posix.String
 
 
 execReplace :: MyOptions -> IO ()
-execReplace opts@ModeReplace{..} = do
+execReplace opts@Repl{..} = do
 
 
     putStrLn $ "[Pre-clean:] Replacing " ++ searchString ++ " with " ++ replaceString ++ ""
@@ -64,15 +65,15 @@ execReplace opts@ModeReplace{..} = do
         Right compiledRegex -> do
             putStrLn "Compiled OK"
 
-            --forM_ activeProjects (grepProject compiledRegex opts)
             mapM_ (actionReplace compiledRegex replaceString) files
+
+            case  noApply of 
+                False -> do
+                    return ()
+                True  -> do
+                    execApply (ModeApply)
+                    
             return ()
-    --
-    --files <- (mapM srcFiles activeProjects) >>= concat
-
-
-
-    -- Apply the patchs to each file:
 
 
 actionReplace :: Regex -> String -> File -> IO()

@@ -32,7 +32,7 @@ optionHandler opts@ModeGrep{..}  = do
     putStrLn  $ "Grepping for: " ++ "'" ++ grepString ++ "'"
     execGrep opts
 
-optionHandler opts@ModeReplace{..}  = do
+optionHandler opts@Repl{..}  = do
     putStrLn  $ "Replacing for: " ++ "'" ++ searchString ++ "'"
     execReplace opts
 
