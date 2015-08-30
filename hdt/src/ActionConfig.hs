@@ -13,7 +13,7 @@ import System.Console.ANSI
 import Control.Monad
 import Data.List
 import Database.SQLite.Simple
---import Data.Traversable (for)
+
 
 
 -- Printing to the screen

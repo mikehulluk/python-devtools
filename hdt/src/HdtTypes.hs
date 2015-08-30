@@ -4,8 +4,8 @@
 module HdtTypes where
 
 import System.Directory
---import Filesystem.Path hiding (filename)
---import Control.Applicative
+
+
 import Data.List
 
 import Data.Aeson

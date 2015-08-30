@@ -2,22 +2,22 @@
 module ExtTools where
 
 
---import HdtTypes
---import CmdLineOpts
---import HdtProject
---import HdtFilePatchStack
+
+
+
+
 
 import System.IO.Temp
---import GHC.IO.Handle
+
 import System.IO
 
 import System.Process
 import System.Exit
 import System.Directory
 
---import Data.Algorithm.Diff
---import Data.ByteString.Delta
---import qualified Data.ByteString as B
+
+
+
 import qualified Data.ByteString.Char8 as B
 
 
