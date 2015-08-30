@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
-module ActionGrep where
+module ActionGrep(execGrep) where
 
 import HdtTypes
 import CmdLineOpts

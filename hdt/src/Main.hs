@@ -2,7 +2,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
 
-import HdtTypes
 import CmdLineOpts
 import ActionGrep
 import ActionReplace
@@ -11,23 +10,16 @@ import ActionApply
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
-import System.Exit
-import Data.List
-import Data.Text.Format
 
-import System.Console.ANSI
+--import System.Console.ANSI
 import Control.Monad
-import Control.Exception
-
-import Text.Regex.Posix   
-import Text.Regex.Posix.String
 
 
 main :: IO ()
 main = do
-    args <- getArgs
+    args' <- getArgs
     -- If the user did not specify any arguments, pretend as "--help" was given
-    opts <- (if null args then withArgs ["--help"] else id) $ cmdArgsRun myModes
+    opts <- (if null args' then withArgs ["--help"] else id) $ cmdArgsRun myModes
     optionHandler opts
 
 optionHandler :: MyOptions -> IO ()

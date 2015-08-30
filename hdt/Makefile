@@ -8,7 +8,7 @@ build:
 	cabal build
 
 check:
-	 cabal build --ghc-options='-fno-code'
+	 cabal build --ghc-options='-fno-code -Wall'
 
 run: build
 	rm -rf ~/.hdt/

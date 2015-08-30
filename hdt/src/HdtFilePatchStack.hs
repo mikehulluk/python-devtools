@@ -110,7 +110,7 @@ getFileId dbConn file = do
         otherwise -> error ""
 
 
-addFileOutstandingPatchs :: File -> String -> String -> IO()
+addFileOutstandingPatchs :: File -> String -> B.ByteString -> IO()
 addFileOutstandingPatchs file description newBlob = do
     -- putStrLn $ "Saving new file patchs for: " ++ filename file
     -- putStrLn  "New File:"
@@ -136,9 +136,9 @@ addFileOutstandingPatchs file description newBlob = do
 
     -- Create the new patch entry:
     --putStrLn $ "Running query"
-    let newBlob' = B.pack newBlob
+    --let newBlob' = newBlob
 
-    execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id_ :: Int, insertionIdx :: Int, timestamp :: Int, description :: String, newBlob' :: B.ByteString ) 
+    execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id_ :: Int, insertionIdx :: Int, timestamp :: Int, description :: String, newBlob :: B.ByteString ) 
     --putStrLn $ "Done Running query"
 
     return ()

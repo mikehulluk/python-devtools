@@ -2,7 +2,7 @@
 
 {-# LANGUAGE RecordWildCards #-}
 
-module ActionApply where
+module ActionApply(execApply) where
 
 import HdtTypes
 import CmdLineOpts

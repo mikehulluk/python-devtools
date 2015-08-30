@@ -2,7 +2,7 @@
     "projects" : [
         
         { "name": "project1",
-          "active":true,
+          "active":false,
           "rootdir":"/home/michael/hw/python-devtools/",
           "files": [
                 {"glob":"src/**/*.py", "tags":["src",".py"]}

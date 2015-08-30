@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module ActionConfig where
+module ActionConfig(execConfig) where
 
 import HdtTypes
 import CmdLineOpts
@@ -55,7 +55,5 @@ execConfig opts@ModeConfig{..} = do
     projects <- getAllProjectConfigs
     forM_ projects summariseProjectConsole
     forM_ projects getProjectDBHandle
-
-    x <- getConfigFileSetup
     return ()
 

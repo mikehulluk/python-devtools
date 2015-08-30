@@ -10,6 +10,7 @@ import HdtFilePatchStack
 
 import Data.String.Utils
 
+import qualified Data.ByteString.Char8 as B
 
 
 execReplace :: MyOptions -> IO ()
@@ -24,6 +25,9 @@ execReplace opts@ModeReplace{..} = do
     -- Find all the files:
     allfiles' <- mapM srcFiles activeProjects
     let files = concat allfiles'
+
+    --files <- (mapM srcFiles activeProjects) >>= concat
+
 
     -- Check no files belong to more than one project:
     let allFullFilename = map filename files
@@ -44,11 +48,11 @@ actionReplace findStr replStr file = do
 
 
 
-tryReplace :: String -> String -> File -> IO( Maybe String)
+tryReplace :: String -> String -> File -> IO( Maybe B.ByteString)
 tryReplace findStr replStr file = do
     oldContents <- readFile $ filename file
     let newContents  = replace findStr replStr oldContents
-    if newContents==oldContents then return Nothing else return $ Just newContents
+    if newContents==oldContents then return Nothing else return $ Just $ B.pack newContents
 
 
 
