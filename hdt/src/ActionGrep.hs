@@ -112,7 +112,7 @@ execGrepFile compiledRegex opts filename= do
                     -- Add context lines, group the lines, then strip empty leading/trailing context lines:
                     let linesIncludingContext = addContextLinesNew nContextLines_ nLinesFile ls grepLines
                     let groupedLinesPrinted = groupLines linesIncludingContext
-                    let groupedLinesPrintedStripped = map (stripEmptyContextLines ls)  groupedLinesPrinted
+                    let groupedLinesPrintedStripped = map stripEmptyContextLines  groupedLinesPrinted
 
                     -- Print out the lines by group
                     case length groupedLinesPrinted of
@@ -121,7 +121,7 @@ execGrepFile compiledRegex opts filename= do
                             setSGR [SetColor Foreground Dull Yellow]
                             putStrLn  filename
                             setSGR []
-                            mapM_ (printGroupLines ls filename lineNumberWidth) groupedLinesPrintedStripped
+                            mapM_ (printGroupLines filename lineNumberWidth) groupedLinesPrintedStripped
                             return ()
 
     return ()
@@ -136,20 +136,20 @@ printLineSimple    lineNumberWidth filename lineMatch = do
 
 
 
-stripEmptyContextLines ::  [FileLineType] -> [GrepLinePrinted] ->[GrepLinePrinted] 
-stripEmptyContextLines allLines x = striphead $ striptail x
-    where striphead = stripEmptyContextLinesHeads allLines
-          striptail = reverse . stripEmptyContextLinesHeads allLines . reverse
+stripEmptyContextLines ::  [GrepLinePrinted] ->[GrepLinePrinted] 
+stripEmptyContextLines x = striphead $ striptail x
+    where striphead = stripEmptyContextLinesHeads 
+          striptail = reverse . stripEmptyContextLinesHeads  . reverse
 
 isEmptyLine :: GrepLinePrinted -> Bool
-isEmptyLine (ContextLine lineNo lineContents ) =  trim lineContents  == ""
+isEmptyLine (ContextLine _ lineContents ) =  trim lineContents  == ""
 isEmptyLine _ = False
 
-stripEmptyContextLinesHeads ::  [FileLineType] -> [GrepLinePrinted] ->[GrepLinePrinted] 
-stripEmptyContextLinesHeads _ []  = []
-stripEmptyContextLinesHeads allLines [x] = if isEmptyLine  x then [] else [x] 
-stripEmptyContextLinesHeads allLines (x:xs) 
-    | isEmptyLine x = stripEmptyContextLinesHeads allLines xs 
+stripEmptyContextLinesHeads :: [GrepLinePrinted] ->[GrepLinePrinted] 
+stripEmptyContextLinesHeads  []  = []
+stripEmptyContextLinesHeads  [x] = if isEmptyLine  x then [] else [x] 
+stripEmptyContextLinesHeads  (x:xs) 
+    | isEmptyLine x = stripEmptyContextLinesHeads xs 
     | otherwise = x:xs
 
 grepLine :: Regex -> (Int, FileLineType) -> IO [GrepLineMatch]
@@ -160,9 +160,8 @@ grepLine compiledRegex (lineNo, line) = do
             putStrLn $ "Unexpected error grepping line " ++ (show lineNo)
             putStrLn $ line
             putStrLn $ "Error: " ++ (show retCode) ++ " -- " ++ errMsg
-            return ()
-        
             return []
+
         Right matchLine -> case matchLine of
             Nothing -> return []
             Just (pre, matched, post,subexpression) -> return [ GrepLineMatch (pre, matched, post,subexpression) lineNo ]
@@ -239,10 +238,10 @@ printGrepLine lineNumberWidth (ContextLine lineNo lineContents)  = do
 
 
 
-printGroupLines :: [FileLineType] -> String -> PrintLineNumberWidth -> [GrepLinePrinted] -> IO ()
-printGroupLines allLines filename lineNumberWidth lines = do
+printGroupLines :: String -> PrintLineNumberWidth -> [GrepLinePrinted] -> IO ()
+printGroupLines filename lineNumberWidth fileLines = do
     putStrLn $ "In file:" ++ filename
-    mapM_ (printGrepLine lineNumberWidth) lines
+    mapM_ (printGrepLine lineNumberWidth) fileLines
     return ()
 
 
