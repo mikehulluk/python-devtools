@@ -7,6 +7,7 @@ import ActionGrep
 import ActionReplace
 import ActionConfig
 import ActionApply
+import ActionDrop
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
@@ -35,6 +36,10 @@ optionHandler opts@ModeGrep{..}  = do
 optionHandler opts@ModeReplace{..}  = do
     putStrLn  $ "Replacing for: " ++ "'" ++ searchString ++ "'"
     execReplace opts
+
+optionHandler opts@ModeDrop{..}  = do
+    execDrop opts
+
 
 optionHandler opts@ModeApply{..}  = do
     execApply opts

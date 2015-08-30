@@ -26,6 +26,7 @@ executable hdt
                        Glob,
                        ansi-terminal,
                        regex-posix,
+                       regex-compat,
                        sqlite-simple,
                        text,
                        text-format,
