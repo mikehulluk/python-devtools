@@ -1,10 +1,11 @@
 
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 module HdtTypes where
 
 import System.Directory
-import Filesystem.Path hiding (filename)
-import Control.Applicative
+--import Filesystem.Path hiding (filename)
+--import Control.Applicative
 import Data.List
 
 import Data.Aeson
@@ -31,6 +32,10 @@ data File = File {
     , project :: Project
     } deriving (Show)
 
+data ConfigFileSetup = MHNothing | ConfigFileSetup {
+    projects :: [Project]
+
+} deriving (Show)
 
 
 
@@ -41,17 +46,14 @@ data File = File {
 
 
 relativeFilename :: File -> String
-relativeFilename file= if rootdir `isPrefixOf` fname then drop (length rootdir) fname else fname
-    where fname = filename file
-          rootdir = rootDir $ project file
-
+relativeFilename File{..} = if rootDir project `isPrefixOf` filename then drop (length $ rootDir project) filename else filename
 
 getHDTConfigPath :: IO String
 getHDTConfigPath  = do
     homeDir <- getHomeDirectory
-    let thepath = homeDir ++ "/.hdt/"
-    createDirectoryIfMissing True thepath
-    return thepath
+    let hdtPath = homeDir ++ "/.hdt/"
+    createDirectoryIfMissing True hdtPath
+    return hdtPath
 
 
 
@@ -64,10 +66,6 @@ sampleConfigFileContents = do
 
 
 
-data ConfigFileSetup = MHNothing | ConfigFileSetup {
-    projects :: [Project]
-
-} deriving (Show)
 
 
 
@@ -76,23 +74,23 @@ data ConfigFileSetup = MHNothing | ConfigFileSetup {
 instance FromJSON HdtTypes.FileSelector where
     parseJSON (Object o) = do
         globString <- o .: "glob"
-        addTags' <- o .: "tags"
-        return HdtTypes.FileSelector{HdtTypes.globString=globString,HdtTypes.addTags=addTags'}
+        addTags <- o .: "tags"
+        return HdtTypes.FileSelector{..}
 
 
 instance FromJSON ConfigFileSetup where
     parseJSON (Object o) = do
         projects <- parseJSON =<< (o.: "projects")
-        return ConfigFileSetup{projects=projects}
+        return ConfigFileSetup{..}
     parseJSON _ = mzero
 
 instance FromJSON Project where
     parseJSON (Object v) = do
-        name <- v .: "name"
+        projectName <- v .: "name"
         isActive <- v .:? "active" .!= False
         rootDir <- v .: "rootdir"
         fileSelectors <- parseJSON =<< (v.: "files")
-        return Project{projectName=name, isActive=isActive, rootDir=rootDir, fileSelectors=fileSelectors}
+        return Project{..} 
 
     parseJSON _ = mzero
 

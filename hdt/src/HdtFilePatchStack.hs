@@ -5,17 +5,17 @@
 module HdtFilePatchStack where
 
 
-import System.FilePath.Glob
-import System.Directory
-import Filesystem.Path hiding (filename,null)
+--import System.FilePath.Glob
+--import System.Directory
+--import Filesystem.Path hiding (filename,null)
 --import Control.Applicative
 import Database.SQLite.Simple
-import Database.SQLite.Simple.FromRow
-import Data.List
+--import Database.SQLite.Simple.FromRow
+--import Data.List
 
-import Data.Aeson
+--import Data.Aeson
 import Control.Applicative
-import Control.Monad
+--import Control.Monad
 import Data.Time.Clock.POSIX
 
 import qualified Data.ByteString.Char8 as B
@@ -26,9 +26,9 @@ import HdtProject
 
 -- TODO: replace the string concatentaion with "</>"
 getDBFilename :: Project -> IO String
-getDBFilename project = do
+getDBFilename proj = do
     configPath <- getHDTConfigPath
-    let path = configPath ++ "/" ++ (projectName project ++ ".sqlite")
+    let path = configPath ++ "/" ++ (projectName proj ++ ".sqlite")
     return path
 
 
@@ -42,8 +42,8 @@ ensureFileInDB conn file = do
 
 
 getProjectDBHandle :: Project -> IO Connection
-getProjectDBHandle project = do
-    dbFilename <- getDBFilename project
+getProjectDBHandle proj = do
+    dbFilename <- getDBFilename proj
     --putStrLn $ "Database file:" ++ dbFilename
 
     -- Build the database tables, if they don't exist:
@@ -52,7 +52,7 @@ getProjectDBHandle project = do
     execute_ conn "CREATE TABLE IF NOT EXISTS FilePatches(id INTEGER PRIMARY KEY, file_id INTEGER, insertionIdx INTEGER, timestamp INTEGER, description TEXT, blob TEXT, UNIQUE(file_id,insertionIdx));"
 
     -- Add entries for files, if they don't exist:
-    files <- srcFiles project
+    files <- srcFiles proj
     mapM_ (ensureFileInDB conn) files
 
     -- Todo: trim out old entries:
@@ -77,13 +77,13 @@ instance FromRow DbFileEntry where
     fromRow = DbFileEntry <$> field <*> field
 
 instance ToRow DbFileEntry where
-    toRow (DbFileEntry id_ filename) = toRow (id_, filename)
+    toRow (DbFileEntry id_ fname) = toRow (id_, fname)
 
 instance FromRow DbFilePatchEntry where
     fromRow = DbFilePatchEntry <$> field <*> field <*> field  <*> field  <*> field  <*> field
 
 instance ToRow DbFilePatchEntry where
-    toRow (DbFilePatchEntry primaryKey fileId insertionIdx timestamp description blob) = toRow (primaryKey, fileId, insertionIdx, timestamp, description, blob)
+    toRow (DbFilePatchEntry primaryKey' fileId' insertionIdx' timestamp' description' blob') = toRow (primaryKey', fileId', insertionIdx', timestamp', description', blob')
 
 
 getFilePatchs :: Connection -> File -> IO [DbFilePatchEntry] 
@@ -107,22 +107,22 @@ getFileId dbConn file = do
     case length r of
         1 -> return id_
             where DbFileEntry id_ _ = head r
-        otherwise -> error ""
+        _ -> error ""
 
 
 addFileOutstandingPatchs :: File -> String -> B.ByteString -> IO()
-addFileOutstandingPatchs file description newBlob = do
+addFileOutstandingPatchs file description' newBlob = do
     -- putStrLn $ "Saving new file patchs for: " ++ filename file
     -- putStrLn  "New File:"
     -- putStrLn  newBlob
 
     let proj = project file
-    let fname = filename file
+    --let fname = filename file
     dbConn <- getProjectDBHandle proj
 
 
     -- Get the file-id:
-    id_ <- getFileId dbConn file
+    id' <- getFileId dbConn file
     -- putStrLn $ "Found id: " ++ (show id_) ++ " for filename: " ++ fname
 
     -- Find existing patchs:
@@ -130,15 +130,15 @@ addFileOutstandingPatchs file description newBlob = do
     --putStrLn $ "Found existing patchs: "
     --putStrLn $ unlines $ map show patchs
 
-    let insertionIdx = (length patchs +1) * 10
+    let insertionIdx' = (length patchs +1) * 10
     --let description = "DUMMY REPLACEMENT"
-    timestamp <- round `fmap` getPOSIXTime
+    timestamp' <- round `fmap` getPOSIXTime
 
     -- Create the new patch entry:
     --putStrLn $ "Running query"
     --let newBlob' = newBlob
 
-    execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id_ :: Int, insertionIdx :: Int, timestamp :: Int, description :: String, newBlob :: B.ByteString ) 
+    execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id' :: Int, insertionIdx' :: Int, timestamp' :: Int, description' :: String, newBlob :: B.ByteString ) 
     --putStrLn $ "Done Running query"
 
     return ()
@@ -152,7 +152,7 @@ dropOutstandingPatchs file = do
     putStrLn $ "Dropping patchs for: " ++ fname
     dbConn <- getProjectDBHandle proj
     id_ <- getFileId dbConn file 
-    r <- query dbConn "DELETE FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]
+    query dbConn "DELETE FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]
     return ()
 
 

@@ -1,9 +1,20 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
-module CmdLineOpts where
+module CmdLineOpts(
+    MyOptions(ModeConfig,ModeGrep,ModeReplace,ModeApply), 
+    modeConfig,
+        first_name, last_name,
+    modeGrep,
+        grepString, ignoreCase, word, count, lineNumbers, doEdit, nContextLines,
+    modeReplace,
+        searchString, replaceString, doWordRegex,
+    modeApply,
+    myModes
+    )
+where
 
 import System.Console.CmdArgs
-import System.Environment (getArgs, withArgs)
+--import System.Environment (getArgs, withArgs)
 
 
 
@@ -86,6 +97,14 @@ myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply]
     &= help _PROGRAM_ABOUT
     &= helpArg [explicit, name "help", name "h"]
     &= program _PROGRAM_NAME
+
+
+_PROGRAM_NAME :: String
+_PROGRAM_VERSION :: String
+_PROGRAM_INFO :: String
+_PROGRAM_ABOUT :: String
+_COPYRIGHT :: String
+
 
 _PROGRAM_NAME = "myProg"
 _PROGRAM_VERSION = "0.1.2.3"

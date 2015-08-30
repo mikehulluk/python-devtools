@@ -5,18 +5,17 @@ module HdtProject where
 import HdtTypes
 import System.FilePath.Glob
 
-import Prelude hiding (findFiles)
 
 
 findFiles :: Project -> FileSelector -> IO [File]
-findFiles project fileSelector = do
-    files <- globDir1 (compile $ globString fileSelector) (rootDir project)
+findFiles proj fileSelector = do
+    files <- globDir1 (compile $ globString fileSelector) (rootDir proj)
     return $ map _buildFile files
-    where _buildFile s = File {filename=s, tags=addTags fileSelector, project=project}
+    where _buildFile s = File {filename=s, tags=addTags fileSelector, project=proj}
 
 srcFiles :: Project -> IO [File]
-srcFiles project =  do
-    files <- mapM (findFiles project) (fileSelectors project)
+srcFiles proj =  do
+    files <- mapM (findFiles proj) (fileSelectors proj)
     return $ concat files
 
 getAllProjectConfigs :: IO [Project]

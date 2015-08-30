@@ -2,10 +2,10 @@
 module ExtTools where
 
 
-import HdtTypes
-import CmdLineOpts
-import HdtProject
-import HdtFilePatchStack
+--import HdtTypes
+--import CmdLineOpts
+--import HdtProject
+--import HdtFilePatchStack
 
 import System.IO.Temp
 --import GHC.IO.Handle
