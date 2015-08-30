@@ -131,7 +131,7 @@ execGrepFile compiledRegex opts filename= do
 printLineSimple :: PrintLineNumberWidth -> Maybe String -> GrepLineMatch -> IO () 
 printLineSimple    lineNumberWidth filename lineMatch = do 
     putStr $ maybe "" (++":") filename
-    (printGrepLine [] lineNumberWidth ) $ MatchLine lineMatch
+    (printGrepLine lineNumberWidth ) $ MatchLine lineMatch
     return ()
 
 
@@ -141,15 +141,15 @@ stripEmptyContextLines allLines x = striphead $ striptail x
     where striphead = stripEmptyContextLinesHeads allLines
           striptail = reverse . stripEmptyContextLinesHeads allLines . reverse
 
-isEmptyLine :: [FileLineType] -> GrepLinePrinted -> Bool
-isEmptyLine allLines (ContextLine lineNo lineContents ) =  trim lineContents  == ""
-isEmptyLine _ _ = False
+isEmptyLine :: GrepLinePrinted -> Bool
+isEmptyLine (ContextLine lineNo lineContents ) =  trim lineContents  == ""
+isEmptyLine _ = False
 
 stripEmptyContextLinesHeads ::  [FileLineType] -> [GrepLinePrinted] ->[GrepLinePrinted] 
 stripEmptyContextLinesHeads _ []  = []
-stripEmptyContextLinesHeads allLines [x] = if isEmptyLine allLines x then [] else [x] 
+stripEmptyContextLinesHeads allLines [x] = if isEmptyLine  x then [] else [x] 
 stripEmptyContextLinesHeads allLines (x:xs) 
-    | isEmptyLine allLines x = stripEmptyContextLinesHeads allLines xs 
+    | isEmptyLine x = stripEmptyContextLinesHeads allLines xs 
     | otherwise = x:xs
 
 grepLine :: Regex -> (Int, FileLineType) -> IO [GrepLineMatch]
@@ -213,8 +213,8 @@ printGrepLineNo (Just lineNumberWidth) x = x_out
           padding =  concat $ replicate padding_needed " "
           x_out = padding ++ x_str
 
-printGrepLine :: [FileLineType] -> PrintLineNumberWidth -> GrepLinePrinted  -> IO ()
-printGrepLine allLines lineNumberWidth (MatchLine m) = do
+printGrepLine ::  PrintLineNumberWidth -> GrepLinePrinted  -> IO ()
+printGrepLine lineNumberWidth (MatchLine m) = do
     setSGR [SetColor Foreground Vivid Blue]
     putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
@@ -228,7 +228,7 @@ printGrepLine allLines lineNumberWidth (MatchLine m) = do
 
 
 
-printGrepLine allLines lineNumberWidth (ContextLine lineNo lineContents)  = do
+printGrepLine lineNumberWidth (ContextLine lineNo lineContents)  = do
     setSGR [SetColor Foreground Vivid Blue]
     putStr $ printGrepLineNo lineNumberWidth lineNo
     setSGR [SetColor Foreground Dull White]
@@ -242,7 +242,7 @@ printGrepLine allLines lineNumberWidth (ContextLine lineNo lineContents)  = do
 printGroupLines :: [FileLineType] -> String -> PrintLineNumberWidth -> [GrepLinePrinted] -> IO ()
 printGroupLines allLines filename lineNumberWidth lines = do
     putStrLn $ "In file:" ++ filename
-    mapM_ (printGrepLine allLines lineNumberWidth) lines
+    mapM_ (printGrepLine lineNumberWidth) lines
     return ()
 
 
