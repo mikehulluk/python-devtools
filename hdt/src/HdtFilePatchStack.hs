@@ -1,7 +1,7 @@
 
 
 {-# LANGUAGE OverloadedStrings #-}
---{-# LANGUAGE RecordWildCards #-}
+
 module HdtFilePatchStack where
 
 
@@ -36,7 +36,7 @@ getDBFilename proj = do
 ensureFileInDB :: Connection -> File -> IO()
 ensureFileInDB conn file = do
     let fname = filename file
-    --putStrLn $ "Adding file:" ++ fname
+    
     execute conn "INSERT OR IGNORE INTO Files (filename) VALUES (?);" (Only (fname :: String)) 
     return ()
 
@@ -44,7 +44,7 @@ ensureFileInDB conn file = do
 getProjectDBHandle :: Project -> IO Connection
 getProjectDBHandle proj = do
     dbFilename <- getDBFilename proj
-    --putStrLn $ "Database file:" ++ dbFilename
+    
 
     -- Build the database tables, if they don't exist:
     conn <-open dbFilename
@@ -97,7 +97,7 @@ getFilePatchs conn file = do
 fileHasOutstandingPatchs :: Connection -> File -> IO Bool
 fileHasOutstandingPatchs conn file = do
     patchs <- getFilePatchs conn file
-    return $ null patchs --(length patchs == 0) 
+    return $ null patchs 
 
 
 getFileId :: Connection -> File -> IO Int
@@ -112,31 +112,28 @@ getFileId dbConn file = do
 
 addFileOutstandingPatchs :: File -> String -> B.ByteString -> IO()
 addFileOutstandingPatchs file description' newBlob = do
-    -- putStrLn $ "Saving new file patchs for: " ++ filename file
-    -- putStrLn  "New File:"
-    -- putStrLn  newBlob
+    
+    
+    
 
     let proj = project file
-    --let fname = filename file
+    
     dbConn <- getProjectDBHandle proj
 
 
     -- Get the file-id:
     id' <- getFileId dbConn file
-    -- putStrLn $ "Found id: " ++ (show id_) ++ " for filename: " ++ fname
+    
 
     -- Find existing patchs:
     patchs <- getFilePatchs dbConn file
-    --putStrLn $ "Found existing patchs: "
-    --putStrLn $ unlines $ map show patchs
-
+    
     let insertionIdx' = (length patchs +1) * 10
-    --let description = "DUMMY REPLACEMENT"
+    
     timestamp' <- round `fmap` getPOSIXTime
 
     -- Create the new patch entry:
-    --putStrLn $ "Running query"
-    --let newBlob' = newBlob
+
 
     execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id' :: Int, insertionIdx' :: Int, timestamp' :: Int, description' :: String, newBlob :: B.ByteString ) 
     --putStrLn $ "Done Running query"

@@ -31,7 +31,7 @@ execApply opts@ModeApply{..} = do
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
 
-    -- Apply to each active project:
+    
     mapM_ execApplyProject activeProjects 
 
 execApplyProject :: Project -> IO ()

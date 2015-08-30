@@ -16,9 +16,6 @@ import Database.SQLite.Simple
 
 
 
--- Printing to the screen
--- ^^^^^^^^^^^^^^^^^^^^^^^^
-
 summariseFileLine :: Connection -> Int -> File -> IO()
 summariseFileLine conn filenamePadding file = do
 

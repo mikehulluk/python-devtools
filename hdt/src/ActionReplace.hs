@@ -8,8 +8,8 @@ import CmdLineOpts
 import HdtProject
 import HdtFilePatchStack
 
-import Data.String.Utils
-import Data.List
+--import Data.String.Utils
+--import Data.List
 
 import qualified Data.ByteString.Char8 as B
 

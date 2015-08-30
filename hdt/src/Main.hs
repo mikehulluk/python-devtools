@@ -1,4 +1,3 @@
---{-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 {-# LANGUAGE RecordWildCards #-}
 
 

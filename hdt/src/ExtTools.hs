@@ -51,7 +51,7 @@ extDiff originalBlob newBlob = do
 
 
 
-    --
+    
 
 
 runExtPatch :: B.ByteString -> B.ByteString -> IO ( Maybe B.ByteString)

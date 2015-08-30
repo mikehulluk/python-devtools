@@ -102,7 +102,7 @@ getConfigFileSetup = do
     let mjson = eitherDecode contents
     case mjson of
         Left err -> do
-            -- putStrLn
+            
             putStrLn ("Unable to read Configfile: " ++ err)
             return MHNothing
         Right result ->  do

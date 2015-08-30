@@ -18,7 +18,7 @@ import Data.List
 import System.Console.ANSI
 import Control.Exception
 
-import Text.Regex.Posix   -- for regular expressions
+import Text.Regex.Posix   
 import Text.Regex.Posix.String
 
 
@@ -29,7 +29,7 @@ type FileLineType = String
 
 
 
---where GrepLineMatch (pre, matched, post,subexpression) lineNo = m
+
 data GrepLineMatch = GrepLineMatch (String, String, String, [String]) Int deriving (Data, Typeable, Show, Eq)
 data GrepLinePrinted = MatchLine GrepLineMatch | ContextLine Int FileLineType deriving (Data, Typeable, Show, Eq)
 
@@ -104,7 +104,6 @@ execGrepFile compiledRegex opts filename= do
 
                 -- With context:
                 _ -> do
-
                     -- By default, print line numbers:
                     let defaultLineNumberWidth = Just 4
                     let lineNumberWidth = if lineNumbers opts then defaultLineNumberWidth else Nothing
@@ -188,11 +187,10 @@ groupLines = groupLines' []
 
 
 groupLines' :: [GrepLinePrinted] -> [GrepLinePrinted] -> [[GrepLinePrinted]]
---groupLines' currentBlk remainingLines = ??
 groupLines' x [] = [x]
 groupLines' [] (x:xs) = groupLines' [x] xs
 groupLines' currentBlk (x:xs)
-        | thisLineNo > (lastLineNo + maxSep) = currentBlk:groupLines' [x] xs              -- New Block
+        | thisLineNo > (lastLineNo + maxSep) = currentBlk:groupLines' [x] xs
         | otherwise  = groupLines' (currentBlk ++ [x]) xs
     where maxSep = 1
           lastLineNo = grepLineNum $ last currentBlk
@@ -223,7 +221,7 @@ printGrepLine lineNumberWidth (MatchLine m) = do
     setSGR [SetColor Foreground Dull White]
     putStr $ post ++ "\n"
     setSGR []
-    where GrepLineMatch (pre, matched, post,subexpression) lineNo = m
+    where GrepLineMatch (pre, matched, post, _) lineNo = m
 
 
 
@@ -243,18 +241,3 @@ printGroupLines filename lineNumberWidth fileLines = do
     putStrLn $ "In file:" ++ filename
     mapM_ (printGrepLine lineNumberWidth) fileLines
     return ()
-
-
-
-
---Ord GrepLinePrinted
-
-
-
-
-
-
-
-
-
-

@@ -36,6 +36,3 @@ executable hdt
                        temporary,
                        process,
                        MissingH
-                       --Diff,
-                       --gdiff
-                       --bytestring-delta
