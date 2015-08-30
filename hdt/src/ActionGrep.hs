@@ -18,7 +18,7 @@ import Data.List
 import System.Console.ANSI
 import Control.Exception
 
-import Text.Regex.Posix   
+import Text.Regex.Posix
 import Text.Regex.Posix.String
 
 
@@ -75,9 +75,6 @@ execGrepFile compiledRegex opts filename= do
                   putStrLn ("Warning: Couldn't open " ++ filename ++ ": " ++ err)
                   return "")
 
-    --putStrLn $ show opts
-
-
     let ls = lines contents
     let ils = zip [0..] ls
 
@@ -85,7 +82,7 @@ execGrepFile compiledRegex opts filename= do
     grepLinesAll <- mapM (grepLine compiledRegex) ils
     let grepLines = concat grepLinesAll
 
-    case length grepLines of 
+    case length grepLines of
         0 -> return ()
         _ -> do
             -- Add in context lines
@@ -127,28 +124,28 @@ execGrepFile compiledRegex opts filename= do
 
 
 
-printLineSimple :: PrintLineNumberWidth -> Maybe String -> GrepLineMatch -> IO () 
-printLineSimple    lineNumberWidth filename lineMatch = do 
+printLineSimple :: PrintLineNumberWidth -> Maybe String -> GrepLineMatch -> IO ()
+printLineSimple    lineNumberWidth filename lineMatch = do
     putStr $ maybe "" (++":") filename
     (printGrepLine lineNumberWidth ) $ MatchLine lineMatch
     return ()
 
 
 
-stripEmptyContextLines ::  [GrepLinePrinted] ->[GrepLinePrinted] 
+stripEmptyContextLines ::  [GrepLinePrinted] ->[GrepLinePrinted]
 stripEmptyContextLines x = striphead $ striptail x
-    where striphead = stripEmptyContextLinesHeads 
+    where striphead = stripEmptyContextLinesHeads
           striptail = reverse . stripEmptyContextLinesHeads  . reverse
 
 isEmptyLine :: GrepLinePrinted -> Bool
 isEmptyLine (ContextLine _ lineContents ) =  trim lineContents  == ""
 isEmptyLine _ = False
 
-stripEmptyContextLinesHeads :: [GrepLinePrinted] ->[GrepLinePrinted] 
+stripEmptyContextLinesHeads :: [GrepLinePrinted] ->[GrepLinePrinted]
 stripEmptyContextLinesHeads  []  = []
-stripEmptyContextLinesHeads  [x] = if isEmptyLine  x then [] else [x] 
-stripEmptyContextLinesHeads  (x:xs) 
-    | isEmptyLine x = stripEmptyContextLinesHeads xs 
+stripEmptyContextLinesHeads  [x] = if isEmptyLine  x then [] else [x]
+stripEmptyContextLinesHeads  (x:xs)
+    | isEmptyLine x = stripEmptyContextLinesHeads xs
     | otherwise = x:xs
 
 grepLine :: Regex -> (Int, FileLineType) -> IO [GrepLineMatch]
