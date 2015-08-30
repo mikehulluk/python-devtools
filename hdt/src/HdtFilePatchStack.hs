@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module HdtFilePatchStack where
 
@@ -18,17 +19,15 @@ import System.FilePath ((</>), (<.>))
 getDBFilename :: Project -> IO String
 getDBFilename proj = do
     configPath <- getHDTConfigPath
-    --let path = configPath ++ "/" ++ (projectName proj ++ ".sqlite")
-    let path = configPath </> (projectName proj) <.> "sqlite"
-    return path
+    return $ configPath </> (projectName proj) <.> "sqlite"
 
 
 
 ensureFileInDB :: Connection -> File -> IO()
-ensureFileInDB conn file = do
-    let fname = filename file
+ensureFileInDB conn File{..} = do
+    --let fname = filename file
 
-    execute conn "INSERT OR IGNORE INTO Files (filename) VALUES (?);" (Only (fname :: String))
+    execute conn "INSERT OR IGNORE INTO Files (filename) VALUES (?);" (Only (filename :: String))
     return ()
 
 
