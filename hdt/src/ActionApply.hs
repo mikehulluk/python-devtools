@@ -10,12 +10,12 @@ import HdtProject
 import HdtFilePatchStack
 import ExtTools
 
-import System.IO.Temp
-import System.IO
+--import System.IO.Temp
+--import System.IO
 
-import System.Process
-import System.Exit
-import System.Directory
+--import System.Process
+--import System.Exit
+--import System.Directory
 
 import qualified Data.ByteString.Char8 as B
 import Database.SQLite.Simple

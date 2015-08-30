@@ -7,11 +7,11 @@ import CmdLineOpts
 import HdtProject
 
 import System.Console.CmdArgs
-import System.Environment (getArgs, withArgs)
-import System.Exit
+--import System.Environment (getArgs, withArgs)
+--import System.Exit
 import Control.Monad
 import Data.List
-import Data.Text.Format
+--import Data.Text.Format
 
 
 
@@ -51,8 +51,9 @@ execGrep opts@ModeGrep{..} = do
     -- Compile the regular expression:
     regexCompRes <- compile defaultCompOpt execBlank grepString
     case regexCompRes of
-        Left wrapError -> do
-            putStrLn "Unable to compile"
+        Left (retCode,errMsg) -> do
+            putStrLn $ "Unable to compile regex: " ++ grepString
+            putStrLn $ "Errorcode: " ++ (show retCode) ++ " -- " ++ errMsg
             return ()
         Right compiledRegex -> do
             putStrLn "Compiled OK"
@@ -150,10 +151,10 @@ stripEmptyContextLines allLines x = striphead $ striptail x
 
 isEmptyLine :: [String] -> GrepLinePrinted -> Bool
 isEmptyLine allLines (ContextLine l) =  trim (allLines!!l)  == ""
-isEmptyLine allLines _ = False
+isEmptyLine _ _ = False
 
 stripEmptyContextLinesHeads ::  [String] -> [GrepLinePrinted] ->[GrepLinePrinted] 
-stripEmptyContextLinesHeads allLines []  = []
+stripEmptyContextLinesHeads _ []  = []
 stripEmptyContextLinesHeads allLines [x] = if isEmptyLine allLines x then [] else [x] 
 stripEmptyContextLinesHeads allLines (x:xs) 
     | isEmptyLine allLines x = stripEmptyContextLinesHeads allLines xs 
@@ -163,7 +164,13 @@ grepLine :: Regex -> (Int, String) -> IO [GrepLineMatch]
 grepLine compiledRegex (lineNo, line) = do
     result <- regexec compiledRegex line
     case result of
-        Left (returnCode, errorStr) -> return []
+        Left (retCode, errMsg) -> do
+            putStrLn $ "Unexpected error grepping line " ++ (show lineNo)
+            putStrLn $ line
+            putStrLn $ "Error: " ++ (show retCode) ++ " -- " ++ errMsg
+            return ()
+        
+            return []
         Right match -> case match of
             Nothing -> return []
             Just (pre, matched, post,subexpression) -> return [ GrepLineMatch (pre, matched, post,subexpression) lineNo ]
