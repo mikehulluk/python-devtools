@@ -69,9 +69,9 @@ execReplace opts@Repl{..} = do
 
             case  noApply of 
                 False -> do
-                    return ()
+                    execApply (Apply)
                 True  -> do
-                    execApply (ModeApply)
+                    return ()
                     
             return ()
 

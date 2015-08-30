@@ -42,7 +42,7 @@ instance Ord GrepLinePrinted where
 -- Grepping:
 -- ^^^^^^^^^^^^^^^^^^^^^^^^
 execGrep :: MyOptions -> IO ()
-execGrep opts@ModeGrep{..} = do
+execGrep opts@Grep{..} = do
     -- Get the active projects
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects

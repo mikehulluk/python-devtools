@@ -27,7 +27,7 @@ import Data.Maybe
 
 
 execApply :: MyOptions -> IO ()
-execApply opts@ModeApply{..} = do
+execApply opts@Apply{..} = do
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
 

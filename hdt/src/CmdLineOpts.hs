@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
 module CmdLineOpts(
-    MyOptions(ModeConfig,ModeGrep,Repl,ModeApply,ModeDrop), 
+    MyOptions(Config,Grep,Repl,Apply,Drop), 
     modeConfig,
         first_name, last_name,
     modeGrep,
@@ -20,10 +20,10 @@ import System.Console.CmdArgs
 
 
 data MyOptions =
-    ModeConfig   { first_name :: String
+    Config   { first_name :: String
                  , last_name :: String
                  }
-    | ModeGrep {  grepString    :: String
+    | Grep {  grepString    :: String
                 , ignoreCase    :: Bool
                 , word          :: Bool
                 , count         :: Bool
@@ -38,14 +38,14 @@ data MyOptions =
         , doWordRegex    :: Bool
         , noApply        :: Bool
         }
-    | ModeApply { }
-    | ModeDrop { }
+    | Apply { }
+    | Drop { }
     deriving (Data, Typeable, Show, Eq)
 
 
 
 modeConfig :: MyOptions
-modeConfig = ModeConfig
+modeConfig = Config
     { first_name = "FIRSTNAME" &= help "your first name"
     , last_name = "LASTNAME" &= help "your last name"
     }
@@ -55,7 +55,7 @@ modeConfig = ModeConfig
 
 
 modeGrep :: MyOptions
-modeGrep = ModeGrep
+modeGrep = Grep
     {
       grepString    = def   &= argPos 0 &= typ "GREPSTRING"
     , ignoreCase    = True  &= help "ignoreCase"
@@ -84,14 +84,14 @@ modeReplace = Repl
                 ]
 
 modeApply :: MyOptions
-modeApply = ModeApply
+modeApply = Apply
     { }
     &= details  [ "Examples:"
                 , "Blah blah blah again."
                 ]
 
 modeDrop :: MyOptions
-modeDrop = ModeDrop
+modeDrop = Drop
     { }
     &= details  [ "Examples:"
                 , "Blah blah blah again."

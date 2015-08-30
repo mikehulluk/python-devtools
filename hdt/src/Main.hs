@@ -23,12 +23,12 @@ main = do
     optionHandler opts
 
 optionHandler :: MyOptions -> IO ()
-optionHandler opts@ModeConfig{..}  = do
+optionHandler opts@Config{..}  = do
     when (null first_name) $ putStrLn "warning: --first-name is blank"
     when (null last_name) $ putStrLn "warning: --last-name is blank"
     execConfig opts
 
-optionHandler opts@ModeGrep{..}  = do
+optionHandler opts@Grep{..}  = do
     putStrLn  $ "Grepping for: " ++ "'" ++ grepString ++ "'"
     execGrep opts
 
@@ -36,11 +36,11 @@ optionHandler opts@Repl{..}  = do
     putStrLn  $ "Replacing for: " ++ "'" ++ searchString ++ "'"
     execReplace opts
 
-optionHandler opts@ModeDrop{..}  = do
+optionHandler opts@Drop{..}  = do
     execDrop opts
 
 
-optionHandler opts@ModeApply{..}  = do
+optionHandler opts@Apply{..}  = do
     execApply opts
 
 

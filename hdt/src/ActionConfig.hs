@@ -48,7 +48,7 @@ summariseProjectConsole project = do
     where textcolor = if isActive project then Green else Red
 
 execConfig :: MyOptions -> IO ()
-execConfig opts@ModeConfig{..} = do
+execConfig opts@Config{..} = do
     projects <- getAllProjectConfigs
     forM_ projects summariseProjectConsole
     forM_ projects getProjectDBHandle

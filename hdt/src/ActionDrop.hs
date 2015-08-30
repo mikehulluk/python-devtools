@@ -8,7 +8,7 @@ import HdtProject
 import HdtFilePatchStack
 
 execDrop :: MyOptions -> IO ()
-execDrop opts@ModeDrop{..} = do
+execDrop opts@Drop{..} = do
     -- Get the active projects
     projects <- getAllProjectConfigs
     let activeProjects = filter isActive projects
