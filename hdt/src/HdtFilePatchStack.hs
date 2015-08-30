@@ -25,7 +25,6 @@ getDBFilename proj = do
 
 ensureFileInDB :: Connection -> File -> IO()
 ensureFileInDB conn File{..} = do
-    --let fname = filename file
 
     execute conn "INSERT OR IGNORE INTO Files (filename) VALUES (?);" (Only (filename :: String))
     return ()
@@ -103,41 +102,27 @@ getFileId dbConn file = do
 addFileOutstandingPatchs :: File -> String -> B.ByteString -> IO()
 addFileOutstandingPatchs file description' newBlob = do
 
-
-
-
     let proj = project file
-
     dbConn <- getProjectDBHandle proj
-
-
     -- Get the file-id:
     id' <- getFileId dbConn file
-
-
     -- Find existing patchs:
     patchs <- getFilePatchs dbConn file
-
     let insertionIdx' = (length patchs +1) * 10
-
     timestamp' <- round `fmap` getPOSIXTime
 
     -- Create the new patch entry:
-
-
     execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id' :: Int, insertionIdx' :: Int, timestamp' :: Int, description' :: String, newBlob :: B.ByteString )
-    --putStrLn $ "Done Running query"
 
-    return ()
+    --return ()
 
 
 
 dropOutstandingPatchs :: File -> IO()
 dropOutstandingPatchs file = do
-    let proj = project file
     let fname = filename file
     putStrLn $ "Dropping patchs for: " ++ fname
-    dbConn <- getProjectDBHandle proj
+    dbConn <- getProjectDBHandle (project file) 
     id_ <- getFileId dbConn file
     query dbConn "DELETE FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]
     return ()
