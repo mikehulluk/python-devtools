@@ -1,15 +1,22 @@
 {
     "projects" : [
-        
-        { "name": "project1",
+        { "name": "morphforge",
+          "active":true,
+          "rootdir":"/home/michael/hw/morphforge/",
+          "files": [
+                {"glob":"src/**/*.py", "tags":["src",".py"]}
+            ]
+        },
+        { "name": "Python Dev-Tools",
           "active":false,
           "rootdir":"/home/michael/hw/python-devtools/",
           "files": [
                 {"glob":"src/**/*.py", "tags":["src",".py"]}
             ]
         },
-        { "name": "project2",
-          "active":true,
+        {
+         "name": "Python Dev-Tools [HDT]",
+          "active":false,
           "rootdir":"/home/michael/hw/python-devtools/hdt/",
           "files": [
                 {"glob":"src/**/*.hs", "tags":["src",".hs"]}
@@ -24,7 +31,7 @@
             ]
         },
         { "name": "project2B",
-          "active":true,
+          "active":false,
           "rootdir":"/home/mike/dev/python-devtools/hdt/",
           "files": [
                 {"glob":"src/**/*.hs", "tags":["src",".hs"]}

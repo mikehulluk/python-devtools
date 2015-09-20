@@ -7,10 +7,10 @@ import ActionReplace
 import ActionConfig
 import ActionApply
 import ActionDrop
+import ActionTags
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
-
 
 import Control.Monad
 
@@ -42,5 +42,8 @@ optionHandler opts@Drop{..}  = do
 
 optionHandler opts@Apply{..}  = do
     execApply opts
+
+optionHandler opts@Tags{..}  = do
+    execTags opts
 
 

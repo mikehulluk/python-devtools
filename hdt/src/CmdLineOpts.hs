@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
 module CmdLineOpts(
-    MyOptions(Config,Grep,Repl,Apply,Drop), 
+    MyOptions(Config,Grep,Repl,Apply,Drop, Tags), 
     modeConfig,
         first_name, last_name,
     modeGrep,
@@ -10,6 +10,7 @@ module CmdLineOpts(
         searchString, replaceString, doWordRegex, noApply,
     modeApply,
     modeDrop,
+    modeTags,
     myModes
     )
 where
@@ -40,6 +41,7 @@ data MyOptions =
         }
     | Apply { }
     | Drop { }
+    | Tags { }
     deriving (Data, Typeable, Show, Eq)
 
 
@@ -98,9 +100,15 @@ modeDrop = Drop
                 ]
 
 
+modeTags :: MyOptions
+modeTags = Tags
+    { }
+    &= details  [ "Examples:"
+                , "Blah blah blah again."
+                ]
 
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop]
+myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
