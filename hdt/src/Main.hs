@@ -8,6 +8,7 @@ import ActionConfig
 import ActionApply
 import ActionDrop
 import ActionTags
+import ActionGetRootDir
 
 import System.Console.CmdArgs
 import System.Environment (getArgs, withArgs)
@@ -46,4 +47,6 @@ optionHandler opts@Apply{..}  = do
 optionHandler opts@Tags{..}  = do
     execTags opts
 
+optionHandler opts@GetRootDir{..}  = do
+    execGetRootDir opts
 

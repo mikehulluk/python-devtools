@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
 module CmdLineOpts(
-    MyOptions(Config,Grep,Repl,Apply,Drop, Tags), 
+    MyOptions(Config,Grep,Repl,Apply,Drop, Tags, GetRootDir), 
     modeConfig,
         first_name, last_name,
     modeGrep,
@@ -11,6 +11,7 @@ module CmdLineOpts(
     modeApply,
     modeDrop,
     modeTags,
+    modeGetRootDir,
     myModes
     )
 where
@@ -42,6 +43,7 @@ data MyOptions =
     | Apply { }
     | Drop { }
     | Tags { }
+    | GetRootDir {}
     deriving (Data, Typeable, Show, Eq)
 
 
@@ -107,8 +109,15 @@ modeTags = Tags
                 , "Blah blah blah again."
                 ]
 
+modeGetRootDir :: MyOptions
+modeGetRootDir = GetRootDir
+    { }
+    &= details  [ "Examples:"
+                , "Blah blah blah again."
+                ]
+
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags]
+myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags, modeGetRootDir]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
