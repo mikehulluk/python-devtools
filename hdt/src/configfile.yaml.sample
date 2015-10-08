@@ -1,0 +1,18 @@
+
+projects:
+    - name: morphforge
+      active: true
+      rootdir: /home/michael/hw/morphforge/
+      files:
+        - glob: src/**/*.py
+          tags:
+            - src
+            - .py
+    - name: Python Dev-Tools
+      active: false
+      rootdir: /home/michael/hw/python-devtools/
+      files:
+        - glob: src/**/*.py
+          tags:
+            - src
+            - .py

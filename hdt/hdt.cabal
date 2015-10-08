@@ -35,4 +35,5 @@ executable hdt
                        bytestring,
                        temporary,
                        process,
-                       MissingH
+                       MissingH,
+                       yaml

@@ -8,9 +8,11 @@ import System.Directory
 
 import Data.List
 
-import Data.Aeson
+import Data.Aeson as A
+import Data.Yaml as Y
 import Control.Monad
 import qualified Data.ByteString.Lazy as LB
+import qualified Data.ByteString as B
 
 
 
@@ -58,9 +60,10 @@ getHDTConfigPath  = do
 
 
 
-sampleConfigFileContents :: IO LB.ByteString 
+sampleConfigFileContents :: IO B.ByteString 
 sampleConfigFileContents = do
-    contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
+    --contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
+    contents <- B.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.yaml.sample"
     --contents <- LB.readFile "/home/mike/dev/python-devtools/hdt/src/configfile.json.sample"
     return contents
 
@@ -99,7 +102,7 @@ instance FromJSON Project where
 getConfigFileSetup :: IO ConfigFileSetup
 getConfigFileSetup = do
     contents <- sampleConfigFileContents
-    let mjson = eitherDecode contents
+    let mjson = Y.decodeEither contents
     case mjson of
         Left err -> do
             
