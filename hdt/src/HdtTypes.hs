@@ -1,6 +1,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module HdtTypes where
 
 import System.Directory
@@ -70,7 +71,10 @@ sampleConfigFileContents = do
 
 
 
-
+data ActiveProjectConfig = ActiveProjectConfig {
+    primaryProject :: String,
+    activeProjects :: [String]
+}
 
 
 
@@ -79,13 +83,6 @@ instance FromJSON HdtTypes.FileSelector where
         globString <- o .: "glob"
         addTags <- o .: "tags"
         return HdtTypes.FileSelector{..}
-
-
-instance FromJSON ConfigFileSetup where
-    parseJSON (Object o) = do
-        projects <- parseJSON =<< (o.: "projects")
-        return ConfigFileSetup{..}
-    parseJSON _ = mzero
 
 instance FromJSON Project where
     parseJSON (Object v) = do
@@ -96,6 +93,22 @@ instance FromJSON Project where
         return Project{..} 
 
     parseJSON _ = mzero
+
+instance FromJSON ActiveProjectConfig where
+    parseJSON (Object v) = do
+        primaryProject <- v .: "primary"
+        activeProjects <- v .: "active"
+        
+        return ActiveProjectConfig{..}
+
+instance FromJSON ConfigFileSetup where
+    parseJSON (Object o) = do
+        general:: ActiveProjectConfig    <- parseJSON =<< (o.: "general")
+        projects <- parseJSON =<< (o.: "projects")
+        -- Set the active/primary flags in each project
+        return ConfigFileSetup{projects=projects}
+    parseJSON _ = mzero
+
 
 
 

@@ -1,3 +1,8 @@
+general:
+    primary: PythonDevTools
+    active: 
+        - morphforge
+        - PythonDevTools
 
 projects:
     - name: morphforge
@@ -8,7 +13,7 @@ projects:
           tags:
             - src
             - .py
-    - name: Python Dev-Tools
+    - name: PythonDevTools
       active: false
       rootdir: /home/michael/hw/python-devtools/
       files:
