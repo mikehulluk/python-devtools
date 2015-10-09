@@ -136,7 +136,7 @@ getConfigFileSetup = do
             putStrLn ("Unable to read Configfile: " ++ err)
             return MHNothing
         Right result ->  do
-            putStrLn $ show result
+            --putStrLn $ show result
             return result
 
 
