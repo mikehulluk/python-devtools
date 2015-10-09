@@ -23,6 +23,7 @@ data Project = Project {
       projectName :: String
     , rootDir :: String
     , isActive :: Bool
+    , isPrimary :: Bool
     , fileSelectors :: [FileSelector]
 } deriving (Show)
 
@@ -103,6 +104,7 @@ instance FromJSON ConfigFileSetup where
     parseJSON (Object o) = do
         apc :: ActiveProjectConfig    <- parseJSON =<< (o.: "general")
         projects <- parseJSON =<< (o.: "projects")
+
         -- Set the active/primary flags in each project
         let projects' = map (updateIsActiveFields apc) projects 
         return ConfigFileSetup{projects=projects'}
@@ -113,6 +115,10 @@ updateIsActiveFields apc proj =
     case (projectName proj) `elem` (activeProjects apc) of
         True -> proj{ isActive = True}
         False -> proj
+
+updateIsPrimaryFields :: ActiveProjectConfig -> Project -> Project
+updateIsPrimaryFields apc proj = proj{ isPrimary = isPrimary}
+    where isPrimary = (projectName proj) == (primaryProject apc)
 
 
 
