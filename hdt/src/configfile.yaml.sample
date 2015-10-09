@@ -13,6 +13,15 @@ projects:
           tags:
             - src
             - .py
+    
+    - name: Paper2
+      rootdir: /home/michael/hw/PaperSimulations2/
+      files:
+        - glob: "**/*.py"
+          tags:
+            - src
+            - .py
+
     - name: PythonDevTools
       active: false
       rootdir: /home/michael/hw/python-devtools/

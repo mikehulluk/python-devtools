@@ -22,3 +22,12 @@ getAllProjectConfigs :: IO [Project]
 getAllProjectConfigs = do
     conf <- getConfigFileSetup
     return $ projects conf
+
+getPrimaryProject :: IO (Maybe Project)
+getPrimaryProject = do
+    projects <- getAllProjectConfigs
+    let primaryProjects = filter isPrimary projects
+    case length(primaryProjects) of
+        0 -> return Nothing
+        1 -> return $ Just $ head primaryProjects
+        _ -> error "Unexpected number of primary projects"

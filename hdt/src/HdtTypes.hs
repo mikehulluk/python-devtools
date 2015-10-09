@@ -88,6 +88,7 @@ instance FromJSON Project where
         isActive <- v .:? "active" .!= False
         rootDir <- v .: "rootdir"
         fileSelectors <- parseJSON =<< (v.: "files")
+        let isPrimary = False 
         return Project{..} 
 
     parseJSON _ = mzero
@@ -106,7 +107,8 @@ instance FromJSON ConfigFileSetup where
         projects <- parseJSON =<< (o.: "projects")
 
         -- Set the active/primary flags in each project
-        let projects' = map (updateIsActiveFields apc) projects 
+        let updatefunc = (updateIsActiveFields apc) . (updateIsPrimaryFields apc)
+        let projects' = map (updatefunc) projects 
         return ConfigFileSetup{projects=projects'}
     parseJSON _ = mzero
 

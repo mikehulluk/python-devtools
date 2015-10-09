@@ -27,25 +27,37 @@ summariseFileLine conn filenamePadding file = do
           tagString = "tags:[" ++ intercalate "," (tags file)  ++ "]"
 
 
+
+projectTextColor :: Project -> Color
+projectTextColor proj = case (isPrimary proj, isActive proj) of
+    (True, _) -> Magenta
+    (False, True) -> Green
+    otherwise -> Red
+
 summariseProjectConsole :: Project -> IO ()
 summariseProjectConsole project = do
-
+        let textcolor = projectTextColor project
         conn <- getProjectDBHandle project
         setSGR [SetColor Foreground Vivid textcolor]
 
-        putStrLn $ projectName project ++ ": " ++ if isActive project then "<active>" else "<inactive>"
+        let isActiveLabel = if isActive project then "<active>" else "<inactive>"
+        let isPrimaryLabel = if isPrimary project then "<primary>" else ""
+        putStrLn $ projectName project ++ ": " ++ isPrimaryLabel ++ " " ++ isActiveLabel
         let rootdir = rootDir project
         putStrLn $ "  Root:" ++  rootdir
 
-        putStrLn "  Files:"
         srcfiles' <-(srcFiles project)
+        putStrLn $"  Files: " ++ (show $ length srcfiles')
 
-        let nFnamePadding = (maximum $ map (length.relativeFilename) srcfiles' ) + 3
-        mapM_ (summariseFileLine conn nFnamePadding)  srcfiles'
+        -- let nFnamePadding = (maximum $ map (length.relativeFilename) srcfiles' ) + 3
+        -- mapM_ (summariseFileLine conn nFnamePadding)  srcfiles'
+        
+
+
         setSGR []
         putStrLn ""
         return ()
-    where textcolor = if isActive project then Green else Red
+    --where textcolor = if isActive project then Green else Red
 
 execConfig :: MyOptions -> IO ()
 execConfig opts@Config{..} = do

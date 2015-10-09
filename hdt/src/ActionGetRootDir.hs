@@ -9,13 +9,21 @@ import HdtFilePatchStack
 
 import Data.List
 import System.Cmd
+import System.Data
 
 
 
 execGetRootDir :: MyOptions -> IO ()
 execGetRootDir opts@GetRootDir{..} = do
+    let primaryProject = getPrimaryProject;
+    case primaryProject of
+        Nothing     ->  do
+            putStrLn "No primary project selected"
+            exitWith (ExitFailure 10)
+        (Just proj) -> do
+            putStrLn $ rootDir proj
 
-    putStrLn "/home/mike/dev/python-devtools/hdt"
+    --putStrLn "/home/mike/dev/python-devtools/hdt"
     -- -- Get the active projects
     -- projects <- getAllProjectConfigs
     -- let activeProjects = filter isActive projects
