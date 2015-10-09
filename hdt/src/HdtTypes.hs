@@ -38,7 +38,7 @@ data File = File {
     , project :: Project
     } deriving (Show)
 
-data ConfigFileSetup = MHNothing | ConfigFileSetup {
+data ConfigFileSetup = ConfigFileSetup {
     projects :: [Project]
 
 } deriving (Show)
@@ -132,11 +132,8 @@ getConfigFileSetup = do
     let mjson = Y.decodeEither contents
     case mjson of
         Left err -> do
-            
-            putStrLn ("Unable to read Configfile: " ++ err)
-            return MHNothing
+          error ("Unable to read Configfile: " ++ err)
         Right result ->  do
-            --putStrLn $ show result
-            return result
+          return result
 
 

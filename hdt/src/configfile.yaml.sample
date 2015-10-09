@@ -30,3 +30,7 @@ projects:
           tags:
             - src
             - .py
+        - glob: hdt/**/*.hs
+          tags:
+            - src
+            - .hs
