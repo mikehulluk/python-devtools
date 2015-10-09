@@ -36,4 +36,5 @@ executable hdt
                        temporary,
                        process,
                        MissingH,
-                       yaml
+                       yaml,
+                       unix

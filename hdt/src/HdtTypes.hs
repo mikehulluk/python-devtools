@@ -15,6 +15,8 @@ import Control.Monad
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString as B
 
+import MHUtil (expandUser)
+
 
 
 data Project = Project {
@@ -43,11 +45,6 @@ data ConfigFileSetup = MHNothing | ConfigFileSetup {
 
 
 
-
-
-
-
-
 relativeFilename :: File -> String
 relativeFilename File{..} = if rootDir project `isPrefixOf` filename then drop (length $ rootDir project) filename else filename
 
@@ -63,9 +60,9 @@ getHDTConfigPath  = do
 
 sampleConfigFileContents :: IO B.ByteString 
 sampleConfigFileContents = do
-    --contents <- LB.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.json.sample"
-    contents <- B.readFile "/home/michael/hw/python-devtools/hdt/src/configfile.yaml.sample"
-    --contents <- LB.readFile "/home/mike/dev/python-devtools/hdt/src/configfile.json.sample"
+    --fname <- expandUser "~/hw/python-devtools/hdt/src/configfile.yaml.sample"
+    fname <- expandUser "~/.hdtrc"
+    contents <- B.readFile fname
     return contents
 
 
@@ -103,11 +100,19 @@ instance FromJSON ActiveProjectConfig where
 
 instance FromJSON ConfigFileSetup where
     parseJSON (Object o) = do
-        general:: ActiveProjectConfig    <- parseJSON =<< (o.: "general")
+        apc :: ActiveProjectConfig    <- parseJSON =<< (o.: "general")
         projects <- parseJSON =<< (o.: "projects")
         -- Set the active/primary flags in each project
-        return ConfigFileSetup{projects=projects}
+        let projects' = map (updateIsActiveFields apc) projects 
+        return ConfigFileSetup{projects=projects'}
     parseJSON _ = mzero
+
+updateIsActiveFields :: ActiveProjectConfig -> Project -> Project
+updateIsActiveFields apc proj = 
+    case (projectName proj) `elem` (activeProjects apc) of
+        True -> proj{ isActive = True}
+        False -> proj
+
 
 
 

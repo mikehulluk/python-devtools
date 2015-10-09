@@ -1,8 +1,10 @@
 
 {-# LANGUAGE OverloadedStrings #-}
-module MHUtil(pad,trim) where
+module MHUtil(pad,trim, expandUser) where
 
 import Data.Char (isSpace)
+import System.Directory
+import System.Posix.User
 
 pad :: Char -> Int -> String -> String
 pad c cnt src = src ++ padding
@@ -13,3 +15,18 @@ pad c cnt src = src ++ padding
 trim :: String -> String
 trim = f . f
    where f = reverse . dropWhile isSpace
+
+
+
+
+
+expandUser :: String -> IO String
+expandUser "~"         = do
+    homeDir <- getHomeDirectory
+    return homeDir
+expandUser ('~':up)    = do
+    homeDir <- getHomeDirectory
+    return $ homeDir ++ up
+
+expandUser p           = return p
+
