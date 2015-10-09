@@ -94,7 +94,8 @@ instance FromJSON Project where
 instance FromJSON ActiveProjectConfig where
     parseJSON (Object v) = do
         primaryProject <- v .: "primary"
-        activeProjects <- v .: "active"
+        activeProjects' <- v .: "active"
+        let activeProjects = nub $ [primaryProject] ++ activeProjects'
         
         return ActiveProjectConfig{..}
 
