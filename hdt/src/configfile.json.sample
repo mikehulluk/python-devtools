@@ -1,4 +1,10 @@
 {
+
+    "general": {
+        "primary": "PythonDevTools",
+        "active": ["morphforge","PythonDevTools"],
+    },
+    
     "projects" : [
         { "name": "morphforge",
           "active":true,
