@@ -5,10 +5,10 @@ module ActionGetRootDir where
 import HdtTypes
 import CmdLineOpts
 import HdtProject
-import HdtFilePatchStack
+--import HdtFilePatchStack
 
-import Data.List
-import System.Cmd
+--import Data.List
+--import System.Cmd
 import System.Exit
 
 
@@ -22,3 +22,4 @@ execGetRootDir opts@GetRootDir{..} = do
             exitWith (ExitFailure 10)
         (Just proj) -> do
             putStrLn $ rootDir proj
+execGetRootDir _ = error "execGetRootDir called with wrong argument"

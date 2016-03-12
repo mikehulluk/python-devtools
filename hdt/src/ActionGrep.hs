@@ -59,6 +59,8 @@ execGrep opts@Grep{..} = do
 
             forM_ activeProjects (grepProject compiledRegex opts)
             return ()
+execGrep _ = error "execGrep called with wrong argument"
+
 
 grepProject ::  Regex -> MyOptions -> Project -> IO ()
 grepProject compiledRegex opts proj = do

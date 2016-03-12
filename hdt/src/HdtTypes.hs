@@ -12,7 +12,7 @@ import Data.List
 import Data.Aeson as A
 import Data.Yaml as Y
 import Control.Monad
-import qualified Data.ByteString.Lazy as LB
+--import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString as B
 
 import MHUtil (expandUser)
@@ -61,7 +61,6 @@ getHDTConfigPath  = do
 
 sampleConfigFileContents :: IO B.ByteString 
 sampleConfigFileContents = do
-    --fname <- expandUser "~/hw/python-devtools/hdt/src/configfile.yaml.sample"
     fname <- expandUser "~/.hdtrc"
     contents <- B.readFile fname
     return contents
@@ -81,6 +80,8 @@ instance FromJSON HdtTypes.FileSelector where
         globString <- o .: "glob"
         addTags <- o .: "tags"
         return HdtTypes.FileSelector{..}
+    parseJSON _ = mzero
+    --parseJSON _ = error "Unexpected token"
 
 instance FromJSON Project where
     parseJSON (Object v) = do
@@ -90,7 +91,6 @@ instance FromJSON Project where
         fileSelectors <- parseJSON =<< (v.: "files")
         let isPrimary = False 
         return Project{..} 
-
     parseJSON _ = mzero
 
 instance FromJSON ActiveProjectConfig where
@@ -98,19 +98,19 @@ instance FromJSON ActiveProjectConfig where
         primaryProject <- v .: "primary"
         activeProjects' <- v .: "active"
         let activeProjects = nub $ [primaryProject] ++ activeProjects'
-        
         return ActiveProjectConfig{..}
+    parseJSON _ = mzero
 
 instance FromJSON ConfigFileSetup where
     parseJSON (Object o) = do
         apc :: ActiveProjectConfig    <- parseJSON =<< (o.: "general")
         projects <- parseJSON =<< (o.: "projects")
-
         -- Set the active/primary flags in each project
         let updatefunc = (updateIsActiveFields apc) . (updateIsPrimaryFields apc)
         let projects' = map (updatefunc) projects 
         return ConfigFileSetup{projects=projects'}
     parseJSON _ = mzero
+
 
 updateIsActiveFields :: ActiveProjectConfig -> Project -> Project
 updateIsActiveFields apc proj = 

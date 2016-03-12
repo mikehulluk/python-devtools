@@ -18,8 +18,7 @@ import Database.SQLite.Simple
 
 summariseFileLine :: Connection -> Int -> File -> IO()
 summariseFileLine conn filenamePadding file = do
-
-    patchs <-getFilePatchs conn file
+    patchs <- getFilePatchs conn file
     let nPatchs = show $ length  patchs
     let outstandingPatchs = "Patches: " ++ nPatchs ++ "  "
     putStrLn $ "\t" ++ paddedFname ++ "[" ++ outstandingPatchs ++ tagString ++ "]"
@@ -32,12 +31,11 @@ projectTextColor :: Project -> Color
 projectTextColor proj = case (isPrimary proj, isActive proj) of
     (True, _) -> Magenta
     (False, True) -> Green
-    otherwise -> Red
+    _ -> Red
 
 summariseProjectConsole :: Project -> IO ()
 summariseProjectConsole project = do
         let textcolor = projectTextColor project
-        conn <- getProjectDBHandle project
         setSGR [SetColor Foreground Vivid textcolor]
 
         let isActiveLabel = if isActive project then "<active>" else "<inactive>"
@@ -49,6 +47,7 @@ summariseProjectConsole project = do
         srcfiles' <-(srcFiles project)
         putStrLn $"  Files: " ++ (show $ length srcfiles')
 
+        --conn <- getProjectDBHandle project
         -- let nFnamePadding = (maximum $ map (length.relativeFilename) srcfiles' ) + 3
         -- mapM_ (summariseFileLine conn nFnamePadding)  srcfiles'
         
@@ -65,4 +64,5 @@ execConfig opts@Config{..} = do
     forM_ projects summariseProjectConsole
     forM_ projects getProjectDBHandle
     return ()
+execConfig _ = error "execConfig called with bad argument"
 
