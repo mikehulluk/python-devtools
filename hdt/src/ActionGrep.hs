@@ -44,8 +44,9 @@ instance Ord GrepLinePrinted where
 execGrep :: MyOptions -> IO ()
 execGrep opts@Grep{..} = do
     -- Get the active projects
-    projects <- getAllProjectConfigs
-    let activeProjects = filter isActive projects
+    --projects <- getAllProjectConfigs
+    --let activeProjects = filter isActive projects
+    activeProjects <- getActiveProjects
 
     -- Compile the regular expression:
     regexCompRes <- compile defaultCompOpt execBlank grepString
@@ -59,7 +60,7 @@ execGrep opts@Grep{..} = do
 
             forM_ activeProjects (grepProject compiledRegex opts)
             return ()
-execGrep _ = error "execGrep called with wrong argument"
+execGrep _ = error "execGrep() called with wrong option type"
 
 
 grepProject ::  Regex -> MyOptions -> Project -> IO ()
@@ -88,7 +89,7 @@ execGrepFile compiledRegex opts filename= do
         0 -> return ()
         _ -> do
             -- Add in context lines
-            let nContextLines_ = nContextLines opts --3
+            let nContextLines_ = nContextLines opts 
             let nLinesFile = (length ls)
 
             case nContextLines_ of

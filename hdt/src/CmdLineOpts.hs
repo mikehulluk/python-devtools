@@ -133,8 +133,8 @@ _PROGRAM_ABOUT :: String
 _COPYRIGHT :: String
 
 
-_PROGRAM_NAME = "myProg"
-_PROGRAM_VERSION = "0.1.2.3"
+_PROGRAM_NAME = "hdt"
+_PROGRAM_VERSION = "0.0.1"
 _PROGRAM_INFO = _PROGRAM_NAME ++ " version " ++ _PROGRAM_VERSION
-_PROGRAM_ABOUT = "a sample CmdArgs program for you tinkering pleasure"
-_COPYRIGHT = "(C) Your Name Here 2011"
+_PROGRAM_ABOUT = "Haskell-DevTools: a collection of programming tools."
+_COPYRIGHT = "(C) Mike Hull 2016. (mikehulluk@gmail.com)"

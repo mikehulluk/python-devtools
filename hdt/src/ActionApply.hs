@@ -1,8 +1,11 @@
-
-
 {-# LANGUAGE RecordWildCards #-}
 
 module ActionApply(execApply) where
+
+
+import qualified Data.ByteString.Char8 as B
+import Database.SQLite.Simple
+import Data.Maybe
 
 import HdtTypes
 import CmdLineOpts
@@ -14,28 +17,17 @@ import ExtTools
 
 
 
-
-
-
-import qualified Data.ByteString.Char8 as B
-import Database.SQLite.Simple
-import Data.Maybe
-
-
-
-
-
-
 execApply :: MyOptions -> IO ()
-execApply opts@Apply{..} = do
-    projects <- getAllProjectConfigs
-    let activeProjects = filter isActive projects
-
-    
+execApply _opts@Apply{..} = do
+    activeProjects <- getActiveProjects
     mapM_ execApplyProject activeProjects 
+    
+execApply _ = error "execApply() called with wrong option type"
+
+
 
 execApplyProject :: Project -> IO ()
-execApplyProject proj = getProjectFileMergeInfos proj >>= applyProjectFileMergeInfos
+execApplyProject proj = (getProjectFileMergeInfos proj) >>= applyProjectFileMergeInfos
 
 
 data FileMergeInfo = FileMergeInfo {

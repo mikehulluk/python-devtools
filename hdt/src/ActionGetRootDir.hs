@@ -5,16 +5,14 @@ module ActionGetRootDir where
 import HdtTypes
 import CmdLineOpts
 import HdtProject
---import HdtFilePatchStack
 
---import Data.List
---import System.Cmd
+
 import System.Exit
 
 
 
 execGetRootDir :: MyOptions -> IO ()
-execGetRootDir opts@GetRootDir{..} = do
+execGetRootDir _opts@GetRootDir{..} = do
     primaryProject <- getPrimaryProject;
     case primaryProject of
         Nothing     ->  do
@@ -22,4 +20,4 @@ execGetRootDir opts@GetRootDir{..} = do
             exitWith (ExitFailure 10)
         (Just proj) -> do
             putStrLn $ rootDir proj
-execGetRootDir _ = error "execGetRootDir called with wrong argument"
+execGetRootDir _ = error "execGetRootDir() called with wrong option type"

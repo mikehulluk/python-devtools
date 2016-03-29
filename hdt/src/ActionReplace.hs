@@ -28,24 +28,14 @@ import Text.Regex.Posix.String
 
 
 execReplace :: MyOptions -> IO ()
-execReplace opts@Repl{..} = do
+execReplace _opts@Repl{..} = do
 
 
     putStrLn $ "[Pre-clean:] Replacing " ++ searchString ++ " with " ++ replaceString ++ ""
-    -- Clean up the input strings we expect them to be enclosed in quotes, which we get rid of:
-    --let searchString' = cleanCmdlineString (searchString)
-    ----let searchString' = cleanCmdlineString (searchString)
-
-    ----putStrLn x
-    --searchStr <- case searchString' of 
-    --    Nothing -> error "KL:" --return "" --error "??"
-    --    Just s -> return s
-
-
     putStrLn $ "Replacing " ++ searchString ++ " with " ++ replaceString ++ ""
+    
     -- Get the active projects
-    projects <- getAllProjectConfigs
-    let activeProjects = filter isActive projects
+    activeProjects <- getActiveProjects
 
     -- Find all the files:
     allfiles' <- mapM srcFiles activeProjects
@@ -76,6 +66,9 @@ execReplace opts@Repl{..} = do
             return ()
 
 
+execReplace _ = error "execReplace() called with wrong option type"
+
+
 actionReplace :: Regex -> String -> File -> IO()
 actionReplace searchRegex replStr file = do
     x <- tryReplace searchRegex replStr file
@@ -92,8 +85,9 @@ tryReplace :: Regex -> String -> File -> IO( Maybe B.ByteString)
 tryReplace searchRegex replStr file = do
     oldContents <- readFile $ filename file
     let newContents = subRegex searchRegex oldContents replStr 
-    --let newContents  = replace findStr replStr oldContents
-    if newContents==oldContents then return Nothing else return $ Just $ B.pack newContents
+    if newContents==oldContents 
+        then return Nothing 
+        else return $ Just $ B.pack newContents
 
 
 

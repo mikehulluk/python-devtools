@@ -2,13 +2,7 @@
 module ExtTools where
 
 
-
-
-
-
-
 import System.IO.Temp
-
 import System.IO
 
 import System.Process

@@ -2,15 +2,17 @@
 
 module ActionDrop(execDrop) where
 
-import HdtTypes
+--import HdtTypes
 import CmdLineOpts
 import HdtProject
 import HdtFilePatchStack
 
 execDrop :: MyOptions -> IO ()
-execDrop opts@Drop{..} = do
+execDrop _opts@Drop{..} = do
+
     -- Get the active projects
-    projects <- getAllProjectConfigs
-    let activeProjects = filter isActive projects
-    srcfiles <- mapM srcFiles activeProjects
-    mapM_ dropOutstandingPatchs $ concat srcfiles
+    srcfiles <- allActiveSrcFiles
+    mapM_ dropOutstandingPatchs  srcfiles
+
+    
+execDrop _ = error "execDrop() called with wrong option type"

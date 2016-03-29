@@ -3,15 +3,17 @@
 
 module HdtFilePatchStack where
 
-import HdtTypes
-import HdtProject
 
 import Database.SQLite.Simple
 import Control.Applicative
 import Data.Time.Clock.POSIX
 import qualified Data.ByteString.Char8 as B
---import qualified System.FilePath as SF
 import System.FilePath ((</>), (<.>))
+
+
+import HdtTypes
+import HdtProject
+import HdtConfigFile
 
 
 -- TODO: replace the string concatentaion with "</>"
@@ -113,7 +115,7 @@ addFileOutstandingPatchs file description' newBlob = do
     -- Create the new patch entry:
     execute dbConn "INSERT OR IGNORE INTO FilePatches (file_id,insertionIdx,timestamp, description, blob) VALUES (?,?,?,?,?);"  (id' :: Int, insertionIdx' :: Int, timestamp' :: Int, description' :: String, newBlob :: B.ByteString )
 
-    --return ()
+
 
 
 
