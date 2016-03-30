@@ -1,0 +1,5 @@
+
+
+
+class PatchApplyError(RuntimeError):
+    pass

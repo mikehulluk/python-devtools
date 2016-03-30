@@ -12,8 +12,7 @@ import ActionApply
 import ActionDrop
 import ActionTags
 import ActionGetRootDir
-import ActionClean
-import ActionFormatCode
+
 
 main :: IO ()
 main = do
@@ -48,12 +47,4 @@ optionHandler opts@Tags{..}  = do
 
 optionHandler opts@GetRootDir{..}  = do
     execGetRootDir opts
-
-optionHandler opts@Clean{..}  = do
-    execClean opts
-    
-optionHandler opts@FormatCode{..}  = do
-    execFormatCode opts
-    
-
 

@@ -1,0 +1,42 @@
+{
+
+    "general": {
+        "primary": "PDT",
+        "active": ["morphforge","PythonDevTools"],
+    },
+    
+    "projects" : [
+        { "name": "PDT",
+          "active":false,
+          "rootdir":"/home/michael/python-devtools/",
+          "files": [
+                {"glob":"src/**/*.py", "tags":["src",".py"]},
+                {"glob":"hdt/**/*.hs", "tags":["src",".hs"]}
+            ]
+        },
+        {
+         "name": "Python Dev-Tools [HDT]",
+          "active":false,
+          "rootdir":"/home/michael/hw/python-devtools/hdt/",
+          "files": [
+                {"glob":"src/**/*.hs", "tags":["src",".hs"]}
+            ]
+
+        },
+        { "name": "project1B",
+          "active":false,
+          "rootdir":"/home/mike/dev/python-devtools/",
+          "files": [
+                {"glob":"src/**/*.py", "tags":["src",".py"]}
+            ]
+        },
+        { "name": "project2B",
+          "active":false,
+          "rootdir":"/home/mike/dev/python-devtools/hdt/",
+          "files": [
+                {"glob":"src/**/*.hs", "tags":["src",".hs"]}
+            ]
+
+        }
+    ]
+}

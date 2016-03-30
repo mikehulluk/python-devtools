@@ -1,3 +1,5 @@
 
 dist/
 .cabal-sandbox
+test/build
+test/out.txt

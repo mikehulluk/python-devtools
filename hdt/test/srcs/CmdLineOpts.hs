@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
 module CmdLineOpts(
-    MyOptions(Config,Grep,Repl,Apply,Drop, Tags, GetRootDir, Clean, FormatCode), 
+    MyOptions(Config,Grep,Repl,Apply,Drop, Tags, GetRootDir), 
     modeConfig,
         --first_name, last_name,
     modeGrep,
@@ -13,11 +13,7 @@ module CmdLineOpts(
     modeDrop,
     modeTags,
     modeGetRootDir,
-    modeClean,
-    modeFormatCode,
-    
     myModes
-    
     )
 where
 
@@ -53,8 +49,6 @@ data MyOptions =
     | Drop { }
     | Tags { }
     | GetRootDir {}
-    | Clean {}
-    | FormatCode {}
     deriving (Data, Typeable, Show, Eq)
 
 
@@ -102,7 +96,7 @@ modeReplace = Repl
 modeApply :: MyOptions
 modeApply = Apply
     { 
-        acceptAll = False &= help "No Gui, just accept all patches"
+        acceptAll = def &= help "No Gui, just accept all patches"
     }
     &= details  [ "Examples:"
                 , "Blah blah blah again."
@@ -130,20 +124,8 @@ modeGetRootDir = GetRootDir
                 , "Blah blah blah again."
                 ]
 
-
-modeClean :: MyOptions
-modeClean = Clean 
-    {   }
-    &= details  [ "Clean out the ~/.hdt directory"]
-    
-modeFormatCode :: MyOptions
-modeFormatCode = FormatCode
-    {   }
-    &= details ["Format source code"]
-
-
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags, modeGetRootDir, modeClean, modeFormatCode]
+myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags, modeGetRootDir]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)

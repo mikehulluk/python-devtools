@@ -18,6 +18,6 @@ execGetRootDir _opts@GetRootDir{..} = do
         Nothing     ->  do
             putStrLn "No primary project selected"
             exitWith (ExitFailure 10)
-        Just proj -> do
+        (Just proj) -> do
             putStrLn $ rootDir proj
 execGetRootDir _ = error "execGetRootDir() called with wrong option type"
