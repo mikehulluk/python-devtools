@@ -19,7 +19,7 @@ import HdtFilePatchStack
 
 pipeFileThroughTool :: (String,[String]) -> String -> IO( Maybe B.ByteString )
 pipeFileThroughTool (toolName, args) fName = do
-    printf "\n  Running %s through %s " fName toolName
+    putStrLn $ printf "  Running %s through %s " fName toolName
     original <- B.readFile fName
     (Just hIn, Just hOut, _, hProcess) <- createProcess (proc toolName args ){std_in=CreatePipe, std_out=CreatePipe}
     B.hPutStr hIn original
@@ -54,7 +54,7 @@ formatFile file = do
 
 execFormatCode :: MyOptions -> IO ()
 execFormatCode _opts@FormatCode{..} = do
-    putStrLn "Formatting code"
+    putStrLn $ "Formatting code"
     files <- allActiveSrcFiles
     mapM_ formatFile files
 

@@ -46,6 +46,9 @@ main = do
     -- If the user did not specify any arguments, pretend as "--help" was given
     opts <- (if null args' then withArgs ["--help"] else id) $ cmdArgsRun myModes
     optionHandler opts    
+    
+    
+    -- Did we finish cleanly?
     debugM "main" $ printf "LOG:Finished OK."
     
     
@@ -56,30 +59,32 @@ optionHandler opts@Config{..}  = do
     execConfig opts
 
 optionHandler opts@Grep{..}  = do
-    putStrLn  $ "Grepping for: " ++ "'" ++ grepString ++ "'"
+    infoM "main"  $ printf "Hdt:Grepping: '%s'" grepString
     execGrep opts
 
 optionHandler opts@Repl{..}  = do
-    putStrLn  $ "Replacing for: " ++ "'" ++ searchString ++ "'"
+    infoM "main"  $ printf "Hdt:Replacing: '%s' -> '%s'" searchString replaceString
     execReplace opts
 
 optionHandler opts@Drop{..}  = do
+    infoM "main"  $ printf "Hdt:Drop"
     execDrop opts
 
 optionHandler opts@Apply{..}  = do
+    infoM "main"  $ printf "Hdt:Apply"
     execApply opts
 
 optionHandler opts@Tags{..}  = do
+    infoM "main"  $ printf "Hdt:Tag"
     execTags opts
 
 optionHandler opts@GetRootDir{..}  = do
     execGetRootDir opts
 
 optionHandler opts@Clean{..}  = do
+    infoM "main"  $ printf "Hdt:Clean"
     execClean opts
     
 optionHandler opts@FormatCode{..}  = do
+    infoM "main"  $ printf "Hdt:FormatCode"
     execFormatCode opts
-    
-
-

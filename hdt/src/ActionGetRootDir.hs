@@ -16,7 +16,7 @@ execGetRootDir _opts@GetRootDir{..} = do
     primaryProject <- getPrimaryProject;
     case primaryProject of
         Nothing     ->  do
-            putStrLn "No primary project selected"
+            putStrLn $ "No primary project selected"
             exitWith (ExitFailure 10)
         Just proj -> do
             putStrLn $ rootDir proj

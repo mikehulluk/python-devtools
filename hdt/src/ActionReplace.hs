@@ -29,7 +29,7 @@ execReplace _opts@Repl{..} = do
     -- Find all the files:
     files <- allActiveSrcFiles
 
-    printf "Replacing: '%s' with '%s' in %d files"  searchString replaceString (length files)
+    putStrLn $ printf "Replacing: '%s' with '%s' in %d files"  searchString replaceString (length files)
         
 
     -- Build the regular expression:
@@ -45,10 +45,10 @@ execReplace _opts@Repl{..} = do
 
             case noApply of 
                 False -> do
-                    printf "\nApplying changes"
+                    putStrLn $ printf "\nApplying changes"
                     execApply (Apply{acceptAll=False} )
                 True  -> do
-                    printf "\nNot applying changes"
+                    printf "Not applying changes"
                     return ()
                     
             return ()
@@ -62,9 +62,9 @@ actionReplace searchRegex replStr description file = do
     x <- tryReplace searchRegex replStr file
     case x of
         Nothing -> do
-            printf "\n  No replacements made in: %s" $ filename file
+            putStrLn $ printf "  No replacements made in: %s" $ filename file
         Just newContents -> do
-            printf "\n  Replacements made in: %s" $ filename file
+            putStrLn $ printf "  Replacements made in: %s" $ filename file
             addFileOutstandingPatchs file description newContents
 
 

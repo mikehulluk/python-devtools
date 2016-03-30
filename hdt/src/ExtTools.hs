@@ -54,7 +54,7 @@ extDiff originalBlob newBlob = do
 
 runExtPatch :: B.ByteString -> B.ByteString -> IO ( Maybe B.ByteString)
 runExtPatch originalBlob patch = do
-    printf "\n  Applying patch" 
+    putStrLn $ printf "  Applying patch" 
     hdtDir <- getHDTConfigPath
     (p0, h0) <- openTempFile hdtDir "merge"
     hPutStr h0 (B.unpack originalBlob)
@@ -69,8 +69,8 @@ runExtPatch originalBlob patch = do
             Nothing -> (return "")
             Just h -> (hGetContents h)
 
-    printf  "\n    -- Stdout from 'patch': '%s'" (trim $ stdOut) 
-    printf  "\n    -- Stderr from 'patch': '%s'" (trim $ stdErr) 
+    putStrLn $ printf  "    -- Stdout from 'patch': '%s'" (trim $ stdOut) 
+    putStrLn $ printf  "    -- Stderr from 'patch': '%s'" (trim $ stdErr) 
 
     case exitCode of
         ExitSuccess -> do
@@ -85,7 +85,7 @@ runExtPatch originalBlob patch = do
 
 runMergeTool :: String -> B.ByteString -> FilePath -> Handle -> IO Bool
 runMergeTool fname newBlob tmpFilePath hFile = do
-    putStrLn $ "\nrunMergeTool: writing into temp file:" ++ tmpFilePath
+    putStrLn $ "runMergeTool: writing into temp file:" ++ tmpFilePath
 
     -- Write the newBlob into the temp-file:
     B.hPutStr hFile newBlob
@@ -94,7 +94,7 @@ runMergeTool fname newBlob tmpFilePath hFile = do
     (_, _, _, hProcess) <- createProcess (proc "meld" [fname, tmpFilePath ])
     exitCode <- waitForProcess hProcess
 
-    putStrLn $ "\nFinished with exit code: " ++ show exitCode
+    putStrLn $ "Finished with exit code: " ++ show exitCode
     case exitCode of
         ExitSuccess -> return True
         ExitFailure _ ->  do
@@ -105,4 +105,4 @@ uiMergeFile :: String -> B.ByteString -> IO ()
 uiMergeFile fname newBlob  = do
     hdtDir <- getHDTConfigPath
     exitCode <- withTempFile hdtDir "tmp.mergefile" (runMergeTool fname newBlob)
-    putStrLn $ "\n --- Finished with exit code: " ++ show exitCode
+    putStrLn $ " --- Finished with exit code: " ++ show exitCode

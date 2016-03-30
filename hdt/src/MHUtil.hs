@@ -1,10 +1,10 @@
-
 {-# LANGUAGE OverloadedStrings #-}
 module MHUtil(pad,trim, expandUser) where
 
+
 import Data.Char (isSpace)
 import System.Directory
---import System.Posix.User
+
 
 pad :: Char -> Int -> String -> String
 pad c cnt src = src ++ padding

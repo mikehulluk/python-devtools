@@ -71,10 +71,12 @@ applyFileMergeInfo opts mergeInfo =
 
 applyProjectFileMergeInfos :: MyOptions -> [Maybe FileMergeInfo] -> IO()
 applyProjectFileMergeInfos opts infos = do
+    let validInfos = (catMaybes infos)
     -- Apply the changes:
-    mapM (applyFileMergeInfo opts) (catMaybes infos)
+    mapM (applyFileMergeInfo opts) validInfos
+    
     -- And drop the changes from the database:
-    mapM_ (dropOutstandingPatchs . file) (catMaybes infos)
+    mapM_ (dropOutstandingPatchs . file) validInfos
     
 
 
