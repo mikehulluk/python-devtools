@@ -15,14 +15,40 @@ import ActionGetRootDir
 import ActionClean
 import ActionFormatCode
 
+import System.Log.Logger
+import System.Log.Handler (setFormatter)
+import System.Log.Handler.Simple
+import System.Log.Formatter 
+
+
+import System.FilePath ((</>))
+import System.IO
+import HdtConstants
+
 main :: IO ()
 main = do
+
+    let consoleLogLevel = INFO
+
+    -- Setup logging:
+    hdtPath <- getHDTConfigPath
+    updateGlobalLogger rootLoggerName (setLevel DEBUG)
+    h <- fileHandler (hdtPath </> "debug.log") DEBUG >>= \lh -> return $ setFormatter lh (simpleLogFormatter "[$time : $loggername : $prio] $msg")
+    g <- streamHandler (stdout) consoleLogLevel >>= \lh -> return $ setFormatter lh (simpleLogFormatter "[$loggername : $prio] $msg")
+    updateGlobalLogger rootLoggerName (addHandler h)
+    updateGlobalLogger rootLoggerName (addHandler g)
+    updateGlobalLogger rootLoggerName (setHandlers [g,h])
+    debugM "main" $ printf "Starting."
+    
+    
+    -- Parse commandline:
     args' <- getArgs
     -- If the user did not specify any arguments, pretend as "--help" was given
     opts <- (if null args' then withArgs ["--help"] else id) $ cmdArgsRun myModes
-    optionHandler opts
-    printf "\nFinished OK.\n"
-
+    optionHandler opts    
+    debugM "main" $ printf "LOG:Finished OK."
+    
+    
 optionHandler :: MyOptions -> IO ()
 optionHandler opts@Config{..}  = do
 --    when (null first_name) $ putStrLn "warning: --first-name is blank"

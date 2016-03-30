@@ -13,6 +13,7 @@ import Database.SQLite.Simple
 import Data.Maybe
 import Text.Printf
 
+import System.Log.Logger
 
 
 
@@ -20,8 +21,8 @@ execApply :: MyOptions -> IO ()
 execApply _opts@Apply{..} = do
     activeProjects <- getActiveProjects
     mapM_ (execApplyProject _opts) activeProjects 
-    
 execApply _ = error "execApply() called with wrong option type"
+
 
 execApplyProject :: MyOptions -> Project -> IO ()
 execApplyProject opts proj = (getProjectFileMergeInfos proj) >>= (applyProjectFileMergeInfos opts)
@@ -38,7 +39,7 @@ data FileMergeInfo = FileMergeInfo {
 
 getFileMergeInfo :: Connection -> File -> IO ( Maybe FileMergeInfo)
 getFileMergeInfo dbConn file = do
-    printf "Generating merge info for: %s" $ filename file
+    debugM "action.apply" $ printf "Generating merge info for: %s" $ filename file
     -- Generate all the patches:
     patches <- getFilePatchs dbConn file
     

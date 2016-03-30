@@ -38,4 +38,5 @@ executable hdt
                        process,
                        MissingH,
                        yaml,
-                       unix
+                       unix,
+                       hslogger
