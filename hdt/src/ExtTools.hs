@@ -8,17 +8,21 @@ import System.IO
 import System.Process
 import System.Exit
 import System.Directory
-
-
-
+import Text.Printf
 
 import qualified Data.ByteString.Char8 as B
+
+import HdtConstants
+import MHUtil (trim)
+
+
 
 
 extDiff :: B.ByteString -> B.ByteString -> IO B.ByteString
 extDiff originalBlob newBlob = do
-    (p0, h0) <- openTempFile "/home/michael/.hdt/" "diff"
-    (p1, h1) <- openTempFile "/home/michael/.hdt/" "diff"
+    hdtDir <- getHDTConfigPath
+    (p0, h0) <- openTempFile hdtDir "diff"
+    (p1, h1) <- openTempFile hdtDir "diff"
     B.hPutStr h0 originalBlob
     B.hPutStr h1 newBlob
     mapM_ hClose [h0,h1]
@@ -39,7 +43,7 @@ extDiff originalBlob newBlob = do
             mapM_ removeFile [p0,p1]
             return $ contents
         ExitFailure _ ->  do
-            error "Failed to diff - terminating"
+            error "\nFailed to diff - terminating\n"
             B.putStrLn $ contents
             return $ B.pack ""
 
@@ -50,23 +54,30 @@ extDiff originalBlob newBlob = do
 
 runExtPatch :: B.ByteString -> B.ByteString -> IO ( Maybe B.ByteString)
 runExtPatch originalBlob patch = do
-    (p0, h0) <- openTempFile "/home/michael/.hdt/" "merge"
+    printf "\n  Applying patch" 
+    hdtDir <- getHDTConfigPath
+    (p0, h0) <- openTempFile hdtDir "merge"
     hPutStr h0 (B.unpack originalBlob)
     hClose h0
-    (Just hIn, Just hOut, _, hProcess) <- createProcess (proc "patch" ["-u", p0] ){std_out=CreatePipe, std_in=CreatePipe}
+    (Just hIn, Just hOut, hErr, hProcess) <- createProcess (proc "patch" ["-u", p0] ){std_out=CreatePipe, std_in=CreatePipe}
     hPutStr hIn (B.unpack patch)
     hClose hIn
     exitCode <- waitForProcess hProcess
     stdOut <- hGetContents hOut
+    
+    stdErr <- case hErr of
+            Nothing -> (return "")
+            Just h -> (hGetContents h)
 
-    putStrLn $ "Output of patch:" ++ stdOut
+    printf  "\n    -- Stdout from 'patch': '%s'" (trim $ stdOut) 
+    printf  "\n    -- Stderr from 'patch': '%s'" (trim $ stdErr) 
 
     case exitCode of
         ExitSuccess -> do
             contents <- readFile p0
             return $ Just ( B.pack contents)
         ExitFailure _ ->  do
-            error "Failed to patch - terminating"
+            error "\nFailed to patch - terminating"
             return $ Nothing
 
 
@@ -74,7 +85,7 @@ runExtPatch originalBlob patch = do
 
 runMergeTool :: String -> B.ByteString -> FilePath -> Handle -> IO Bool
 runMergeTool fname newBlob tmpFilePath hFile = do
-    putStrLn $ "Writing into temp file:" ++ tmpFilePath
+    putStrLn $ "\nrunMergeTool: writing into temp file:" ++ tmpFilePath
 
     -- Write the newBlob into the temp-file:
     B.hPutStr hFile newBlob
@@ -83,14 +94,15 @@ runMergeTool fname newBlob tmpFilePath hFile = do
     (_, _, _, hProcess) <- createProcess (proc "meld" [fname, tmpFilePath ])
     exitCode <- waitForProcess hProcess
 
-    putStrLn $ "Finished with exit code: " ++ show exitCode
+    putStrLn $ "\nFinished with exit code: " ++ show exitCode
     case exitCode of
         ExitSuccess -> return True
         ExitFailure _ ->  do
-            error "Failed to merge - terminating"
+            error "\nFailed to merge - terminating"
             return False
 
 uiMergeFile :: String -> B.ByteString -> IO ()
 uiMergeFile fname newBlob  = do
-    exitCode <- withTempFile "/home/michael/.hdt/" "tmp.mergefile" (runMergeTool fname newBlob)
-    putStrLn $ " --- Finished with exit code: " ++ show exitCode
+    hdtDir <- getHDTConfigPath
+    exitCode <- withTempFile hdtDir "tmp.mergefile" (runMergeTool fname newBlob)
+    putStrLn $ "\n --- Finished with exit code: " ++ show exitCode

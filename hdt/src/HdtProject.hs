@@ -42,7 +42,7 @@ findFiles proj fileSelector = do
 srcFiles :: Project -> IO [File]
 srcFiles proj =  do
     files <- mapM (findFiles proj) (fileSelectors proj)
-    return $ concat files
+    return $ sort $ concat files
 
 allActiveSrcFiles :: IO [File]
 allActiveSrcFiles = do

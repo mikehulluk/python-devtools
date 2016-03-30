@@ -32,7 +32,6 @@ projectTextColor proj = case (isPrimary proj, isActive proj) of
 summariseProjectConsole :: Project -> IO ()
 summariseProjectConsole project = do
         
-        
         srcfiles' <- (srcFiles project)
         let isActiveLabel =  if isActive project then "<active>" else "<inactive>"
         let isPrimaryLabel = if isPrimary project then "<primary>" else ""

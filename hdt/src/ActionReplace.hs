@@ -3,26 +3,22 @@
 
 module ActionReplace where
 
-import ActionApply
-import HdtTypes
-import CmdLineOpts
-import HdtProject
-import HdtFilePatchStack
 
---import Data.String.Utils
---import Data.List
 
 import qualified Data.ByteString.Char8 as B
 
 import Text.Regex
 import Text.Regex.Posix   -- for regular expressions
 import Text.Regex.Posix.String
+import Text.Printf
 
---cleanCmdlineString :: String -> Maybe String
---cleanCmdlineString x = do
---    x0 <- stripPrefix "'" x
---    x1 <- stripPrefix "'" (reverse x0)
---    return ( reverse x1)
+
+import ActionApply
+import HdtTypes
+import CmdLineOpts
+import HdtProject
+import HdtFilePatchStack
+
 
 
 
@@ -30,37 +26,29 @@ import Text.Regex.Posix.String
 execReplace :: MyOptions -> IO ()
 execReplace _opts@Repl{..} = do
 
-
-    putStrLn $ "[Pre-clean:] Replacing " ++ searchString ++ " with " ++ replaceString ++ ""
-    putStrLn $ "Replacing " ++ searchString ++ " with " ++ replaceString ++ ""
-    
-    -- Get the active projects
-    activeProjects <- getActiveProjects
-
     -- Find all the files:
-    allfiles' <- mapM srcFiles activeProjects
-    let files = concat allfiles'
+    files <- allActiveSrcFiles
 
-    -- Check no files belong to more than one project:
-    let allFullFilename = map filename files
-    putStrLn $ unlines allFullFilename
+    printf "Replacing: '%s' with '%s' in %d files"  searchString replaceString (length files)
+        
 
     -- Build the regular expression:
     regexCompRes <- compile defaultCompOpt execBlank searchString
     case regexCompRes of
         Left (retCode,errMsg) -> do
             putStrLn $ "Unable to compile regex: " ++ searchString
-            putStrLn $ "Errorcode: " ++ (show retCode) ++ " -- " ++ errMsg
+            putStrLn $ "Error: " ++ (show retCode) ++ " -- " ++ errMsg
             return ()
         Right compiledRegex -> do
-            putStrLn "Compiled OK"
+            let description = printf "(s/%s/%s/)" searchString replaceString
+            mapM_ (actionReplace compiledRegex replaceString description) files
 
-            mapM_ (actionReplace compiledRegex replaceString) files
-
-            case  noApply of 
+            case noApply of 
                 False -> do
-                    execApply (Apply)
+                    printf "\nApplying changes"
+                    execApply (Apply{acceptAll=False} )
                 True  -> do
+                    printf "\nNot applying changes"
                     return ()
                     
             return ()
@@ -69,14 +57,14 @@ execReplace _opts@Repl{..} = do
 execReplace _ = error "execReplace() called with wrong option type"
 
 
-actionReplace :: Regex -> String -> File -> IO()
-actionReplace searchRegex replStr file = do
+actionReplace :: Regex -> String -> String-> File -> IO()
+actionReplace searchRegex replStr description file = do
     x <- tryReplace searchRegex replStr file
     case x of
-        Nothing -> return ()
+        Nothing -> do
+            printf "\n  No replacements made in: %s" $ filename file
         Just newContents -> do
-            putStrLn $ "<Replacements made in : " ++ (filename file) ++ " ]"
-            let description = "(s/" ++ "???" ++ "/" ++ replStr ++ ")"
+            printf "\n  Replacements made in: %s" $ filename file
             addFileOutstandingPatchs file description newContents
 
 

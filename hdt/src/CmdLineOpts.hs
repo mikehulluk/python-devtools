@@ -3,12 +3,13 @@
 module CmdLineOpts(
     MyOptions(Config,Grep,Repl,Apply,Drop, Tags, GetRootDir), 
     modeConfig,
-        first_name, last_name,
+        --first_name, last_name,
     modeGrep,
         grepString, ignoreCase, word, count, lineNumbers, doEdit, nContextLines,
     modeReplace,
         searchString, replaceString, doWordRegex, noApply,
     modeApply,
+        acceptAll,
     modeDrop,
     modeTags,
     modeGetRootDir,
@@ -22,25 +23,29 @@ import System.Console.CmdArgs
 
 
 data MyOptions =
-    Config   { first_name :: String
-                 , last_name :: String
-                 }
-    | Grep {  grepString    :: String
-                , ignoreCase    :: Bool
-                , word          :: Bool
-                , count         :: Bool
-                , lineNumbers   :: Bool
-                , doEdit        :: Bool
-                , nContextLines :: Int
-            }
-    | Repl {
-          searchString   :: String
-        , replaceString  :: String
-        , ignoreCase     :: Bool
-        , doWordRegex    :: Bool
-        , noApply        :: Bool
+    Config   {  
+         detailed     :: Bool
+        --,last_name    :: String
         }
-    | Apply { }
+    | Grep {      
+         grepString    :: String
+        ,ignoreCase    :: Bool
+        ,word          :: Bool
+        ,count         :: Bool
+        ,lineNumbers   :: Bool
+        ,doEdit        :: Bool
+        ,nContextLines :: Int
+        }
+    | Repl {
+         searchString   :: String
+        ,replaceString  :: String
+        ,ignoreCase     :: Bool
+        ,doWordRegex    :: Bool
+        ,noApply        :: Bool
+        }
+    | Apply {
+        acceptAll       :: Bool
+        }
     | Drop { }
     | Tags { }
     | GetRootDir {}
@@ -50,11 +55,12 @@ data MyOptions =
 
 modeConfig :: MyOptions
 modeConfig = Config
-    { first_name = "FIRSTNAME" &= help "your first name"
-    , last_name = "LASTNAME" &= help "your last name"
+    { 
+        detailed = False &= help "Display detailed information"
     }
-    &= details  [ "Examples:"
-                , "Blah blah blah."
+    &= details  [ "Examples:",
+                  "  hdt config\n", 
+                  "  hdt config --detailed\n"
                 ]
 
 
@@ -65,9 +71,9 @@ modeGrep = Grep
     , ignoreCase    = True  &= help "ignoreCase"
     , word          = False &= name "jkl" &= help "doWordRegex"
     , count         = False &= help "doCount"
-    , lineNumbers   = False  &= help "doLineNumber"
+    , lineNumbers   = False &= help "doLineNumber"
     , doEdit        = False &= help "doEdit"
-    , nContextLines = 0      &= name "contextlines" &= help "nContextLines"
+    , nContextLines = 0     &= name "contextlines" &= help "nContextLines"
     }
     &= details  [ "Examples:"
                 , "Blah blah blah again."
@@ -76,11 +82,11 @@ modeGrep = Grep
 modeReplace :: MyOptions
 modeReplace = Repl
     {
-          searchString  = def &= argPos 0 &= typ "GREPSTRING"
-        , replaceString = def &= argPos 1 &= typ "replaceString"
-        , ignoreCase    = def &= help "GREPSTRING"
-        , doWordRegex   = def &= help "GREPSTRING"
-        , noApply       = False &= help "GREPSTRING"
+          searchString  = def &= argPos 1 &= typ "Search-String"
+        , replaceString = def &= argPos 2 &= typ "Replace-String"
+        , ignoreCase    = def &= help "Case insensitive search"
+        , doWordRegex   = def &= help "Search for word"
+        , noApply       = False &= help "Don't apply the replace. This allows a series of operations to be batched up"
 
     }
     &= details  [ "Examples:"
@@ -89,7 +95,9 @@ modeReplace = Repl
 
 modeApply :: MyOptions
 modeApply = Apply
-    { }
+    { 
+        acceptAll = False &= help "No Gui, just accept all patches"
+    }
     &= details  [ "Examples:"
                 , "Blah blah blah again."
                 ]
@@ -126,15 +134,15 @@ myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, mo
     &= program _PROGRAM_NAME
 
 
-_PROGRAM_NAME :: String
+_PROGRAM_NAME    :: String
 _PROGRAM_VERSION :: String
-_PROGRAM_INFO :: String
-_PROGRAM_ABOUT :: String
-_COPYRIGHT :: String
+_PROGRAM_INFO    :: String
+_PROGRAM_ABOUT   :: String
+_COPYRIGHT       :: String
 
 
 _PROGRAM_NAME = "hdt"
 _PROGRAM_VERSION = "0.0.1"
 _PROGRAM_INFO = _PROGRAM_NAME ++ " version " ++ _PROGRAM_VERSION
-_PROGRAM_ABOUT = "Haskell-DevTools: a collection of programming tools."
+_PROGRAM_ABOUT = "Haskell-DevTools: a collection of tools for dealing with text files from the commandline"
 _COPYRIGHT = "(C) Mike Hull 2016. (mikehulluk@gmail.com)"

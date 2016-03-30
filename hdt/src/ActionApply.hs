@@ -2,17 +2,16 @@
 
 module ActionApply(execApply) where
 
-
-import qualified Data.ByteString.Char8 as B
-import Database.SQLite.Simple
-import Data.Maybe
-
 import HdtTypes
 import CmdLineOpts
 import HdtProject
 import HdtFilePatchStack
 import ExtTools
 
+import qualified Data.ByteString.Char8 as B
+import Database.SQLite.Simple
+import Data.Maybe
+import Text.Printf
 
 
 
@@ -20,14 +19,13 @@ import ExtTools
 execApply :: MyOptions -> IO ()
 execApply _opts@Apply{..} = do
     activeProjects <- getActiveProjects
-    mapM_ execApplyProject activeProjects 
+    mapM_ (execApplyProject _opts) activeProjects 
     
 execApply _ = error "execApply() called with wrong option type"
 
+execApplyProject :: MyOptions -> Project -> IO ()
+execApplyProject opts proj = (getProjectFileMergeInfos proj) >>= (applyProjectFileMergeInfos opts)
 
-
-execApplyProject :: Project -> IO ()
-execApplyProject proj = (getProjectFileMergeInfos proj) >>= applyProjectFileMergeInfos
 
 
 data FileMergeInfo = FileMergeInfo {
@@ -40,29 +38,43 @@ data FileMergeInfo = FileMergeInfo {
 
 getFileMergeInfo :: Connection -> File -> IO ( Maybe FileMergeInfo)
 getFileMergeInfo dbConn file = do
+    printf "Generating merge info for: %s" $ filename file
+    -- Generate all the patches:
     patches <- getFilePatchs dbConn file
-    case length patches of 
+    
+    -- Merge them into a single output:
+    case (length patches) of 
         0 -> return Nothing
         _ -> do
+            printf "\n%d patchs for %s" (length patches) (filename file)
             newBlob <- mergePatches file patches
             return $ Just FileMergeInfo{file=file,newBlob=newBlob}
 
 
 getProjectFileMergeInfos :: Project -> IO [ Maybe FileMergeInfo] 
 getProjectFileMergeInfos proj = do
+    printf "Collecting merge information for: %s" (projectName proj)
     dbConn <- getProjectDBHandle proj
     files <- srcFiles proj
     infos <- mapM (getFileMergeInfo dbConn) files
     return infos
 
-applyFileMergeInfo :: FileMergeInfo -> IO()
-applyFileMergeInfo mergeInfo = uiMergeFile (filename $ file mergeInfo) (newBlob mergeInfo)
+applyFileMergeInfo :: MyOptions -> FileMergeInfo -> IO()
+applyFileMergeInfo opts mergeInfo = 
+    case  (acceptAll opts) of
+        False -> uiMergeFile fname' newblob  -- Use a GUI?
+        True  -> B.writeFile fname' newblob  -- Just copy the blob over
+    where fname' = (filename $ file mergeInfo) :: String
+          newblob = (newBlob mergeInfo)
+    
 
-
-applyProjectFileMergeInfos :: [Maybe FileMergeInfo] -> IO()
-applyProjectFileMergeInfos  infos = do
-    mapM_ applyFileMergeInfo (catMaybes infos)
-
+applyProjectFileMergeInfos :: MyOptions -> [Maybe FileMergeInfo] -> IO()
+applyProjectFileMergeInfos opts infos = do
+    -- Apply the changes:
+    mapM (applyFileMergeInfo opts) (catMaybes infos)
+    -- And drop the changes from the database:
+    mapM_ (dropOutstandingPatchs . file) (catMaybes infos)
+    
 
 
 

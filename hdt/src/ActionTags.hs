@@ -9,29 +9,28 @@ import CmdLineOpts
 import HdtProject
 import Data.List
 import System.Process
+import Text.Printf
+--import Control.Monad
+import Control.Applicative
 
+import HdtConstants
 
 
 execTags :: MyOptions -> IO ()
 execTags _opts@Tags{..} = do
-    -- Get the active projects
-    activeProjects <- getActiveProjects
-    
-    srcfiles <- mapM srcFiles activeProjects
-
-    let all_srcfiles = map filename ( concat( srcfiles) )
-    createTagsFile all_srcfiles 
+    srcfiles <- allActiveSrcFiles
+    createTagsFile $ filename <$> srcfiles
     return ()
+    
 execTags _ = error "execTags() called with wrong option type"
 
-outputTagFile :: String
-outputTagFile = "/home/michael/.tags"
+
 
 createTagsFile :: [String] -> IO()
 createTagsFile fnames = do
+    outputTagFile' <- outputTagFile
     let file_str = intercalate " " fnames
-    -- putStrLn $ show $ file_str
-    let cmd_str = "ctags -f " ++ outputTagFile ++ " " ++ file_str
-    putStrLn $ show $ cmd_str
+    let cmd_str = printf "ctags -f %s %s" outputTagFile' file_str
+    putStrLn $ cmd_str
     system cmd_str
     return ()

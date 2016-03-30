@@ -9,14 +9,13 @@ import Control.Applicative
 import Data.Time.Clock.POSIX
 import qualified Data.ByteString.Char8 as B
 import System.FilePath ((</>), (<.>))
-
+import Text.Printf
 
 import HdtTypes
 import HdtProject
-import HdtConfigFile
+import HdtConstants
 
 
--- TODO: replace the string concatentaion with "</>"
 getDBFilename :: Project -> IO String
 getDBFilename proj = do
     configPath <- getHDTConfigPath
@@ -26,7 +25,6 @@ getDBFilename proj = do
 
 ensureFileInDB :: Connection -> File -> IO()
 ensureFileInDB conn File{..} = do
-
     execute conn "INSERT OR IGNORE INTO Files (filename) VALUES (?);" (Only (filename :: String))
     return ()
 
@@ -35,9 +33,8 @@ getProjectDBHandle :: Project -> IO Connection
 getProjectDBHandle proj = do
     dbFilename <- getDBFilename proj
 
-
     -- Build the database tables, if they don't exist:
-    conn <-open dbFilename
+    conn <- open dbFilename
     execute_ conn "CREATE TABLE IF NOT EXISTS Files(id INTEGER PRIMARY KEY, filename TEXT, UNIQUE(filename) );"
     execute_ conn "CREATE TABLE IF NOT EXISTS FilePatches(id INTEGER PRIMARY KEY, file_id INTEGER, insertionIdx INTEGER, timestamp INTEGER, description TEXT, blob TEXT, UNIQUE(file_id,insertionIdx));"
 
@@ -46,7 +43,6 @@ getProjectDBHandle proj = do
     mapM_ (ensureFileInDB conn) files
 
     -- Todo: trim out old entries:
-
     return conn
 
 
@@ -121,8 +117,9 @@ addFileOutstandingPatchs file description' newBlob = do
 
 dropOutstandingPatchs :: File -> IO()
 dropOutstandingPatchs file = do
-    let fname = filename file
-    putStrLn $ "Dropping patchs for: " ++ fname
+    --let fname = filename file
+    --putStrLn $ "Dropping patchs for: " ++ fname
+    printf "\n  Dropping patches for: %s" (filename file)
     dbConn <- getProjectDBHandle (project file) 
     id_ <- getFileId dbConn file
     query dbConn "DELETE FROM FilePatches where(file_id=?);" (Only (id_ :: Int))  :: IO [DbFilePatchEntry]

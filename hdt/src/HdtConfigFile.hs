@@ -18,13 +18,10 @@ import qualified Data.ByteString as B
 
 import MHUtil (expandUser)
 import HdtTypes
+import HdtConstants
 
-getHDTConfigPath :: IO String
-getHDTConfigPath  = do
-    homeDir <- getHomeDirectory
-    let hdtPath = homeDir ++ "/.hdt/"
-    createDirectoryIfMissing True hdtPath
-    return hdtPath
+
+
 
 
 
@@ -89,7 +86,7 @@ updateIsPrimaryFields apc proj = proj{ isPrimary = isPrimary}
 
 
 configFileContents :: IO B.ByteString 
-configFileContents = expandUser "~/.hdtrc" >>= B.readFile
+configFileContents = filenameConfig >>= B.readFile
 
 
 
