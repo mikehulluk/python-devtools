@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable, RecordWildCards #-}
 
 module CmdLineOpts(
-    MyOptions(Config,Grep,Repl,Apply,Drop, Tags, GetRootDir), 
+    MyOptions(Config,Grep,Repl,Apply,Drop, Tags, GetRootDir, Clean), 
     modeConfig,
         --first_name, last_name,
     modeGrep,
@@ -13,7 +13,11 @@ module CmdLineOpts(
     modeDrop,
     modeTags,
     modeGetRootDir,
+    
+    modeClean,
+    
     myModes
+    
     )
 where
 
@@ -49,6 +53,7 @@ data MyOptions =
     | Drop { }
     | Tags { }
     | GetRootDir {}
+    | Clean {}
     deriving (Data, Typeable, Show, Eq)
 
 
@@ -124,8 +129,17 @@ modeGetRootDir = GetRootDir
                 , "Blah blah blah again."
                 ]
 
+
+modeClean :: MyOptions
+modeClean = Clean 
+    {   }
+    &= details  [ "Clean out the ~/.hdt directory"]
+    
+
+
+
 myModes :: Mode (CmdArgs MyOptions)
-myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags, modeGetRootDir]
+myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags, modeGetRootDir, modeClean]
     &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
