@@ -28,6 +28,6 @@ expandUser ('~':up)    = do
     homeDir <- getHomeDirectory
     return $ homeDir ++ up
 
-expandUser p           = return p
+expandUser p  = return p
 
 

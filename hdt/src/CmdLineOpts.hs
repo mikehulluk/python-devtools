@@ -3,7 +3,7 @@
 module CmdLineOpts(
     MyOptions(Config,Grep,Repl,Apply,Drop, Tags, GetRootDir, Clean, FormatCode), 
     modeConfig,
-        --first_name, last_name,
+        detailed,
     modeGrep,
         grepString, ignoreCase, word, count, lineNumbers, doEdit, nContextLines,
     modeReplace,
@@ -29,7 +29,6 @@ import System.Console.CmdArgs
 data MyOptions =
     Config   {  
          detailed     :: Bool
-        --,last_name    :: String
         }
     | Grep {      
          grepString    :: String
@@ -144,7 +143,6 @@ modeFormatCode = FormatCode
 
 myModes :: Mode (CmdArgs MyOptions)
 myModes = cmdArgsMode $ modes [modeConfig,  modeGrep, modeReplace, modeApply, modeDrop, modeTags, modeGetRootDir, modeClean, modeFormatCode]
-    &= verbosityArgs [explicit, name "Verbose", name "V"] []
     &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
     &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
     &= help _PROGRAM_ABOUT
